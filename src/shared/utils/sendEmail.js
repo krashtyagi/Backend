@@ -22,7 +22,7 @@ const sendWhatsAppOTP = async (phone, otp) => {
         phoneNumber: cleanNumber,
         type: "Template",
         template: {
-          name: "otp_verification_hilexa",
+          name: "otp_verification_trivllo",
           languageCode: "en",
           bodyValues: [otp],
           buttonValues: {

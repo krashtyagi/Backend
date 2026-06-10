@@ -497,13 +497,13 @@ exports.userInvoiceDownload = async (booking, res) => {
 
   // COLORS
   const primaryBlue = "#1a73e8";
-  const hilexaRed = "#ff3838";
+  const trivlloGreen = "#005e1bff";
   const lightBg = "#f8f9fa";
   const textColor = "#333333";
   const borderColor = "#eeeeee";
 
   //HEADER
-  doc.circle(65, 60, 20).fill(hilexaRed);
+  doc.circle(65, 60, 20).fill(trivlloGreen);
   doc
     .fillColor("#000")
     .fontSize(20)
@@ -678,7 +678,7 @@ exports.userInvoiceDownload = async (booking, res) => {
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
       .fontSize(isTotal ? 12 : 10)
-      .fillColor(isDisc ? hilexaRed : isTotal ? primaryBlue : textColor);
+      .fillColor(isDisc ? trivlloGreen : isTotal ? primaryBlue : textColor);
 
     doc.text(label, calcX, currentY);
     doc.text(`Rs. ${value}`, calcX, currentY, {
@@ -715,7 +715,7 @@ exports.userInvoiceDownload = async (booking, res) => {
   doc
     .fontSize(8)
     .fillColor("gray")
-    .text("Thank you for booking with Hilexa!", 40, 760, {
+    .text("Thank you for booking with trivllo!", 40, 760, {
       align: "center",
     });
 
@@ -1172,13 +1172,13 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
 
   // COLORS & STYLES
   const primaryBlue = "#1a73e8";
-  const hilexaRed = "#ff3838";
+  const trivlloGreen = "#005e1bff";
   const lightBg = "#f8f9fa";
   const textColor = "#333333";
   const borderColor = "#eeeeee";
 
   //HEADER (HILEXA LOGO)
-  doc.circle(65, 60, 20).fill(hilexaRed);
+  doc.circle(65, 60, 20).fill(trivlloGreen);
   doc
     .fillColor("#000")
     .fontSize(20)
@@ -1369,7 +1369,7 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
       .fontSize(isTotal ? 12 : 10)
-      .fillColor(isDisc ? hilexaRed : isTotal ? primaryBlue : textColor);
+      .fillColor(isDisc ? trivlloGreen : isTotal ? primaryBlue : textColor);
 
     // Label drawing
     doc.text(label, calcX, currentY);
@@ -1409,7 +1409,7 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
   doc
     .fontSize(8)
     .fillColor("gray")
-    .text("Thank you for booking with Hilexa! Have a great stay.", 40, 760, {
+    .text("Thank you for booking with trivllo! Have a great stay.", 40, 760, {
       align: "center",
     })
     .text("Carry a valid Govt. ID (Aadhar/Passport) for check-in.", {
