@@ -534,9 +534,10 @@ exports.changePassword = async (userId, oldPassword, newPassword) => {
 const generateOTPByEmail = () => { return Math.floor(1000 + Math.random() * 9000).toString(); }; // dummy email sender const sendEmailOTP = async (email, otp) => { console.log(`OTP for ${email}: ${otp}`); }; const generateToken = (userId) => { return jwt.sign( { id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" } ); };
 const jwt = require("jsonwebtoken");
 // dummy email sender
-const sendEmailOTP = async (email, otp) => {
-  console.log(`OTP for ${email}: ${otp}`);
-};
+// const sendEmailOTP = async (email, otp) => {
+//   console.log("service send email otp", email, otp);
+//   sendOTPEmail(email , otp);
+// };
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -565,9 +566,7 @@ exports.emailSignup = async ({ email, password }) => {
   }
 
   const otp = generateOTPByEmail();
-
   let user = existingUser;
-
   if (!user) {
     user = await User.create({
       email,
@@ -583,8 +582,7 @@ exports.emailSignup = async ({ email, password }) => {
 
     await user.save();
   }
-
-  await sendEmailOTP(email, otp);
+  await  sendOTPEmail(email , otp);
 
   return {
     message: "OTP sent successfully",
