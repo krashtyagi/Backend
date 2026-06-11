@@ -97,7 +97,7 @@ const sendBookingConfirmationEmail = async (email, details) => {
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Helix booking email send failed:", err.message);
+    logger.error("Trivllo booking email send failed:", err.message);
     throw err;
   }
 };
@@ -107,7 +107,7 @@ const sendAdminVendorNotificationEmail = async (vendor, hotel = null) => {
     const subject = "🚨 New Vendor Submission Received";
 
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
       subject,
       html: `
@@ -148,13 +148,13 @@ const sendVendorSubmissionConfirmationEmail = async (vendor) => {
     const subject = "Your Request is Under Review ⏳";
 
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
         <h2>Hello ${vendor.businessName || "Vendor"},</h2>
 
-        <p>Thank you for submitting your business on <b>Helix</b> 🚀</p>
+        <p>Thank you for submitting your business on <b>Trivllo</b> 🚀</p>
 
         <p>Your request is currently under review by our team.</p>
 
@@ -162,7 +162,7 @@ const sendVendorSubmissionConfirmationEmail = async (vendor) => {
 
         <br/>
 
-        <p>— Team Helix</p>
+        <p>— Team Trivllo</p>
       `,
     };
 
@@ -178,7 +178,7 @@ const sendVendorApprovalEmail = async (vendor) => {
     const subject = "🎉 Your Vendor Application is Approved!";
 
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
@@ -198,7 +198,7 @@ const sendVendorApprovalEmail = async (vendor) => {
 
           <p>We’re excited to have you onboard!</p>
 
-          <p>— Team Helix</p>
+          <p>— Team Trivllo</p>
         </div>
       `,
     };
@@ -228,7 +228,7 @@ const sendVendorRejectionEmail = async (vendor) => {
     }
 
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
@@ -244,7 +244,7 @@ const sendVendorRejectionEmail = async (vendor) => {
 
 
           <br/>
-          <p>— Team Helix</p>
+          <p>— Team Trivllo</p>
         </div>
       `,
     };
@@ -259,7 +259,7 @@ const sendVendorRejectionEmail = async (vendor) => {
 const sendAccountDeletionApprovedEmail = async (email, firstName) => {
   try {
     const mailOptions = {
-      from: `"Helixa Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Account Deletion Request Approved",
       html: `
@@ -272,10 +272,10 @@ const sendAccountDeletionApprovedEmail = async (email, firstName) => {
 
           <p>Your account and associated personal information have been permanently removed from our platform.</p>
 
-          <p>Thank you for being a part of Helix.</p>
+          <p>Thank you for being a part of Trivllo.</p>
 
           <br />
-          <p>— Team Helixa</p>
+          <p>— Team Trivllo</p>
         </div>
       `,
     };
@@ -290,7 +290,7 @@ const sendAccountDeletionApprovedEmail = async (email, firstName) => {
 const sendAccountDeletionRejectedEmail = async (email, firstName) => {
   try {
     const mailOptions = {
-      from: `"Helixa Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Account Deletion Request Rejected",
       html: `
@@ -306,7 +306,7 @@ const sendAccountDeletionRejectedEmail = async (email, firstName) => {
           <p>Your account remains active and accessible.</p>
 
           <br />
-          <p>— Team Helixa</p>
+          <p>— Team Trivllo</p>
         </div>
       `,
     };
