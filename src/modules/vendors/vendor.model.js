@@ -43,6 +43,7 @@ const vendorSchema = new mongoose.Schema(
       trim: true,
       index: true,
       unique: true,
+      sparse: true,
     },
 
     businessPhone: {
