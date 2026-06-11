@@ -46,25 +46,25 @@ const sendWhatsAppOTP = async (phone, otp) => {
 const sendOTPEmail = async (email, otp) => {
   try {
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Verify Your Email for Helix – OTP Inside",
+      subject: "Verify Your Email for Trivllo – OTP Inside",
       html: `
         <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>Welcome to Helix 🚀</h2>
+          <h2>Welcome to Trivllo 🚀</h2>
           <p>Your One-Time Password (OTP) is:</p>
           <h1 style="letter-spacing: 3px;">${otp}</h1>
           <p>This OTP is valid for 10 minutes.</p>
           <p>If you did not request this, please ignore.</p>
           <br/>
-          <p>— Team Helix</p>
+          <p>— Team Trivllo</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Helix email send failed:", err.message);
+    logger.error("Trivllo email send failed:", err.message);
     throw err;
   }
 };
@@ -72,7 +72,7 @@ const sendOTPEmail = async (email, otp) => {
 const sendBookingConfirmationEmail = async (email, details) => {
   try {
     const mailOptions = {
-      from: `"Helix Support" <${process.env.EMAIL_USER}>`,
+      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Booking Confirmed! Reference: ${details.bookingId}`,
       html: `
@@ -90,7 +90,7 @@ const sendBookingConfirmationEmail = async (email, details) => {
           </div>
 
           <p>If you have any questions, feel free to reply to this email.</p>
-          <p>Happy Travels,<br/><strong>Team Helix</strong></p>
+          <p>Happy Travels,<br/><strong>Team Trivllo</strong></p>
         </div>
       `,
     };
