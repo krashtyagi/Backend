@@ -1,6 +1,7 @@
 const User = require("./auth.model");
 const Vendor = require("../vendors/vendor.model");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const logger = require("../../shared/utils/logger");
 const {
   sendOTPEmail,
@@ -433,39 +434,51 @@ exports.verifyOTP = async (email, inputOTP) => {
   }
 };
 
-exports.forgotPassword = async (phone) => {
-  try {
-    if (!phone) throw new Error("Phone number is required");
+const findUserByEmailOrPhoneWithSelect = async (emailOrPhone, selectFields) => {
+  if (!emailOrPhone) throw new Error("Email or Phone number is required");
+  const isEmail = emailOrPhone.includes("@");
+  if (isEmail) {
+    let query = User.findOne({ email: emailOrPhone });
+    if (selectFields) query = query.select(selectFields);
+    const user = await query;
+    if (!user) throw new Error("User not found");
+    return { user, isEmail, target: emailOrPhone };
+  } else {
+    const phoneNumber = normalizePhone(emailOrPhone);
+    let query = User.findOne({ phoneNumber });
+    if (selectFields) query = query.select(selectFields);
+    const user = await query;
+    if (!user) throw new Error("User not found");
+    return { user, isEmail, target: phoneNumber };
+  }
+};
 
-    const phoneNumber = normalizePhone(phone);
+exports.forgotPassword = async (emailOrPhone) => {
+  try {
+    const { user, isEmail, target } = await findUserByEmailOrPhoneWithSelect(emailOrPhone);
 
     const { otp, otpExpires } = await generateOTP();
 
-    const user = await User.findOneAndUpdate(
-      { phoneNumber },
-      { otp, otpExpires },
-      { new: true },
-    );
+    user.otp = otp;
+    user.otpExpires = otpExpires;
 
-    if (!user) throw new Error("User not found");
+    await user.save();
 
-    await sendWhatsAppOTP(phoneNumber, otp);
-
-    return { message: "Password reset OTP sent on WhatsApp" };
+    if (isEmail) {
+      await sendOTPEmail(target, otp);
+      return { message: "Password reset OTP sent to your email" };
+    } else {
+      await sendWhatsAppOTP(target, otp);
+      return { message: "Password reset OTP sent on WhatsApp" };
+    }
   } catch (error) {
     throw error;
   }
 };
 
-exports.otpVerify = async (phone, inputOTP) => {
+exports.otpVerify = async (emailOrPhone, inputOTP) => {
   try {
-    if (!phone) throw new Error("Phone number is required");
-
-    const phoneNumber = normalizePhone(phone);
-
-    const user = await User.findOne({ phoneNumber }).select("+otp +otpExpires");
-
-    if (!user) throw new Error("User not found");
+    const { user } = await findUserByEmailOrPhoneWithSelect(emailOrPhone, "+otp +otpExpires");
 
     if (
       !user.otp ||
@@ -481,15 +494,9 @@ exports.otpVerify = async (phone, inputOTP) => {
   }
 };
 
-exports.resetPassword = async (phone, otp, newPassword) => {
+exports.resetPassword = async (emailOrPhone, otp, newPassword) => {
   try {
-    if (!phone) throw new Error("Phone number is required");
-
-    const phoneNumber = normalizePhone(phone);
-
-    const user = await User.findOne({ phoneNumber }).select("+otp +otpExpires");
-
-    if (!user) throw new Error("User not found");
+    const { user } = await findUserByEmailOrPhoneWithSelect(emailOrPhone, "+otp +otpExpires");
 
     if (
       !user.otp ||
@@ -528,16 +535,6 @@ exports.changePassword = async (userId, oldPassword, newPassword) => {
   }
 };
 
-
-
-
-const generateOTPByEmail = () => { return Math.floor(1000 + Math.random() * 9000).toString(); }; // dummy email sender const sendEmailOTP = async (email, otp) => { console.log(`OTP for ${email}: ${otp}`); }; const generateToken = (userId) => { return jwt.sign( { id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" } ); };
-const jwt = require("jsonwebtoken");
-// dummy email sender
-// const sendEmailOTP = async (email, otp) => {
-//   console.log("service send email otp", email, otp);
-//   sendOTPEmail(email , otp);
-// };
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -620,7 +617,7 @@ exports.emailVerifySignupOTP = async ({ email, otp }) => {
   const accessToken = generateToken(user._id);
 
   return {
-    message: "Signup successful",
+    message: "Otp verification successful",
     accessToken,
     data: {
       user,
@@ -687,4 +684,3 @@ exports.emailLogin = async ({ email, password }) => {
     },
   };
 };
-

@@ -8,6 +8,13 @@ const BikeCompany = require("../bike/company/bike.model");
 const TourCompany = require("../tour/company/tour.model");
 const Adventure = require("../adventure/category/adventure.model");
 
+const RoomType = require("../rooms/roomType.model");
+const CabService = require("../cab/service/cabService.model");
+const BikeService = require("../bike/service/bikeService.model");
+const AdventureService = require("../adventure/service/service.model");
+const TourService = require("../tour/service/tourService.model");
+const Promotion = require("../admin/promotion/promotion.model");
+
 const SERVICE_MODELS = {
   hotel: Hotel,
   cab: CabCompany,
@@ -268,6 +275,8 @@ exports.getVendorMe = async (userId) => {
 
         vendorEmail: user.email,
 
+        propertyId: vendor.propertyId || null,
+
         businessName: vendor.businessName,
         businessEmail: vendor.businessEmail,
 
@@ -400,6 +409,245 @@ exports.getVendorByUserId = async (userId) => {
     return await Vendor.findOne({ userId }).lean();
   } catch (error) {
     logger.error("Service Error: getVendorByUserId", error);
+    throw error;
+  }
+};
+
+// Get vendor's my listing data with services and subservices
+exports.getVendorMyListing = async (userId) => {
+  try {
+    // 1. Get User
+    const user = await User.findById(userId).select("firstName lastName email");
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // 2. Get Vendor
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    // 3. Get Bank details
+    const bank = await VendorBank.findOne({
+      vendorId: vendor._id,
+      isActive: true,
+    }).select("+accountNumber +ifscCode +upiId");
+
+    // 4. Get main service data
+    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    let serviceData = null;
+    if (ServiceModel) {
+      serviceData = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true,
+      });
+    }
+
+    // 5. Get subservices based on serviceType
+    let subServices = [];
+    if (serviceData) {
+      switch (vendor.serviceType) {
+        case "hotel":
+          const roomTypes = await RoomType.find({
+            hotelId: serviceData._id,
+            isActive: true,
+          }).select("name basePrice discountPrice capacity isActive");
+          subServices = roomTypes.map((rt) => ({
+            id: rt._id,
+            name: rt.name,
+            basePrice: rt.basePrice,
+            discountPrice: rt.discountPrice,
+            capacity: rt.capacity,
+            isActive: rt.isActive,
+          }));
+          break;
+
+        case "cab":
+          const cabServices = await CabService.find({
+            cab: serviceData._id,
+            isActive: true,
+          }).select("title carName cabType capacity basePrice isActive");
+          subServices = cabServices.map((cs) => ({
+            id: cs._id,
+            name: cs.title,
+            carName: cs.carName,
+            cabType: cs.cabType,
+            capacity: cs.capacity,
+            basePrice: cs.basePrice,
+            isActive: cs.isActive,
+          }));
+          break;
+
+        case "bike":
+          const bikeServices = await BikeService.find({
+            bike: serviceData._id,
+            isActive: true,
+          }).select("title bikeName bikeType pricePerDay isActive");
+          subServices = bikeServices.map((bs) => ({
+            id: bs._id,
+            name: bs.title,
+            bikeName: bs.bikeName,
+            bikeType: bs.bikeType,
+            pricePerDay: bs.pricePerDay,
+            isActive: bs.isActive,
+          }));
+          break;
+
+        case "adventure":
+          const adventureServices = await AdventureService.find({
+            adventure: serviceData._id,
+            isActive: true,
+          }).select("title type basePrice isActive");
+          subServices = adventureServices.map((as) => ({
+            id: as._id,
+            name: as.title,
+            type: as.type,
+            basePrice: as.basePrice,
+            isActive: as.isActive,
+          }));
+          break;
+
+        case "tour":
+          const tourServices = await TourService.find({
+            tour: serviceData._id,
+            isActive: true,
+          }).select("title duration basePrice isActive");
+          subServices = tourServices.map((ts) => ({
+            id: ts._id,
+            name: ts.title,
+            duration: ts.duration,
+            basePrice: ts.basePrice,
+            isActive: ts.isActive,
+          }));
+          break;
+
+        default:
+          subServices = [];
+      }
+    }
+
+    return {
+      vendor: {
+        vendorId: vendor._id,
+        propertyId: vendor.propertyId || null,
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        email: user.email,
+        businessName: vendor.businessName,
+        serviceType: vendor.serviceType,
+        status: vendor.status,
+      },
+      bankDetails: bank
+        ? {
+            accountHolderName: bank.accountHolderName,
+            bankName: bank.bankName,
+            accountNumber: bank.accountNumber,
+            ifscCode: bank.ifscCode,
+            branchName: bank.branchName,
+            upiId: bank.upiId,
+            verificationStatus: bank.verificationStatus,
+          }
+        : null,
+      serviceDetails: serviceData
+        ? {
+            id: serviceData._id,
+            name: serviceData.name,
+            description: serviceData.description,
+            address: serviceData.address,
+            city: serviceData.city || (serviceData.location ? serviceData.location.city : null),
+            rating: typeof serviceData.rating === "number"
+              ? serviceData.rating
+              : (serviceData.rating ? serviceData.rating.average : 0),
+            verificationStatus: serviceData.verificationStatus,
+            isActive: serviceData.isActive,
+          }
+        : null,
+      subServices,
+    };
+  } catch (error) {
+    logger.error("Service Error: getVendorMyListing", error);
+    throw error;
+  }
+};
+
+exports.applyForPromotion = async (userId, plan) => {
+  try {
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new Error("Vendor profile not found");
+    }
+
+    if (vendor.status !== "approved") {
+      throw new Error("Only approved vendors can apply for promotion");
+    }
+
+    // Find the vendor's active service listing
+    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    if (!ServiceModel) {
+      throw new Error("Invalid vendor service type");
+    }
+
+    const serviceData = await ServiceModel.findOne({
+      vendorId: vendor._id,
+      isActive: true,
+    });
+
+    if (!serviceData) {
+      throw new Error("No active listing found to promote");
+    }
+
+    // Check for existing pending promotion request
+    const existingPending = await Promotion.findOne({
+      vendorId: vendor._id,
+      serviceId: serviceData._id,
+      status: "pending",
+    });
+
+    if (existingPending) {
+      throw new Error("You already have a pending promotion request under review");
+    }
+
+    // Check if they already have an active promotion of this exact plan
+    const existingApproved = await Promotion.findOne({
+      vendorId: vendor._id,
+      serviceId: serviceData._id,
+      plan: plan,
+      status: "approved",
+    });
+
+    if (existingApproved) {
+      throw new Error(`This listing is already active on the ${plan} plan`);
+    }
+
+    const promotion = await Promotion.create({
+      vendorId: vendor._id,
+      serviceType: vendor.serviceType,
+      serviceId: serviceData._id,
+      plan: plan,
+      status: "pending",
+    });
+
+    return promotion;
+  } catch (error) {
+    logger.error("Service Error: applyForPromotion", error);
+    throw error;
+  }
+};
+
+exports.getMyPromotionRequests = async (userId) => {
+  try {
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new Error("Vendor profile not found");
+    }
+
+    const requests = await Promotion.find({ vendorId: vendor._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return requests;
+  } catch (error) {
+    logger.error("Service Error: getMyPromotionRequests", error);
     throw error;
   }
 };

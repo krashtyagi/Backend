@@ -18,6 +18,14 @@ router.post(
 //vendor get me help for the prefilling data 
 router.get("/me", protect, authorize("vendor"), vendorController.getVendorMe);
 
+// Get vendor's my listings data
+router.get(
+  "/my-listing",
+  protect,
+  authorize("vendor"),
+  vendorController.getVendorMyListing,
+);
+
 // Bookings
 router.get(
   "/bookings",
@@ -137,6 +145,21 @@ router.delete(
   protect,
   authorize("vendor"),
   taskController.deleteTask,
+);
+
+// Promotions
+router.post(
+  "/promotions/apply",
+  protect,
+  authorize("vendor"),
+  vendorController.applyForPromotion
+);
+
+router.get(
+  "/promotions/my-requests",
+  protect,
+  authorize("vendor"),
+  vendorController.getMyPromotionRequests
 );
 
 module.exports = router;

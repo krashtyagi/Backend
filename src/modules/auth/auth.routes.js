@@ -67,8 +67,6 @@ router.patch("/change-password", protect, authController.changePassword);
 
 
 
-
-
 router.post("/email-signup", authController.emailSignup);
 
 router.post("/email-verify-otp", authController.emailVerifySignupOTP);
@@ -76,10 +74,6 @@ router.post("/email-verify-otp", authController.emailVerifySignupOTP);
 router.post("/email-resend-otp", authController.emailResendOTP);
 
 router.post("/email-login", authController.emailLogin);
-
-
-
-
 //--social auth
 // Google
 router.get(

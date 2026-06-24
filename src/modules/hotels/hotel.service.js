@@ -142,9 +142,8 @@ exports.getAllHotels = async (query = {}, userId = null) => {
       );
     }
 
-    // WITH DATES
     if (startDate && endDate) {
-      const pipeline = [
+      const basePipeline = [
         {
           $match: {
             isActive: true,
@@ -194,7 +193,12 @@ exports.getAllHotels = async (query = {}, userId = null) => {
               "roomTypes.capacity.children": { $gte: Number(children) },
             }),
             ...(amenityArray && {
-              "roomTypes.amenities": { $all: amenityArray },
+              $and: amenityArray.map((amenity) => ({
+                $or: [
+                  { amenities: amenity },
+                  { "roomTypes.amenities": amenity },
+                ],
+              })),
             }),
             ...(minSize || maxSize
               ? {
@@ -207,7 +211,6 @@ exports.getAllHotels = async (query = {}, userId = null) => {
           },
         },
 
-        // AVAILABILITY
         {
           $lookup: {
             from: "availabilities",
@@ -256,7 +259,6 @@ exports.getAllHotels = async (query = {}, userId = null) => {
 
         { $match: { minAvailableRooms: { $gt: 0 } } },
 
-        // PRICE
         {
           $addFields: {
             effectivePrice: {
@@ -282,7 +284,6 @@ exports.getAllHotels = async (query = {}, userId = null) => {
             ]
           : []),
 
-        // GROUP
         {
           $group: {
             _id: "$_id",
@@ -295,7 +296,6 @@ exports.getAllHotels = async (query = {}, userId = null) => {
             amenities: { $first: "$amenities" },
             images: { $first: "$images" },
 
-            //ADD
             rank: { $first: "$rank" },
 
             startingPrice: { $min: "$effectivePrice" },
@@ -303,7 +303,6 @@ exports.getAllHotels = async (query = {}, userId = null) => {
           },
         },
 
-        //SAFE FALLBACK
         {
           $addFields: {
             rank: { $ifNull: ["$rank", "C"] },
@@ -329,113 +328,151 @@ exports.getAllHotels = async (query = {}, userId = null) => {
             startingPrice: 1,
           },
         },
+      ];
 
+      const allMatched = await Hotel.aggregate(basePipeline);
+      const total = allMatched.length;
+
+      const paginatedPipeline = [
+        ...basePipeline,
         { $skip: skip },
         { $limit: limitNum },
       ];
 
-      const hotels = await Hotel.aggregate(pipeline);
+      const hotels = await Hotel.aggregate(paginatedPipeline);
       const updatedHotels = await attachFavoriteFlag(hotels, userId);
 
-      return { hotels: updatedHotels, total: hotels.length };
+      return { hotels: updatedHotels, total };
     }
 
-    //  NO DATES
-    const roomTypeFilter = { isActive: true };
-
-    if (adults) roomTypeFilter["capacity.adults"] = { $gte: Number(adults) };
-    if (children)
-      roomTypeFilter["capacity.children"] = { $gte: Number(children) };
-
-    if (amenityArray) {
-      roomTypeFilter.amenities = { $all: amenityArray };
-    }
-
-    if (minSize || maxSize) {
-      roomTypeFilter.roomSizeSqm = {
-        ...(minSize && { $gte: Number(minSize) }),
-        ...(maxSize && { $lte: Number(maxSize) }),
-      };
-    }
-
-    if (minPrice || maxPrice) {
-      roomTypeFilter.$or = [
-        {
-          discountPrice: {
-            $gt: 0,
-            ...(minPrice && { $gte: Number(minPrice) }),
-            ...(maxPrice && { $lte: Number(maxPrice) }),
-          },
+    const basePipeline = [
+      {
+        $match: {
+          isActive: true,
+          city: { $regex: city, $options: "i" },
+          ...(minRating && { rating: { $gte: Number(minRating) } }),
         },
-        {
-          discountPrice: 0,
-          basePrice: {
-            ...(minPrice && { $gte: Number(minPrice) }),
-            ...(maxPrice && { $lte: Number(maxPrice) }),
-          },
+      },
+      ...(lat && lng
+        ? [
+            {
+              $match: {
+                location: {
+                  $near: {
+                    $geometry: {
+                      type: "Point",
+                      coordinates: [Number(lng), Number(lat)],
+                    },
+                    $maxDistance: maxDistance
+                      ? Number(maxDistance) * 1000
+                      : 100000,
+                  },
+                },
+              },}
+            ]
+        : []),
+      {
+        $lookup: {
+          from: "roomtypes",
+          localField: "_id",
+          foreignField: "hotelId",
+          as: "roomTypes",
         },
-      ];
-    }
-
-    const hotelIds = await RoomType.distinct("hotelId", roomTypeFilter);
-
-    if (hotelIds.length === 0) {
-      return { hotels: [], total: 0 };
-    }
-
-    const hotelFilter = {
-      _id: { $in: hotelIds },
-      isActive: true,
-      city: { $regex: city, $options: "i" },
-      ...(minRating && { rating: { $gte: Number(minRating) } }),
-    };
-
-    if (amenityArray) {
-      hotelFilter.amenities = { $all: amenityArray };
-    }
-
-    if (lat && lng) {
-      hotelFilter.location = {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [Number(lng), Number(lat)],
-          },
-          $maxDistance: maxDistance ? Number(maxDistance) * 1000 : 100000,
+      },
+      { $unwind: "$roomTypes" },
+      {
+        $match: {
+          "roomTypes.isActive": true,
+          ...(adults && {
+            "roomTypes.capacity.adults": { $gte: Number(adults) },
+          }),
+          ...(children && {
+            "roomTypes.capacity.children": { $gte: Number(children) },
+          }),
+          ...(minSize || maxSize
+            ? {
+                "roomTypes.roomSizeSqm": {
+                  ...(minSize && { $gte: Number(minSize) }),
+                  ...(maxSize && { $lte: Number(maxSize) }),
+                },
+              }
+            : {}),
+          ...(minPrice || maxPrice
+            ? {
+                $or: [
+                  {
+                    "roomTypes.discountPrice": {
+                      $gt: 0,
+                      ...(minPrice && { $gte: Number(minPrice) }),
+                      ...(maxPrice && { $lte: Number(maxPrice) }),
+                    },
+                  },
+                  {
+                    "roomTypes.discountPrice": 0,
+                    "roomTypes.basePrice": {
+                      ...(minPrice && { $gte: Number(minPrice) }),
+                      ...(maxPrice && { $lte: Number(maxPrice) }),
+                    },
+                  },
+                ],
+              }
+            : {}),
+          ...(amenityArray && {
+            $and: amenityArray.map((amenity) => ({
+              $or: [
+                { amenities: amenity },
+                { "roomTypes.amenities": amenity },
+              ],
+            })),
+          }),
         },
-      };
-    }
-
-    const [hotels, total] = await Promise.all([
-      Hotel.find(hotelFilter)
-        .populate("vendorId", "businessName")
-        .select(
-          "name city rating numReviews isFeatured images description amenities rank",
-        )
-        .sort({
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          city: { $first: "$city" },
+          rating: { $first: "$rating" },
+          numReviews: { $first: "$numReviews" },
+          isFeatured: { $first: "$isFeatured" },
+          description: { $first: "$description" },
+          amenities: { $first: "$amenities" },
+          images: { $first: "$images" },
+          rank: { $first: "$rank" },
+        },
+      },
+      {
+        $addFields: {
+          rank: { $ifNull: ["$rank", "C"] },
+          thumbnail: { $arrayElemAt: ["$images.url", 0] },
+          hotelImages: "$images",
+          startingPrice: null,
+          availableRooms: null,
+          totalNights: 1,
+          totalPrice: null,
+        },
+      },
+      { $project: { images: 0 } },
+      {
+        $sort: {
           rank: 1,
           isFeatured: -1,
           rating: -1,
-        })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
+        },
+      },
+    ];
 
-      Hotel.countDocuments(hotelFilter),
-    ]);
+    const allMatched = await Hotel.aggregate(basePipeline);
+    const total = allMatched.length;
 
-    const formattedHotels = hotels.map((h) => ({
-      ...h,
-      rank: h.rank || "C",
-      thumbnail: h.images?.[0]?.url || null,
-      hotelImages: h.images || [],
-      startingPrice: null,
-      availableRooms: null,
-      totalNights: 1,
-      totalPrice: null,
-    }));
+    const paginatedPipeline = [
+      ...basePipeline,
+      { $skip: skip },
+      { $limit: limitNum },
+    ];
 
-    const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
+    const hotels = await Hotel.aggregate(paginatedPipeline);
+    const updatedHotels = await attachFavoriteFlag(hotels, userId);
 
     return { hotels: updatedHotels, total };
   } catch (error) {

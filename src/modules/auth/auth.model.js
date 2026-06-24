@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     firstName: { type: String, trim: true },
     lastName: { type: String, trim: true },
-    phoneNumber: { type: String, unique: true, sparse: true, trim: true },
+    phoneNumber: { type: String, unique: true, trim: true },
     gender: {
       type: String,
       enum: ["male", "female", "other"],

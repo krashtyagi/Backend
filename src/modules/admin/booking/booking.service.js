@@ -476,6 +476,7 @@ exports.getBookingDetail = async (bookingId) => {
           },
           vendor: {
             _id: "$vendor._id",
+            propertyId: "$vendor.propertyId",
             businessName: "$vendor.businessName",
             businessEmail: "$vendor.businessEmail",
             businessPhone: "$vendor.businessPhone",
@@ -597,6 +598,7 @@ exports.getBookingDetail = async (bookingId) => {
           },
           vendor: {
             _id: "$vendor._id",
+            propertyId: "$vendor.propertyId",
             businessName: "$vendor.businessName",
             businessEmail: "$vendor.businessEmail",
             businessPhone: "$vendor.businessPhone",

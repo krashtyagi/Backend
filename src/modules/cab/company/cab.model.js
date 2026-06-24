@@ -74,8 +74,8 @@ const cabCompanySchema = new mongoose.Schema(
 
     rank: {
       type: String,
-      enum: ["A", "B", "C"],
-      default: "C",
+      enum: ["A", "B", "C", null],
+      default: null,
       index: true,
     },
 

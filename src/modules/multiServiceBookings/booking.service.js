@@ -4,8 +4,11 @@ const razorpay = require("../../shared/config/razorpay");
 const Booking = require("./booking.model");
 const Payment = require("./payment.model");
 const Tax = require("../admin/tax/tax.model");
+const Vendor = require("../vendors/vendor.model");
+const User = require("../auth/auth.model");
 
 const logger = require("../../shared/utils/logger");
+const { sendVendorBookingNotificationEmail } = require("../../shared/utils/sendEmail");
 
 const AdventureService = require("../adventure/service/service.model");
 const CabService = require("../cab/service/cabService.model");
@@ -389,6 +392,46 @@ exports.verifyPayment = async (data) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    try {
+      const vendor = await Vendor.findById(updatedBooking.vendorId);
+      if (vendor) {
+        const vendorUser = await User.findById(vendor.userId);
+        const recipientEmails = [vendor.businessEmail, vendorUser?.email].filter(Boolean);
+
+        let bookingDateStr = updatedBooking.bookingDate 
+          ? new Date(updatedBooking.bookingDate).toLocaleDateString()
+          : "N/A";
+        
+        let extraDetails = "";
+        if (updatedBooking.serviceType === "cab") {
+          extraDetails = `Route: ${updatedBooking.meta?.pickup || "N/A"} → ${updatedBooking.meta?.drop || "N/A"}`;
+        } else if (updatedBooking.serviceType === "bike") {
+          const startDate = updatedBooking.duration?.startDate ? new Date(updatedBooking.duration.startDate).toLocaleDateString() : "N/A";
+          const endDate = updatedBooking.duration?.endDate ? new Date(updatedBooking.duration.endDate).toLocaleDateString() : "N/A";
+          extraDetails = `Duration: ${startDate} to ${endDate} (${updatedBooking.duration?.totalDays || 0} Days)`;
+        } else if (updatedBooking.serviceType === "tour") {
+          const startDate = updatedBooking.duration?.startDate ? new Date(updatedBooking.duration.startDate).toLocaleDateString() : "N/A";
+          extraDetails = `Start Date: ${startDate}, Duration: ${updatedBooking.duration?.totalDays || 0} Days`;
+        } else if (updatedBooking.serviceType === "adventure") {
+          extraDetails = `Slot: ${updatedBooking.timeSlot || "N/A"}, Participants: ${updatedBooking.participants?.length || 0}`;
+        }
+
+        await sendVendorBookingNotificationEmail(recipientEmails, {
+          serviceType: updatedBooking.serviceType,
+          serviceName: updatedBooking.serviceSnapshot?.title || updatedBooking.serviceType,
+          bookingReference: updatedBooking.bookingReference,
+          bookingDate: bookingDateStr,
+          extraDetails: extraDetails,
+          totalAmount: updatedBooking.pricing?.totalAmount,
+          customerName: `${updatedBooking.primaryCustomer.firstName} ${updatedBooking.primaryCustomer.lastName || ""}`.trim(),
+          customerEmail: updatedBooking.primaryCustomer.email,
+          customerPhone: updatedBooking.primaryCustomer.phoneNumber,
+        });
+      }
+    } catch (vendorMailErr) {
+      logger.error("Vendor Booking Notification Email failed:", vendorMailErr);
+    }
 
     return {
       booking: updatedBooking,

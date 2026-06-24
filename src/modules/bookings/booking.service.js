@@ -2,6 +2,7 @@ const Booking = require("./booking.model");
 const Availability = require("../availability/availability.model");
 const mongoose = require("mongoose");
 const logger = require("../../shared/utils/logger");
+const trivlloData = require("../../../trivllo.json");
 const Payment = require("../payments/payment.model");
 const Hotel = require("../hotels/hotel.model");
 const Tax = require("../admin/tax/tax.model");
@@ -14,6 +15,12 @@ const crypto = require("crypto");
 const PDFDocument = require("pdfkit");
 
 const RoomType = require("../rooms/roomType.model");
+
+const GenericBooking = require("../multiServiceBookings/booking.model");
+const TourService = require("../tour/company/tour.model");
+const CabService = require("../cab/company/cab.model");
+const BikeService = require("../bike/company/bike.model");
+const AdventureService = require("../adventure/category/adventure.model");
 
 //restore availability function
 async function restoreAvailability(booking, session) {
@@ -52,170 +59,6 @@ async function processRefund(booking, session) {
 
   await payment.save({ session });
 }
-
-//Create Booking + Razorpay Order
-// exports.createBooking = async (data, userId) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-
-//   try {
-//     const {
-//       hotelId,
-//       roomTypeId,
-//       checkIn,
-//       checkOut,
-//       guests,
-//       roomsBooked,
-//       primaryGuest,
-//       additionalGuests = [],
-//     } = data;
-
-//     if (!checkIn || !checkOut)
-//       throw new Error("Check-in and Check-out dates are required");
-
-//     const startDate = new Date(checkIn);
-//     const endDate = new Date(checkOut);
-
-//     startDate.setHours(0, 0, 0, 0);
-//     endDate.setHours(0, 0, 0, 0);
-
-//     if (startDate >= endDate)
-//       throw new Error("Invalid check-in/check-out dates");
-
-//     const nights = (endDate - startDate) / (1000 * 60 * 60 * 24);
-
-//     if (nights <= 0) throw new Error("Invalid booking duration");
-
-//     const rooms = roomsBooked && roomsBooked > 0 ? roomsBooked : 1;
-
-//     if (!guests?.adults || guests.adults <= 0)
-//       throw new Error("At least one adult guest is required");
-
-//     const expectedAdditionalGuests =
-//       (guests.adults || 0) + (guests.children || 0) - 1;
-//     if (additionalGuests.length !== expectedAdditionalGuests)
-//       throw new Error("Additional guests count mismatch");
-
-//     const hotel = await Hotel.findById(hotelId).session(session);
-//     if (!hotel || !hotel.isActive) throw new Error("Hotel not available");
-
-//     const roomType = await RoomType.findById(roomTypeId).session(session);
-//     if (!roomType || !roomType.isActive)
-//       throw new Error("Room type not available");
-
-//     if (
-//       guests.adults > roomType.capacity.adults ||
-//       guests.children > roomType.capacity.children
-//     ) {
-//       throw new Error("Guest count exceeds room capacity");
-//     }
-
-//     //Fetch availability docs for date range
-//     const availabilityDocs = await Availability.find({
-//       roomTypeId,
-//       date: { $gte: startDate, $lt: endDate },
-//     }).session(session);
-
-//     //Build map for quick lookup
-//     const availabilityMap = {};
-//     for (const doc of availabilityDocs) {
-//       const dateStr = doc.date.toISOString().split("T")[0];
-//       availabilityMap[dateStr] = doc;
-//     }
-
-//     //Availability Validation (derived model)
-//     for (let i = 0; i < nights; i++) {
-//       const currentDate = new Date(startDate);
-//       currentDate.setDate(currentDate.getDate() + i);
-
-//       const dateStr = currentDate.toISOString().split("T")[0];
-
-//       const dayDoc = availabilityMap[dateStr];
-
-//       const booked = dayDoc?.bookedRooms || 0;
-//       const blocked = dayDoc?.blockedRooms || 0;
-
-//       const available = roomType.totalRooms - booked - blocked;
-
-//       if (available < rooms) {
-//         throw new Error(
-//           `Insufficient availability on ${currentDate.toDateString()}`,
-//         );
-//       }
-//     }
-
-//     const priceOverride = availabilityDocs[0]?.priceOverride;
-
-//     const pricePerNight =
-//       priceOverride ??
-//       (roomType.discountPrice > 0
-//         ? roomType.discountPrice
-//         : roomType.basePrice);
-
-//     const totalAmount = pricePerNight * nights * rooms;
-
-//     const bookingReference =
-//       "BK-" + crypto.randomBytes(6).toString("hex").toUpperCase();
-
-//     const [booking] = await Booking.create(
-//       [
-//         {
-//           userId,
-//           hotelId,
-//           roomTypeId,
-//           bookingReference,
-//           checkIn: startDate,
-//           checkOut: endDate,
-//           nights,
-//           guests,
-//           roomsBooked: rooms,
-//           primaryGuest,
-//           additionalGuests,
-//           pricePerNight,
-//           totalAmount,
-//           status: "pending",
-//           paymentStatus: "pending",
-//         },
-//       ],
-//       { session },
-//     );
-
-//     const razorpayOrder = await razorpay.orders.create({
-//       amount: totalAmount * 100,
-//       currency: "INR",
-//       receipt: bookingReference,
-//     });
-
-//     const [payment] = await Payment.create(
-//       [
-//         {
-//           bookingId: booking._id,
-//           userId,
-//           razorpayOrderId: razorpayOrder.id,
-//           amountPaid: totalAmount,
-//           status: "created",
-//         },
-//       ],
-//       { session },
-//     );
-
-//     booking.paymentId = payment._id;
-//     await booking.save({ session });
-
-//     await session.commitTransaction();
-//     session.endSession();
-
-//     return {
-//       booking,
-//       razorpayOrder,
-//     };
-//   } catch (err) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     logger.error("Service Error: createBooking", err);
-//     throw err;
-//   }
-// };
 
 exports.createBooking = async (data, userId) => {
   const session = await mongoose.startSession();
@@ -398,38 +241,258 @@ exports.createBooking = async (data, userId) => {
   }
 };
 
+// exports.getUserBookings = async (userId) => {
+//   try {
+//     const bookings = await Booking.find({ userId })
+//       .populate({
+//         path: "hotelId",
+//         select: "name images",
+//       })
+//       .sort({ createdAt: -1 })
+//       .lean();
+
+//     return bookings.map((booking) => ({
+//       hotelId: booking.hotelId._id,
+//       _id: booking._id,
+//       bookingReference: booking.bookingReference,
+//       hotelName: booking.hotelId?.name,
+//       thumbnail: booking.hotelId?.images?.[0]?.url || null,
+//       checkIn: booking.checkIn,
+//       checkOut: booking.checkOut,
+//       guests: booking.guests,
+//       status: booking.status,
+//       totalAmount: booking.totalAmount,
+//     }));
+//   } catch (error) {
+//     logger.error("Service Error: getUserBookings", error);
+//     throw error;
+//   }
+// };
+
+//Get booking detail by id
+
 exports.getUserBookings = async (userId) => {
   try {
-    const bookings = await Booking.find({ userId })
-      .populate({
-        path: "hotelId",
-        select: "name images",
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+    const [hotelBookings, genericBookings] = await Promise.all([
+      Booking.find({ userId })
+        .populate({
+          path: "hotelId",
+          select: "name images",
+        })
+        .lean(),
 
-    return bookings.map((booking) => ({
-      hotelId: booking.hotelId._id,
+      GenericBooking.find({ userId }).lean(),
+    ]);
+
+    // Group serviceIds by type
+    const adventureIds = [];
+    const bikeIds = [];
+    const cabIds = [];
+    const tourIds = [];
+
+    genericBookings.forEach((booking) => {
+      switch (booking.serviceType) {
+        case "adventure":
+          adventureIds.push(booking.serviceId);
+          break;
+
+        case "bike":
+          bikeIds.push(booking.serviceId);
+          break;
+
+        case "cab":
+          cabIds.push(booking.serviceId);
+          break;
+
+        case "tour":
+          tourIds.push(booking.serviceId);
+          break;
+      }
+    });
+
+    const [adventureServices, bikeServices, cabServices, tourServices] =
+      await Promise.all([
+        adventureIds.length
+          ? AdventureService.find({
+              _id: { $in: adventureIds },
+            })
+              .select("title images")
+              .lean()
+          : [],
+
+        bikeIds.length
+          ? BikeService.find({
+              _id: { $in: bikeIds },
+            })
+              .select("title images bikeName")
+              .lean()
+          : [],
+
+        cabIds.length
+          ? CabService.find({
+              _id: { $in: cabIds },
+            })
+              .select("title images carName pickupLocation dropLocation")
+              .lean()
+          : [],
+
+        tourIds.length
+          ? TourService.find({
+              _id: { $in: tourIds },
+            })
+              .select("title images destinations")
+              .lean()
+          : [],
+      ]);
+
+    // Create lookup maps
+    const adventureMap = new Map(
+      adventureServices.map((item) => [item._id.toString(), item]),
+    );
+
+    const bikeMap = new Map(
+      bikeServices.map((item) => [item._id.toString(), item]),
+    );
+
+    const cabMap = new Map(
+      cabServices.map((item) => [item._id.toString(), item]),
+    );
+
+    const tourMap = new Map(
+      tourServices.map((item) => [item._id.toString(), item]),
+    );
+
+    const formattedGenericBookings = genericBookings.map((booking) => {
+      let service = null;
+
+      switch (booking.serviceType) {
+        case "adventure":
+          service = adventureMap.get(booking.serviceId.toString());
+          break;
+
+        case "bike":
+          service = bikeMap.get(booking.serviceId.toString());
+          break;
+
+        case "cab":
+          service = cabMap.get(booking.serviceId.toString());
+          break;
+
+        case "tour":
+          service = tourMap.get(booking.serviceId.toString());
+          break;
+      }
+
+      return {
+        _id: booking._id,
+        bookingReference: booking.bookingReference,
+
+        bookingType: booking.serviceType,
+
+        title: service?.title || booking.serviceSnapshot?.title || "Service",
+
+        thumbnail: service?.images?.[0]?.url || null,
+
+        bookingDate: booking.duration?.startDate || booking.bookingDate,
+
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+
+        totalAmount: booking.pricing?.totalAmount || 0,
+
+        createdAt: booking.createdAt,
+      };
+    });
+
+    const formattedHotelBookings = hotelBookings.map((booking) => ({
       _id: booking._id,
       bookingReference: booking.bookingReference,
-      hotelName: booking.hotelId?.name,
+
+      bookingType: "hotel",
+
+      title: booking.hotelId?.name || "Hotel",
+
       thumbnail: booking.hotelId?.images?.[0]?.url || null,
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
-      guests: booking.guests,
+
+      bookingDate: booking.checkIn,
+
       status: booking.status,
+      paymentStatus: booking.paymentStatus,
+
       totalAmount: booking.totalAmount,
+
+      createdAt: booking.createdAt,
     }));
+
+    return [...formattedHotelBookings, ...formattedGenericBookings].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
   } catch (error) {
     logger.error("Service Error: getUserBookings", error);
     throw error;
   }
 };
 
-//Get booking detail by id
+// exports.getBookingDetail = async (bookingId, userId) => {
+//   try {
+//     const booking = await Booking.findOne({
+//       _id: bookingId,
+//       userId,
+//     })
+//       .populate("hotelId", "name description address location images")
+//       .populate("roomTypeId", "name amenities bedType roomSizeSqm")
+//       .lean();
+
+//     if (!booking) throw new Error("Booking not found");
+
+//     return {
+//       bookingReference: booking.bookingReference,
+
+//       status: booking.status,
+//       paymentStatus: booking.paymentStatus,
+
+//       hotel: {
+//         hotelId: booking.hotelId._id,
+//         name: booking.hotelId.name,
+//         address: booking.hotelId.address,
+//         coordinates: booking.hotelId.location?.coordinates,
+//         thumbnail: booking.hotelId.images?.[0]?.url || null,
+//         address: booking.hotelId.address,
+//       },
+
+//       room: {
+//         name: booking.roomTypeId.name,
+//         amenities: booking.roomTypeId.amenities,
+//         bedType: booking.roomTypeId.bedType,
+//         roomSizeSqm: booking.roomTypeId.roomSizeSqm,
+//       },
+
+//       checkIn: booking.checkIn,
+//       checkOut: booking.checkOut,
+//       nights: booking.nights,
+//       roomsBooked: booking.roomsBooked,
+//       guests: booking.guests,
+
+//       priceBreakdown: {
+//         pricePerNight: booking.pricePerNight,
+//         taxAmount: booking.taxAmount,
+//         cleaningFee: booking.cleaningFee,
+//         discountAmount: booking.discountAmount,
+//         totalAmount: booking.totalAmount,
+//       },
+//     };
+//   } catch (error) {
+//     logger.error("Service Error: getBookingDetail", error);
+//     throw error;
+//   }
+// };
+
+//download user invoice
+
 exports.getBookingDetail = async (bookingId, userId) => {
   try {
-    const booking = await Booking.findOne({
+    // HOTEL BOOKING
+    const hotelBooking = await Booking.findOne({
       _id: bookingId,
       userId,
     })
@@ -437,43 +500,125 @@ exports.getBookingDetail = async (bookingId, userId) => {
       .populate("roomTypeId", "name amenities bedType roomSizeSqm")
       .lean();
 
-    if (!booking) throw new Error("Booking not found");
+    if (hotelBooking) {
+      return {
+        bookingType: "hotel",
+
+        bookingReference: hotelBooking.bookingReference,
+
+        status: hotelBooking.status,
+        paymentStatus: hotelBooking.paymentStatus,
+
+        hotel: {
+          hotelId: hotelBooking.hotelId?._id,
+          name: hotelBooking.hotelId?.name,
+          address: hotelBooking.hotelId?.address,
+          coordinates: hotelBooking.hotelId?.location?.coordinates,
+          thumbnail: hotelBooking.hotelId?.images?.[0]?.url || null,
+        },
+
+        room: {
+          name: hotelBooking.roomTypeId?.name,
+          amenities: hotelBooking.roomTypeId?.amenities || [],
+          bedType: hotelBooking.roomTypeId?.bedType,
+          roomSizeSqm: hotelBooking.roomTypeId?.roomSizeSqm,
+        },
+
+        checkIn: hotelBooking.checkIn,
+        checkOut: hotelBooking.checkOut,
+        nights: hotelBooking.nights,
+
+        guests: hotelBooking.guests,
+        roomsBooked: hotelBooking.roomsBooked,
+
+        priceBreakdown: {
+          pricePerNight: hotelBooking.pricePerNight,
+          taxAmount: hotelBooking.taxAmount,
+          cleaningFee: hotelBooking.cleaningFee,
+          discountAmount: hotelBooking.discountAmount,
+          totalAmount: hotelBooking.totalAmount,
+        },
+
+        createdAt: hotelBooking.createdAt,
+      };
+    }
+
+    // GENERIC BOOKING
+    const booking = await GenericBooking.findOne({
+      _id: bookingId,
+      userId,
+    }).lean();
+
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+
+    let service = null;
+
+    switch (booking.serviceType) {
+      case "adventure":
+        service = await AdventureService.findById(booking.serviceId)
+          .select("title images features description category")
+          .lean();
+        break;
+
+      case "bike":
+        service = await BikeService.findById(booking.serviceId)
+          .select("title bikeName bikeType images features description")
+          .lean();
+        break;
+
+      case "cab":
+        service = await CabService.findById(booking.serviceId)
+          .select(
+            "title carName cabType pickupLocation dropLocation images features",
+          )
+          .lean();
+        break;
+
+      case "tour":
+        service = await TourService.findById(booking.serviceId)
+          .select(
+            "title images destinations duration itinerary features description",
+          )
+          .lean();
+        break;
+    }
 
     return {
+      bookingType: booking.serviceType,
       bookingReference: booking.bookingReference,
-
       status: booking.status,
       paymentStatus: booking.paymentStatus,
 
-      hotel: {
-        hotelId: booking.hotelId._id,
-        name: booking.hotelId.name,
-        address: booking.hotelId.address,
-        coordinates: booking.hotelId.location?.coordinates,
-        thumbnail: booking.hotelId.images?.[0]?.url || null,
-        address: booking.hotelId.address,
+      service: {
+        serviceId: booking.serviceId,
+
+        title: service?.title || booking.serviceSnapshot?.title,
+        thumbnail: service?.images?.[0]?.url || null,
+        description: service?.description || "",
+        features: service?.features || [],
+        details: service || {},
       },
 
-      room: {
-        name: booking.roomTypeId.name,
-        amenities: booking.roomTypeId.amenities,
-        bedType: booking.roomTypeId.bedType,
-        roomSizeSqm: booking.roomTypeId.roomSizeSqm,
+      bookingInfo: {
+        bookingDate: booking.bookingDate,
+        duration: booking.duration,
+        participants: booking.participants,
+        quantity: booking.quantity,
+        specialRequest: booking.specialRequest || "",
       },
 
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
-      nights: booking.nights,
-      roomsBooked: booking.roomsBooked,
-      guests: booking.guests,
+      customer: booking.primaryCustomer,
 
-      priceBreakdown: {
-        pricePerNight: booking.pricePerNight,
-        taxAmount: booking.taxAmount,
-        cleaningFee: booking.cleaningFee,
-        discountAmount: booking.discountAmount,
-        totalAmount: booking.totalAmount,
+      pricing: {
+        baseAmount: booking.pricing?.baseAmount || 0,
+        taxAmount: booking.pricing?.taxAmount || 0,
+        discountAmount: booking.pricing?.discountAmount || 0,
+        totalAmount: booking.pricing?.totalAmount || 0,
       },
+
+      createdAt: booking.createdAt,
     };
   } catch (error) {
     logger.error("Service Error: getBookingDetail", error);
@@ -481,7 +626,6 @@ exports.getBookingDetail = async (bookingId, userId) => {
   }
 };
 
-//download user invoice
 exports.userInvoiceDownload = async (booking, res) => {
   const hotel = await Hotel.findById(booking.hotelId).lean();
   if (!hotel) throw new Error("Hotel not found");
@@ -497,19 +641,18 @@ exports.userInvoiceDownload = async (booking, res) => {
 
   // COLORS
   const primaryBlue = "#1a73e8";
-  const trivlloGreen = "#005e1bff";
+  const trivlloRed = "#ff3838";
   const lightBg = "#f8f9fa";
   const textColor = "#333333";
   const borderColor = "#eeeeee";
 
   //HEADER
-  doc.circle(65, 60, 20).fill(trivlloGreen);
+  doc.circle(65, 60, 20).fill(trivlloRed);
   doc
     .fillColor("#000")
     .fontSize(20)
     .font("Helvetica-BoldOblique")
-    .text("Hi", 50, 52);
-  doc.fillColor("#c52db0").text("lexa", 72, 52);
+    .text(trivlloData.company_name, 50, 52);
 
   doc
     .fillColor(textColor)
@@ -678,7 +821,7 @@ exports.userInvoiceDownload = async (booking, res) => {
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
       .fontSize(isTotal ? 12 : 10)
-      .fillColor(isDisc ? trivlloGreen : isTotal ? primaryBlue : textColor);
+      .fillColor(isDisc ? brandRed : isTotal ? primaryBlue : textColor);
 
     doc.text(label, calcX, currentY);
     doc.text(`Rs. ${value}`, calcX, currentY, {
@@ -715,7 +858,7 @@ exports.userInvoiceDownload = async (booking, res) => {
   doc
     .fontSize(8)
     .fillColor("gray")
-    .text("Thank you for booking with trivllo!", 40, 760, {
+    .text(`Thank you for booking with ${trivlloData.company_name}!`, 40, 760, {
       align: "center",
     });
 
@@ -1172,19 +1315,18 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
 
   // COLORS & STYLES
   const primaryBlue = "#1a73e8";
-  const trivlloGreen = "#005e1bff";
+  const brandRed = "#ff3838";
   const lightBg = "#f8f9fa";
   const textColor = "#333333";
   const borderColor = "#eeeeee";
 
-  //HEADER (HILEXA LOGO)
-  doc.circle(65, 60, 20).fill(trivlloGreen);
+  //HEADER (TRIVLLO LOGO)
+  doc.circle(65, 60, 20).fill(brandRed);
   doc
     .fillColor("#000")
     .fontSize(20)
     .font("Helvetica-BoldOblique")
-    .text("Hi", 50, 52);
-  doc.fillColor("#c52db0").text("lexa", 72, 52);
+    .text(trivlloData.company_name, 50, 52);
 
   // Header Title & Booking ID
   doc
@@ -1369,7 +1511,7 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
       .fontSize(isTotal ? 12 : 10)
-      .fillColor(isDisc ? trivlloGreen : isTotal ? primaryBlue : textColor);
+      .fillColor(isDisc ? brandRed : isTotal ? primaryBlue : textColor);
 
     // Label drawing
     doc.text(label, calcX, currentY);
@@ -1409,7 +1551,7 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
   doc
     .fontSize(8)
     .fillColor("gray")
-    .text("Thank you for booking with trivllo! Have a great stay.", 40, 760, {
+    .text(`Thank you for booking with ${trivlloData.company_name}! Have a great stay.`, 40, 760, {
       align: "center",
     })
     .text("Carry a valid Govt. ID (Aadhar/Passport) for check-in.", {

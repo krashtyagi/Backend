@@ -225,9 +225,9 @@ exports.verifyOTP = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { phone, email } = req.body;
 
-    const result = await authService.forgotPassword(phone);
+    const result = await authService.forgotPassword(phone || email);
 
     res.status(200).json({
       success: true,
@@ -240,9 +240,9 @@ exports.forgotPassword = async (req, res) => {
 
 exports.otpVerify = async (req, res) => {
   try {
-    const { phone, otp } = req.body;
+    const { phone, email, otp } = req.body;
 
-    const result = await authService.otpVerify(phone, otp);
+    const result = await authService.otpVerify(phone || email, otp);
 
     res.status(200).json({
       success: true,
@@ -255,9 +255,9 @@ exports.otpVerify = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    const { phone, otp, newPassword } = req.body;
+    const { phone, email, otp, newPassword } = req.body;
 
-    const result = await authService.resetPassword(phone, otp, newPassword);
+    const result = await authService.resetPassword(phone || email, otp, newPassword);
 
     res.status(200).json({
       success: true,
@@ -412,6 +412,9 @@ exports.resetPasswordWhatsapp = async (req, res) => {
 
 
 
+
+
+
 exports.emailSignup = async (req, res) => {
   try {
     const result = await authService.emailSignup(req.body);
@@ -479,4 +482,3 @@ exports.emailLogin = async (req, res) => {
     });
   }
 };
-

@@ -158,6 +158,14 @@ exports.getAllPayments = async (query) => {
                       $options: "i",
                     },
                   },
+
+                  {
+                    "vendor.propertyId": {
+                      $regex: search,
+
+                      $options: "i",
+                    },
+                  },
                 ],
               },
             },
@@ -202,6 +210,10 @@ exports.getAllPayments = async (query) => {
 
           vendorName: {
             $ifNull: ["$vendor.businessName", "N/A"],
+          },
+
+          propertyId: {
+            $ifNull: ["$vendor.propertyId", "N/A"],
           },
 
           amountPaid: "$amountPaid",
@@ -322,6 +334,14 @@ exports.getAllPayments = async (query) => {
                       $options: "i",
                     },
                   },
+
+                  {
+                    "vendor.propertyId": {
+                      $regex: search,
+
+                      $options: "i",
+                    },
+                  },
                 ],
               },
             },
@@ -364,6 +384,10 @@ exports.getAllPayments = async (query) => {
 
           vendorName: {
             $ifNull: ["$vendor.businessName", "N/A"],
+          },
+
+          propertyId: {
+            $ifNull: ["$vendor.propertyId", "N/A"],
           },
 
           amountPaid: "$amount",
@@ -592,6 +616,8 @@ exports.getPaymentDetail = async (paymentId) => {
           vendor: {
             _id: "$vendor._id",
 
+            propertyId: "$vendor.propertyId",
+
             businessName: "$vendor.businessName",
 
             businessEmail: "$vendor.businessEmail",
@@ -762,6 +788,8 @@ exports.getPaymentDetail = async (paymentId) => {
 
           vendor: {
             _id: "$vendor._id",
+
+            propertyId: "$vendor.propertyId",
 
             businessName: "$vendor.businessName",
 

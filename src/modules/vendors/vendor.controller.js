@@ -322,3 +322,69 @@ exports.checkOutBooking = async (req, res, next) => {
     next(err);
   }
 };
+
+// Get vendor's my listing data
+exports.getVendorMyListing = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const data = await vendorService.getVendorMyListing(userId);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getVendorMyListing", error);
+    next(error);
+  }
+};
+
+exports.applyForPromotion = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { plan } = req.body;
+
+    if (!plan) {
+      return res.status(400).json({
+        success: false,
+        message: "Plan name is required",
+      });
+    }
+
+    const validPlans = ["Boost", "Premium", "Elite"];
+    if (!validPlans.includes(plan)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid plan. Choose between Boost, Premium, or Elite",
+      });
+    }
+
+    const data = await vendorService.applyForPromotion(userId, plan);
+
+    res.status(201).json({
+      success: true,
+      message: "Promotion request submitted successfully",
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: applyForPromotion", error);
+    next(error);
+  }
+};
+
+exports.getMyPromotionRequests = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const data = await vendorService.getMyPromotionRequests(userId);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getMyPromotionRequests", error);
+    next(error);
+  }
+};

@@ -2,6 +2,7 @@ require("dotenv").config();
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 const logger = require("./logger");
+const trivlloData = require("../../../trivllo.json");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -22,7 +23,7 @@ const sendWhatsAppOTP = async (phone, otp) => {
         phoneNumber: cleanNumber,
         type: "Template",
         template: {
-          name: "otp_verification_trivllo",
+          name: "otp_verification_hilexa",
           languageCode: "en",
           bodyValues: [otp],
           buttonValues: {
@@ -46,25 +47,25 @@ const sendWhatsAppOTP = async (phone, otp) => {
 const sendOTPEmail = async (email, otp) => {
   try {
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Verify Your Email for Trivllo – OTP Inside",
+      subject: `Verify Your Email for ${trivlloData.company_name} – OTP Inside`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>Welcome to Trivllo 🚀</h2>
+          <h2>Welcome to ${trivlloData.company_name} 🚀</h2>
           <p>Your One-Time Password (OTP) is:</p>
           <h1 style="letter-spacing: 3px;">${otp}</h1>
           <p>This OTP is valid for 10 minutes.</p>
           <p>If you did not request this, please ignore.</p>
           <br/>
-          <p>— Team Trivllo</p>
+          <p>— Team ${trivlloData.company_name}</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Trivllo email send failed:", err.message);
+    logger.error(`${trivlloData.company_name} email send failed:`, err.message);
     throw err;
   }
 };
@@ -72,7 +73,7 @@ const sendOTPEmail = async (email, otp) => {
 const sendBookingConfirmationEmail = async (email, details) => {
   try {
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Booking Confirmed! Reference: ${details.bookingId}`,
       html: `
@@ -90,14 +91,14 @@ const sendBookingConfirmationEmail = async (email, details) => {
           </div>
 
           <p>If you have any questions, feel free to reply to this email.</p>
-          <p>Happy Travels,<br/><strong>Team Trivllo</strong></p>
+          <p>Happy Travels,<br/><strong>Team ${trivlloData.company_name}</strong></p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Trivllo booking email send failed:", err.message);
+    logger.error(`${trivlloData.company_name} booking email send failed:`, err.message);
     throw err;
   }
 };
@@ -107,7 +108,7 @@ const sendAdminVendorNotificationEmail = async (vendor, hotel = null) => {
     const subject = "🚨 New Vendor Submission Received";
 
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
       subject,
       html: `
@@ -148,13 +149,13 @@ const sendVendorSubmissionConfirmationEmail = async (vendor) => {
     const subject = "Your Request is Under Review ⏳";
 
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
         <h2>Hello ${vendor.businessName || "Vendor"},</h2>
 
-        <p>Thank you for submitting your business on <b>Trivllo</b> 🚀</p>
+        <p>Thank you for submitting your business on <b>${trivlloData.company_name}</b> 🚀</p>
 
         <p>Your request is currently under review by our team.</p>
 
@@ -162,13 +163,13 @@ const sendVendorSubmissionConfirmationEmail = async (vendor) => {
 
         <br/>
 
-        <p>— Team Trivllo</p>
+        <p>— Team ${trivlloData.company_name}</p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Vendor confirmation email failed:", err.message);
+    logger.error(`${trivlloData.company_name} confirmation email failed:`, err.message);
     throw err;
   }
 };
@@ -178,7 +179,7 @@ const sendVendorApprovalEmail = async (vendor) => {
     const subject = "🎉 Your Vendor Application is Approved!";
 
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
@@ -198,14 +199,14 @@ const sendVendorApprovalEmail = async (vendor) => {
 
           <p>We’re excited to have you onboard!</p>
 
-          <p>— Team Trivllo</p>
+          <p>— Team ${trivlloData.company_name}</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Vendor approval email failed:", err.message);
+    logger.error(`${trivlloData.company_name} approval email failed:`, err.message);
     throw err;
   }
 };
@@ -228,7 +229,7 @@ const sendVendorRejectionEmail = async (vendor) => {
     }
 
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: vendor.businessEmail,
       subject,
       html: `
@@ -244,14 +245,14 @@ const sendVendorRejectionEmail = async (vendor) => {
 
 
           <br/>
-          <p>— Team Trivllo</p>
+          <p>— Team ${trivlloData.company_name}</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Vendor rejection email failed:", err.message);
+    logger.error(`${trivlloData.company_name} rejection email failed:`, err.message);
     throw err;
   }
 };
@@ -259,7 +260,7 @@ const sendVendorRejectionEmail = async (vendor) => {
 const sendAccountDeletionApprovedEmail = async (email, firstName) => {
   try {
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Account Deletion Request Approved",
       html: `
@@ -272,17 +273,17 @@ const sendAccountDeletionApprovedEmail = async (email, firstName) => {
 
           <p>Your account and associated personal information have been permanently removed from our platform.</p>
 
-          <p>Thank you for being a part of Trivllo.</p>
+          <p>Thank you for being a part of ${trivlloData.company_name}.</p>
 
           <br />
-          <p>— Team Trivllo</p>
+          <p>— Team ${trivlloData.company_name}</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Account deletion approved email failed:", err.message);
+    logger.error(`${trivlloData.company_name} account deletion approved email failed:`, err.message);
     throw err;
   }
 };
@@ -290,7 +291,7 @@ const sendAccountDeletionApprovedEmail = async (email, firstName) => {
 const sendAccountDeletionRejectedEmail = async (email, firstName) => {
   try {
     const mailOptions = {
-      from: `"Trivllo Support" <${process.env.EMAIL_USER}>`,
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Account Deletion Request Rejected",
       html: `
@@ -306,14 +307,14 @@ const sendAccountDeletionRejectedEmail = async (email, firstName) => {
           <p>Your account remains active and accessible.</p>
 
           <br />
-          <p>— Team Trivllo</p>
+          <p>— Team ${trivlloData.company_name}</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   } catch (err) {
-    logger.error("Account deletion rejected email failed:", err.message);
+    logger.error(`${trivlloData.company_name} account deletion rejected email failed:`, err.message);
     throw err;
   }
 };
@@ -379,6 +380,57 @@ const sendAccountDeletionRejectedWhatsApp = async (phone, firstName) => {
     );
   }
 };
+const sendVendorBookingNotificationEmail = async (emails, details) => {
+  try {
+    const recipientEmails = Array.isArray(emails)
+      ? emails.filter(email => email && typeof email === 'string' && email.trim() !== '')
+      : typeof emails === 'string' ? [emails] : [];
+
+    if (recipientEmails.length === 0) {
+      logger.warn("No valid recipient emails provided for vendor booking notification.");
+      return;
+    }
+
+    const mailOptions = {
+      from: `"${trivlloData.company_name} Support" <${process.env.EMAIL_USER}>`,
+      to: recipientEmails.join(", "),
+      subject: `🚨 New Booking Alert! Reference: ${details.bookingReference}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 15px;">
+          <h2 style="color: #f97316; margin-top: 0;">New Booking Received! 🚀</h2>
+          <p>Hello,</p>
+          <p>Congratulations! You have received a new booking for your service on <strong>${trivlloData.company_name}</strong>.</p>
+          
+          <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #f97316;">
+            <h3 style="margin-top: 0; color: #1e293b;">Service details</h3>
+            <p style="margin: 5px 0;"><strong>Service Type:</strong> ${details.serviceType.toUpperCase()}</p>
+            <p style="margin: 5px 0;"><strong>Service Name:</strong> ${details.serviceName}</p>
+            <p style="margin: 5px 0;"><strong>Booking Reference:</strong> ${details.bookingReference}</p>
+            <p style="margin: 5px 0;"><strong>Booking Date:</strong> ${details.bookingDate}</p>
+            ${details.extraDetails ? `<p style="margin: 5px 0;"><strong>Details:</strong> ${details.extraDetails}</p>` : ''}
+            <p style="margin: 5px 0; color: #16a34a;"><strong>Earnings / Paid:</strong> ₹${details.totalAmount}</p>
+          </div>
+
+          <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+            <h3 style="margin-top: 0; color: #1e293b;">Customer Details</h3>
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${details.customerName}</p>
+            <p style="margin: 5px 0;"><strong>Email:</strong> ${details.customerEmail}</p>
+            <p style="margin: 5px 0;"><strong>Phone Number:</strong> ${details.customerPhone}</p>
+          </div>
+
+          <p>Please check your vendor dashboard for full details and updates.</p>
+          <p>Best Regards,<br/><strong>Team ${trivlloData.company_name}</strong></p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    logger.error(`${trivlloData.company_name} vendor booking notification email send failed:`, err.message);
+    throw err;
+  }
+};
+
 module.exports = {
   sendWhatsAppOTP,
   sendOTPEmail,
@@ -391,4 +443,5 @@ module.exports = {
   sendAccountDeletionApprovedWhatsApp,
   sendAccountDeletionRejectedEmail,
   sendAccountDeletionRejectedWhatsApp,
+  sendVendorBookingNotificationEmail,
 };

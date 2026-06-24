@@ -73,20 +73,60 @@ exports.getAllProperties = async (query) => {
         },
       },
 
-      // BUSINESS JOIN
       {
         $lookup: {
-          from: lookupCollection,
+          from: "hotels",
           localField: "_id",
           foreignField: "vendorId",
-          as: "business",
+          as: "hotelDoc",
         },
       },
-
       {
-        $unwind: {
-          path: "$business",
-          preserveNullAndEmptyArrays: true,
+        $lookup: {
+          from: "cabcompanies",
+          localField: "_id",
+          foreignField: "vendorId",
+          as: "cabDoc",
+        },
+      },
+      {
+        $lookup: {
+          from: "bikecompanies",
+          localField: "_id",
+          foreignField: "vendorId",
+          as: "bikeDoc",
+        },
+      },
+      {
+        $lookup: {
+          from: "tourcompanies",
+          localField: "_id",
+          foreignField: "vendorId",
+          as: "tourDoc",
+        },
+      },
+      {
+        $lookup: {
+          from: "adventures",
+          localField: "_id",
+          foreignField: "vendorId",
+          as: "adventureDoc",
+        },
+      },
+      {
+        $addFields: {
+          business: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$serviceType", "hotel"] }, then: { $arrayElemAt: ["$hotelDoc", 0] } },
+                { case: { $eq: ["$serviceType", "cab"] }, then: { $arrayElemAt: ["$cabDoc", 0] } },
+                { case: { $eq: ["$serviceType", "bike"] }, then: { $arrayElemAt: ["$bikeDoc", 0] } },
+                { case: { $eq: ["$serviceType", "tour"] }, then: { $arrayElemAt: ["$tourDoc", 0] } },
+                { case: { $eq: ["$serviceType", "adventure"] }, then: { $arrayElemAt: ["$adventureDoc", 0] } },
+              ],
+              default: null,
+            },
+          },
         },
       },
 

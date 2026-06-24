@@ -1,0 +1,22 @@
+{
+    "company_name": "Trivllo",
+    "founded": 2026,
+    "headquarters": {
+        "city": "Gwalior",
+        "state": "Madhya Pradesh",
+        "country": "India"
+    },
+    "industry": "LEHK Technology",
+    "services": [
+        "Custom Software Engineering",
+        "Cloud Architecture",
+        "API Integration",
+        "Performance Optimization"
+    ],
+    "employee_count": 10,
+    "active_projects": true,
+    "contact": {
+        "email": "krashtyagi24@gmail.com",
+        "website": "https://www.trivllo.com"
+    }
+}
