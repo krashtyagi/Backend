@@ -636,231 +636,185 @@ exports.userInvoiceDownload = async (booking, res) => {
   );
   res.setHeader("Content-Type", "application/pdf");
 
-  const doc = new PDFDocument({ margin: 40, size: "A4" });
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
   doc.pipe(res);
 
-  // COLORS
-  const primaryBlue = "#1a73e8";
-  const trivlloRed = "#ff3838";
-  const lightBg = "#f8f9fa";
-  const textColor = "#333333";
-  const borderColor = "#eeeeee";
+  // --- THEME & COLORS ---
+  const brandColor = "#2563EB"; // Modern Tailwind Blue-600
+  const brandDark = "#1E293B"; // Slate-800
+  const textMuted = "#64748B"; // Slate-500
+  const borderLight = "#E2E8F0"; // Slate-200
+  const brandRed = "#EF4444"; // Red-500
+  const bgLight = "#F8FAFC"; // Slate-50
 
-  //HEADER
-  doc.circle(65, 60, 20).fill(trivlloRed);
-  doc
-    .fillColor("#000")
-    .fontSize(20)
-    .font("Helvetica-BoldOblique")
-    .text(trivlloData.company_name, 50, 52);
+  const companyName = typeof trivlloData !== "undefined" && trivlloData.company_name ? trivlloData.company_name : "Trivllo";
 
+  // --- HEADER ---
+  // Logo
+  doc.circle(70, 70, 20).fill(brandColor);
   doc
-    .fillColor(textColor)
+    .fillColor("#FFFFFF")
     .fontSize(20)
     .font("Helvetica-Bold")
-    .text("Booking Invoice", 380, 40, { align: "right" });
+    .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
 
   doc
+    .fillColor(brandDark)
+    .fontSize(24)
+    .font("Helvetica-Bold")
+    .text(companyName, 100, 60);
+
+  // INVOICE Title
+  doc
+    .fillColor(brandColor)
+    .fontSize(28)
+    .font("Helvetica-Bold")
+    .text("INVOICE", 50, 55, { align: "right" });
+
+  doc
+    .fillColor(textMuted)
     .fontSize(10)
-    .fillColor("gray")
     .font("Helvetica")
-    .text(`BOOKING ID: ${booking.bookingReference}`, 380, 65, {
-      align: "right",
-    });
+    .text(`Booking Ref: ${booking.bookingReference}`, 50, 85, { align: "right" })
+    .text(`Date: ${new Date().toLocaleDateString()}`, 50, 100, { align: "right" });
 
-  //STATUS
+  // Divider
+  doc.moveTo(50, 130).lineTo(545, 130).strokeColor(borderLight).lineWidth(1).stroke();
+
+  // --- STATUS BANNER ---
   doc.moveDown(2);
-  const statusX = 40;
-  const statusY = 110;
+  const statusY = 150;
 
-  doc.roundedRect(statusX, statusY, 515, 35, 3).fill(lightBg);
+  doc.roundedRect(50, statusY, 495, 40, 6).fill(bgLight);
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("BOOKING STATUS", 70, statusY + 14);
+
+  const statusColor = booking.status === "confirmed" ? "#10B981" : "#F59E0B";
+  doc.fillColor(statusColor).fontSize(12).font("Helvetica-Bold").text(booking.status?.toUpperCase() || "PENDING", 180, statusY + 13);
+
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("PAYMENT STATUS", 320, statusY + 14);
+  const paymentColor = booking.paymentStatus === "paid" ? "#10B981" : "#F59E0B";
+  doc.fillColor(paymentColor).fontSize(12).font("Helvetica-Bold").text(booking.paymentStatus?.toUpperCase() || "PENDING", 430, statusY + 13);
+
+  // --- INFO SECTIONS (Guest & Hotel) ---
+  const infoY = 220;
+
+  // Bill To (Guest)
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("BILLED TO:", 50, infoY);
+  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(`${booking.primaryGuest?.firstName || ''} ${booking.primaryGuest?.lastName || ''}`.trim() || "Guest", 50, infoY + 15);
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(booking.primaryGuest?.email || "", 50, infoY + 30);
+  doc.text(booking.primaryGuest?.phoneNumber || "", 50, infoY + 45);
+
+  // Hotel Info
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("HOTEL DETAILS:", 300, infoY);
+  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(hotel.name, 300, infoY + 15);
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotel.address || ''}, ${hotel.city || ''}`, 300, infoY + 30);
+
+  // --- STAY DETAILS ---
+  const stayY = 300;
+  doc.roundedRect(50, stayY, 495, 60, 6).strokeColor(borderLight).stroke();
+  doc.moveTo(297, stayY).lineTo(297, stayY + 60).strokeColor(borderLight).stroke();
+
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("CHECK-IN", 70, stayY + 15);
+  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(new Date(booking.checkIn).toDateString(), 70, stayY + 30);
+
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("CHECK-OUT", 320, stayY + 15);
+  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(new Date(booking.checkOut).toDateString(), 320, stayY + 30);
+
+  // --- TABLE HEADER ---
+  const tableTop = 400;
+  doc.roundedRect(50, tableTop, 495, 25, 4).fill(brandDark);
 
   doc
-    .fillColor(primaryBlue)
+    .fillColor("#FFFFFF")
     .fontSize(10)
     .font("Helvetica-Bold")
-    .text("BOOKING STATUS:", statusX + 15, statusY + 12)
-    .fillColor("#f5a623")
-    .text(booking.status?.toUpperCase(), statusX + 120, statusY + 12);
+    .text("ROOM DETAILS", 60, tableTop + 8)
+    .text("NIGHTS", 250, tableTop + 8)
+    .text("GUESTS", 350, tableTop + 8)
+    .text("TOTAL", 450, tableTop + 8, { width: 85, align: "right" });
 
+  // --- TABLE ROW ---
+  const rowY = tableTop + 40;
+  const rt = booking.roomTypeId || {};
+  const bedInfo = rt.beds?.map((b) => `${b.quantity} ${b.type}`).join(", ") || "";
+
+  doc.fillColor(brandDark).fontSize(11).font("Helvetica-Bold").text(rt.name || "Standard Room", 60, rowY);
+  
   doc
-    .fillColor(primaryBlue)
-    .text("PAYMENT:", statusX + 280, statusY + 12)
-    .fillColor(textColor)
-    .text(booking.paymentStatus?.toUpperCase(), statusX + 340, statusY + 12);
-
-  //HOTEL + USER
-  doc.moveDown(3.5);
-  const gridY = doc.y;
-
-  doc
-    .fillColor(primaryBlue)
-    .fontSize(12)
-    .font("Helvetica-Bold")
-    .text(hotel.name, 40, gridY);
-
-  doc
-    .fillColor("#666")
+    .fillColor(textMuted)
     .fontSize(9)
-    .text(`${hotel.address}, ${hotel.city}`, 40, gridY + 15);
+    .font("Helvetica")
+    .text(`${bedInfo}${bedInfo && rt.roomSizeSqm ? ' | ' : ''}${rt.roomSizeSqm ? rt.roomSizeSqm + ' m²' : ''}`, 60, rowY + 15)
+    .text(rt.amenities?.slice(0, 4).join(" • ") || "", 60, rowY + 28);
 
-  doc
-    .fillColor(primaryBlue)
-    .fontSize(12)
-    .font("Helvetica-Bold")
-    .text("GUEST", 320, gridY);
+  doc.fillColor(brandDark).fontSize(10).font("Helvetica").text(`${booking.nights || 1}`, 250, rowY);
+  
+  const adultCount = booking.guests?.adults || 0;
+  const childCount = booking.guests?.children || 0;
+  doc.text(`${adultCount}A, ${childCount}C`, 350, rowY);
+  
+  doc.fontSize(11).font("Helvetica-Bold").text(`Rs. ${(booking.totalAmount || 0).toFixed(2)}`, 450, rowY, { width: 85, align: "right" });
 
-  doc
-    .fillColor(textColor)
-    .fontSize(10)
-    .text(
-      `${booking.primaryGuest.firstName} ${booking.primaryGuest.lastName}`,
-      320,
-      gridY + 15,
-    )
-    .fillColor("#666")
-    .fontSize(9)
-    .text(booking.primaryGuest.email)
-    .text(booking.primaryGuest.phoneNumber);
+  // Divider below row
+  const rowBottom = rowY + 50;
+  doc.moveTo(50, rowBottom).lineTo(545, rowBottom).strokeColor(borderLight).stroke();
 
-  //  CHECKIN / CHECKOUT
-  doc.moveDown(5);
-  const boxY = doc.y;
-
-  doc.roundedRect(40, boxY, 515, 65, 3).stroke(borderColor);
-
-  doc
-    .moveTo(297, boxY)
-    .lineTo(297, boxY + 65)
-    .stroke(borderColor);
-
-  doc
-    .fillColor("gray")
-    .fontSize(8)
-    .text("CHECK-IN", 55, boxY + 10);
-  doc
-    .fillColor(textColor)
-    .fontSize(11)
-    .font("Helvetica-Bold")
-    .text(new Date(booking.checkIn).toDateString(), 55, boxY + 25);
-
-  doc
-    .fillColor("gray")
-    .fontSize(8)
-    .text("CHECK-OUT", 312, boxY + 10);
-  doc
-    .fillColor(textColor)
-    .fontSize(11)
-    .font("Helvetica-Bold")
-    .text(new Date(booking.checkOut).toDateString(), 312, boxY + 25);
-
-  //ROOM DETAILS
-  doc.moveDown(6);
-  const tableTop = doc.y;
-
-  doc
-    .fillColor(primaryBlue)
-    .fontSize(12)
-    .font("Helvetica-Bold")
-    .text("ROOM DETAILS", 40, tableTop);
-
-  const headerY = tableTop + 20;
-
-  doc.rect(40, headerY, 515, 20).fill(lightBg);
-
-  doc
-    .fillColor(textColor)
-    .fontSize(9)
-    .font("Helvetica-Bold")
-    .text("ROOM TYPE & SPECS", 50, headerY + 6)
-    .text("CAPACITY", 250, headerY + 6)
-    .text("TOTAL", 480, headerY + 6, { align: "right" });
-
-  const rt = booking.roomTypeId;
-  const rowY = headerY + 25;
-
-  const bedInfo = rt.beds.map((b) => `${b.quantity} ${b.type}`).join(", ");
-
-  doc.fontSize(11).font("Helvetica-Bold").text(rt.name, 50, rowY);
-
-  doc
-    .fillColor("#666")
-    .fontSize(9)
-    .text(`${bedInfo} | ${rt.roomSizeSqm} m²`, 50, rowY + 15);
-
-  doc
-    .fillColor(primaryBlue)
-    .fontSize(8)
-    .text(rt.amenities.slice(0, 4).join(" • "), 50, rowY + 30);
-
-  doc
-    .fillColor(textColor)
-    .fontSize(10)
-    .text(`${booking.guests.adults}A + ${booking.guests.children}C`, 250, rowY);
-
-  doc
-    .fontSize(11)
-    .font("Helvetica-Bold")
-    .text(`Rs. ${booking.totalAmount}`, 480, rowY, { align: "right" });
-
-  //PRICE BREAKDOWN
-  doc.moveDown(4.5);
-
+  // --- TOTALS SECTION ---
   const calcX = 350;
-  const valueX = 555;
+  const valueX = 450;
+  const widthV = 85;
+  let currentY = rowBottom + 25;
 
-  const baseTotal = rt.basePrice * booking.nights;
-  const discountAmt = (rt.basePrice - rt.discountPrice) * booking.nights;
-  const discountPercent = Math.round(
-    ((rt.basePrice - rt.discountPrice) / rt.basePrice) * 100,
-  );
-
-  const drawPriceRow = (label, value, isTotal = false, isDisc = false) => {
-    const currentY = doc.y;
-
-    doc
-      .font(isTotal ? "Helvetica-Bold" : "Helvetica")
-      .fontSize(isTotal ? 12 : 10)
-      .fillColor(isDisc ? brandRed : isTotal ? primaryBlue : textColor);
-
-    doc.text(label, calcX, currentY);
-    doc.text(`Rs. ${value}`, calcX, currentY, {
-      width: valueX - calcX,
-      align: "right",
-    });
-
-    doc.moveDown(1.2);
-  };
-
-  drawPriceRow("Base Price (Original)", baseTotal.toFixed(2));
-
-  if (discountAmt > 0) {
-    drawPriceRow(
-      `Discount (${discountPercent}% OFF)`,
-      `-${discountAmt.toFixed(2)}`,
-      false,
-      true,
-    );
+  const nights = booking.nights || 1;
+  const basePrice = rt.basePrice || booking.pricePerNight || 0;
+  const baseTotal = basePrice * nights;
+  
+  let discountAmt = 0;
+  if (booking.discountAmount !== undefined) {
+    discountAmt = booking.discountAmount;
+  } else if (rt.discountPrice && rt.basePrice) {
+    discountAmt = (rt.basePrice - rt.discountPrice) * nights;
   }
 
-  drawPriceRow(
-    "Taxes & Fees",
-    (booking.totalTax || booking.taxAmount).toFixed(2),
-  );
+  const drawRow = (label, value, isBold = false, isRed = false) => {
+    doc
+      .fillColor(isRed ? brandRed : brandDark)
+      .fontSize(isBold ? 12 : 10)
+      .font(isBold ? "Helvetica-Bold" : "Helvetica");
 
-  doc.moveTo(calcX, doc.y).lineTo(valueX, doc.y).stroke(borderColor);
+    doc.text(label, calcX, currentY);
+    doc.text(value, valueX, currentY, { width: widthV, align: "right" });
+    currentY += 20;
+  };
 
-  doc.moveDown(0.5);
+  drawRow("Base Price", `Rs. ${baseTotal.toFixed(2)}`);
 
-  drawPriceRow("GRAND TOTAL", booking.totalAmount.toFixed(2), true);
+  if (discountAmt > 0) {
+    const discountPercent = baseTotal > 0 ? Math.round((discountAmt / baseTotal) * 100) : 0;
+    drawRow(`Discount (${discountPercent}%)`, `- Rs. ${discountAmt.toFixed(2)}`, false, true);
+  }
 
-  //FOOTER
+  const taxes = booking.taxAmount || booking.totalTax || 0;
+  drawRow("Taxes & Fees", `Rs. ${taxes.toFixed(2)}`);
+
+  if (booking.cleaningFee) {
+    drawRow("Cleaning Fee", `Rs. ${booking.cleaningFee.toFixed(2)}`);
+  }
+
+  currentY += 5;
+  doc.moveTo(calcX, currentY - 5).lineTo(535, currentY - 5).strokeColor(borderLight).stroke();
+  currentY += 5;
+
+  drawRow("GRAND TOTAL", `Rs. ${(booking.totalAmount || 0).toFixed(2)}`, true);
+
+  // --- FOOTER ---
+  const footerY = 780;
+  doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor(borderLight).stroke();
   doc
-    .fontSize(8)
-    .fillColor("gray")
-    .text(`Thank you for booking with ${trivlloData.company_name}!`, 40, 760, {
-      align: "center",
-    });
+    .fillColor(textMuted)
+    .fontSize(9)
+    .font("Helvetica")
+    .text(`Thank you for choosing ${companyName}! For support, please contact us.`, 50, footerY + 15, { align: "center" });
 
   doc.end();
 };
