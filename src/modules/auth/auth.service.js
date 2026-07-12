@@ -562,20 +562,21 @@ exports.emailSignup = async ({ email, password }) => {
     throw new Error("User already exists");
   }
 
-  const otp = generateOTPByEmail();
+  const { otp, otpExpires } = await generateOTP();
+  const signupExpires = Date.now() + 10 * 60 * 1000;
   let user = existingUser;
   if (!user) {
     user = await User.create({
       email,
       password,
       otp,
-      otpExpires: Date.now() + 10 * 60 * 1000,
-      signupExpires: Date.now() + 10 * 60 * 1000,
+      otpExpires,
+      signupExpires,
     });
   } else {
     user.password = password;
     user.otp = otp;
-    user.otpExpires = Date.now() + 10 * 60 * 1000;
+    user.otpExpires = otpExpires;
 
     await user.save();
   }
@@ -638,14 +639,14 @@ exports.emailResendOTP = async (email) => {
     throw new Error("User not found");
   }
 
-  const otp = generateOTP();
+  const { otp, otpExpires } = await generateOTP();
 
   user.otp = otp;
-  user.otpExpires = Date.now() + 10 * 60 * 1000;
+  user.otpExpires = otpExpires;
 
   await user.save();
 
-  await sendEmailOTP(email, otp);
+  await sendOTPEmail(email, otp);
 
   return {
     message: "OTP resent successfully",
