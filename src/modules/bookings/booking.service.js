@@ -96,11 +96,10 @@ exports.createBooking = async (data, userId) => {
     if (!guests?.adults || guests.adults <= 0)
       throw new Error("At least one adult guest is required");
 
-    const expectedAdditionalGuests =
-      (guests.adults || 0) + (guests.children || 0) - 1;
-
-    if (additionalGuests.length !== expectedAdditionalGuests)
-      throw new Error("Additional guests count mismatch");
+    // additionalGuests is optional – accept whatever the client sends
+    const safeAdditionalGuests = Array.isArray(additionalGuests)
+      ? additionalGuests
+      : [];
 
     const hotel = await Hotel.findById(hotelId).session(session);
     if (!hotel || !hotel.isActive) throw new Error("Hotel not available");
@@ -188,7 +187,7 @@ exports.createBooking = async (data, userId) => {
           guests,
           roomsBooked: rooms,
           primaryGuest,
-          additionalGuests,
+          additionalGuests: safeAdditionalGuests,
 
           pricePerNight: firstDayPrice,
           taxAmount: totalTax,
