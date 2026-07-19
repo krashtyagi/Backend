@@ -123,6 +123,7 @@ exports.getTours = async (query, userId = null) => {
         taxPercentage,
 
         thumbnail: tour.images?.[0] || null,
+        thumbnails: tour.images || [],
 
         company: {
           companyId: tour.company._id,
@@ -200,6 +201,7 @@ exports.getCompanyDetails = async (id, userId = null) => {
         taxPercentage,
 
         thumbnail: service.images?.[0] || null,
+        thumbnails: service.images || [],
 
         features: service.features || [],
       };
