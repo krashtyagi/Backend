@@ -12,6 +12,8 @@ const razorpay = require("../../shared/config/razorpay");
 const Room = require("../rooms/room.model");
 
 const crypto = require("crypto");
+const path = require("path");
+const fs = require("fs");
 const PDFDocument = require("pdfkit");
 
 const RoomType = require("../rooms/roomType.model");
@@ -625,6 +627,7 @@ exports.getBookingDetail = async (bookingId, userId) => {
   }
 };
 
+// const logoTrvllo = required("./logo")
 exports.userInvoiceDownload = async (booking, res) => {
   const hotel = await Hotel.findById(booking.hotelId).lean();
   if (!hotel) throw new Error("Hotel not found");
@@ -650,18 +653,51 @@ exports.userInvoiceDownload = async (booking, res) => {
 
   // --- HEADER ---
   // Logo
-  doc.circle(70, 70, 20).fill(brandColor);
-  doc
-    .fillColor("#FFFFFF")
-    .fontSize(20)
-    .font("Helvetica-Bold")
-    .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+  const logoCandidates = [
+    path.join(__dirname, "../../assets/logo.png"),
+    path.join(__dirname, "../../../assets/logo.png"),
+    path.join(__dirname, "../../../public/logo.png"),
+    path.join(process.cwd(), "src/assets/logo.png"),
+    path.join(process.cwd(), "public/logo.png"),
+    path.join(process.cwd(), "../frontend/public/logo.png"),
+    path.join(process.cwd(), "../vendor/public/logo.png"),
+    path.join(process.cwd(), "../admin/public/logo.png"),
+  ];
 
-  doc
-    .fillColor(brandDark)
-    .fontSize(24)
-    .font("Helvetica-Bold")
-    .text(companyName, 100, 60);
+  const logoPath = logoCandidates.find((p) => fs.existsSync(p));
+
+  if (logoPath) {
+    try {
+      doc.image(logoPath, 50, 48, { fit: [140, 50] });
+    } catch (err) {
+      logger.error("Error loading logo image into invoice PDF:", err);
+      doc.circle(70, 70, 20).fill(brandColor);
+      doc
+        .fillColor("#FFFFFF")
+        .fontSize(20)
+        .font("Helvetica-Bold")
+        .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+
+      doc
+        .fillColor(brandDark)
+        .fontSize(24)
+        .font("Helvetica-Bold")
+        .text(companyName, 100, 60);
+    }
+  } else {
+    doc.circle(70, 70, 20).fill(brandColor);
+    doc
+      .fillColor("#FFFFFF")
+      .fontSize(20)
+      .font("Helvetica-Bold")
+      .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+
+    doc
+      .fillColor(brandDark)
+      .fontSize(24)
+      .font("Helvetica-Bold")
+      .text(companyName, 100, 60);
+  }
 
   // INVOICE Title
   doc
