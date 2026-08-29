@@ -29,3 +29,49 @@ exports.createTourCompany = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getTourCompanies = async (req, res, next) => {
+  try {
+    const result = await tourService.getAllTourCompanies(req.query);
+
+    res.status(200).json({
+      success: true,
+      count: result.companies.length,
+      total: result.total,
+      data: result.companies,
+      page: result.page,
+      limit: result.limit,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getTourCompanies", error);
+    next(error);
+  }
+};
+
+exports.getTourCompanyById = async (req, res, next) => {
+  try {
+    const data = await tourService.getTourCompanyById(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getTourCompanyById", error);
+    next(error);
+  }
+};
+
+exports.getTourCompaniesGroupedByCity = async (req, res, next) => {
+  try {
+    const data = await tourService.getTourCompaniesGroupedByCity();
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getTourCompaniesGroupedByCity", error);
+    next(error);
+  }
+};

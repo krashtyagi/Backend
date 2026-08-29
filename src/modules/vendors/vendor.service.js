@@ -234,16 +234,15 @@ exports.getVendorMe = async (userId) => {
         rejectedSteps: vendor.rejectedSteps || [],
         rejectionReasons: vendor.rejectionReasons || {},
         isSubmitted: vendor.isSubmitted,
-
+        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
         serviceType: vendor.serviceType,
       },
 
       businessDetails: {
-
         businessName: vendor.businessName,
         businessEmail: vendor.businessEmail,
         businessPhone: vendor.businessPhone,
-
+        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
         address: vendor.businessAddress,
         city: vendor.city,
         state: vendor.state,
@@ -279,6 +278,7 @@ exports.getVendorMe = async (userId) => {
 
         businessName: vendor.businessName,
         businessEmail: vendor.businessEmail,
+        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
 
         serviceType: vendor.serviceType,
 

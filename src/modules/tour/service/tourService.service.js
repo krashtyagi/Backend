@@ -39,25 +39,129 @@ const checkIsFavorite = async (itemId, userId, itemType) => {
   return !!fav;
 };
 
+// Helper to build flexible regex for keys (matches "guided_tour", "guided tour", "Guided Tour")
+const buildFlexibleRegex = (term) => {
+  if (!term || typeof term !== "string") return null;
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = escaped.replace(/[_\s-]+/g, "[_\\s-]+");
+  return new RegExp(pattern, "i");
+};
+
 //user side
 exports.getTours = async (query, userId = null) => {
   try {
-    const { search = "", page = 1, limit = 10 } = query;
+    const {
+      search = "",
+      city = "",
+      minPrice,
+      maxPrice,
+      minRating,
+      score,
+      features,
+      tourType,
+      amenities,
+      page = 1,
+      limit = 10,
+    } = query;
 
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const matchStage = {
       isActive: true,
-      $or: [
-        { title: { $regex: search, $options: "i" } },
-        { destinations: { $regex: search, $options: "i" } },
-      ],
     };
 
-    //AGGREGATION (JOIN COMPANY)
-    const tours = await TourService.aggregate([
-      { $match: matchStage },
+    if (search && search.trim()) {
+      matchStage.$or = [
+        { title: { $regex: search.trim(), $options: "i" } },
+        { destinations: { $regex: search.trim(), $options: "i" } },
+        { description: { $regex: search.trim(), $options: "i" } },
+      ];
+    }
 
+    // Price filter on basePrice / discountPrice
+    const pMin = minPrice !== undefined && Number(minPrice) > 0 ? Number(minPrice) : null;
+    const pMax = maxPrice !== undefined && Number(maxPrice) > 0 ? Number(maxPrice) : null;
+
+    if (pMin !== null || pMax !== null) {
+      const priceCond = {};
+      if (pMin !== null) priceCond.$gte = pMin;
+      if (pMax !== null) priceCond.$lte = pMax;
+
+      const priceOr = [
+        { discountPrice: { $gt: 0, ...priceCond } },
+        {
+          $and: [
+            { $or: [{ discountPrice: 0 }, { discountPrice: null }, { discountPrice: { $exists: false } }] },
+            { basePrice: priceCond },
+          ],
+        },
+      ];
+
+      if (matchStage.$or) {
+        matchStage.$and = [{ $or: matchStage.$or }, { $or: priceOr }];
+        delete matchStage.$or;
+      } else {
+        matchStage.$or = priceOr;
+      }
+    }
+
+    // Features / Tour Types Filter
+    const featureTerms = [];
+    if (features) {
+      const arr = Array.isArray(features) ? features : [features];
+      featureTerms.push(...arr);
+    }
+    if (tourType) {
+      const arr = Array.isArray(tourType) ? tourType : [tourType];
+      featureTerms.push(...arr);
+    }
+
+    if (featureTerms.length > 0) {
+      const regexes = featureTerms.map(buildFlexibleRegex).filter(Boolean);
+      const featureConditions = [
+        { features: { $in: regexes } },
+        { tourType: { $in: regexes } },
+      ];
+      if (matchStage.$and) {
+        matchStage.$and.push({ $or: featureConditions });
+      } else if (matchStage.$or) {
+        matchStage.$and = [{ $or: matchStage.$or }, { $or: featureConditions }];
+        delete matchStage.$or;
+      } else {
+        matchStage.$or = featureConditions;
+      }
+    }
+
+    // Amenities Filter
+    if (amenities) {
+      const amenityTerms = Array.isArray(amenities) ? amenities : [amenities];
+      if (amenityTerms.length > 0) {
+        const regexes = amenityTerms.map(buildFlexibleRegex).filter(Boolean);
+        matchStage.amenities = { $in: regexes };
+      }
+    }
+
+    // Company match criteria
+    const companyMatch = {
+      "company.isActive": true,
+      "company.verificationStatus": "verified",
+    };
+
+    if (city && city.trim()) {
+      companyMatch.$or = [
+        { "company.location.city": { $regex: city.trim(), $options: "i" } },
+        { destinations: { $regex: city.trim(), $options: "i" } },
+      ];
+    }
+
+    const effectiveMinRating = minRating !== undefined ? Number(minRating) : (score !== undefined ? Number(score) : null);
+    if (effectiveMinRating !== null && !isNaN(effectiveMinRating) && effectiveMinRating > 0) {
+      companyMatch["company.rating.average"] = { $gte: effectiveMinRating };
+    }
+
+    // Pipeline with count facet for accurate pagination
+    const pipeline = [
+      { $match: matchStage },
       {
         $lookup: {
           from: "tourcompanies",
@@ -67,35 +171,40 @@ exports.getTours = async (query, userId = null) => {
         },
       },
       { $unwind: "$company" },
-
+      { $match: companyMatch },
       {
-        $match: {
-          "company.isActive": true,
-          "company.verificationStatus": "verified",
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            {
+              $project: {
+                _id: 1,
+                title: 1,
+                destinations: 1,
+                basePrice: 1,
+                discountPrice: 1,
+                images: 1,
+                duration: 1,
+                features: 1,
+                tourType: 1,
+                amenities: 1,
+                "company._id": 1,
+                "company.name": 1,
+                "company.rating": 1,
+                "company.location": 1,
+              },
+            },
+            { $sort: { basePrice: 1 } },
+            { $skip: Number(skip) },
+            { $limit: Number(limit) },
+          ],
         },
       },
+    ];
 
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          destinations: 1,
-          basePrice: 1,
-          discountPrice: 1,
-          images: 1,
-          duration: 1,
-          "company._id": 1,
-          "company.name": 1,
-          "company.rating": 1,
-          "company.location": 1,
-        },
-      },
-
-      { $sort: { basePrice: 1 } },
-
-      { $skip: Number(skip) },
-      { $limit: Number(limit) },
-    ]);
+    const results = await TourService.aggregate(pipeline);
+    const total = results[0]?.metadata[0]?.total || 0;
+    const tours = results[0]?.data || [];
 
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
@@ -115,8 +224,8 @@ exports.getTours = async (query, userId = null) => {
         serviceType: "tour",
 
         title: tour.title,
-        destinations: tour.destinations,
-        duration: `${tour.duration.days}D/${tour.duration.nights}N`,
+        destinations: tour.destinations || [],
+        duration: tour.duration ? `${tour.duration.days}D/${tour.duration.nights}N` : "1D/0N",
 
         price: effectivePrice,
         totalPriceWithTax,
@@ -124,6 +233,10 @@ exports.getTours = async (query, userId = null) => {
 
         thumbnail: tour.images?.[0] || null,
         thumbnails: tour.images || [],
+
+        features: tour.features || [],
+        tourType: tour.tourType || [],
+        amenities: tour.amenities || [],
 
         company: {
           companyId: tour.company._id,
@@ -143,6 +256,7 @@ exports.getTours = async (query, userId = null) => {
         page: Number(page),
         limit: Number(limit),
         count: updatedTours.length,
+        total,
       },
     };
   } catch (error) {
@@ -289,6 +403,8 @@ exports.getTourServiceDetails = async (id, userId = null) => {
 
       images: service.images || [],
       features: service.features || [],
+      tourType: service.tourType || [],
+      amenities: service.amenities || [],
 
       maxPeople: service.maxPeople,
 
@@ -330,6 +446,8 @@ exports.createTourService = async (data, vendorId) => {
       discountPrice = 0,
       description,
       features = [],
+      tourType = [],
+      amenities = [],
       images = [],
       itinerary = [],
       meta = {},
@@ -391,6 +509,8 @@ exports.createTourService = async (data, vendorId) => {
 
       description: description?.trim() || "",
       features,
+      tourType,
+      amenities,
       images,
 
       itinerary,
@@ -521,6 +641,8 @@ exports.getVendorTourServiceById = async (serviceId, vendorId) => {
       description: service.description || "",
 
       features: service.features || [],
+      tourType: service.tourType || [],
+      amenities: service.amenities || [],
 
       images: service.images || [],
 
@@ -599,6 +721,8 @@ exports.updateVendorTourService = async (serviceId, vendorId, data) => {
       "discountPrice",
       "description",
       "features",
+      "tourType",
+      "amenities",
       "images",
       "meta",
       "maxPeople",

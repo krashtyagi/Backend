@@ -37,6 +37,12 @@ const vendorSchema = new mongoose.Schema(
       index: true,
     },
 
+    logo: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
+
     businessEmail: {
       type: String,
       lowercase: true,

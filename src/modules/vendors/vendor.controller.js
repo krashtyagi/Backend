@@ -388,3 +388,42 @@ exports.getMyPromotionRequests = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.updateVendorLogo = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { logo } = req.body;
+
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found",
+      });
+    }
+
+    if (typeof logo === "string") {
+      vendor.logo = { url: logo, public_id: "", resource_type: "image" };
+    } else if (logo && logo.url) {
+      vendor.logo = logo;
+    } else if (logo === null || logo === "") {
+      vendor.logo = undefined;
+    }
+
+    await vendor.save();
+
+    if (vendor.logo?.url) {
+      const User = require("../../modules/auth/auth.model");
+      await User.findByIdAndUpdate(userId, { avatar: vendor.logo.url });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Company logo updated successfully",
+      data: { logo: vendor.logo },
+    });
+  } catch (error) {
+    logger.error("Controller Error: updateVendorLogo", error);
+    next(error);
+  }
+};

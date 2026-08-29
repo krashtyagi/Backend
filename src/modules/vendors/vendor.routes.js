@@ -18,6 +18,14 @@ router.post(
 //vendor get me help for the prefilling data 
 router.get("/me", protect, authorize("vendor"), vendorController.getVendorMe);
 
+// Update vendor company logo / pfp
+router.patch(
+  "/logo",
+  protect,
+  authorize("vendor"),
+  vendorController.updateVendorLogo,
+);
+
 // Get vendor's my listings data
 router.get(
   "/my-listing",

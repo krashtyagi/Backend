@@ -80,6 +80,20 @@ const tourServiceSchema = new mongoose.Schema(
       },
     ],
 
+    tourType: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    amenities: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
     images: [
       {
         url: String,

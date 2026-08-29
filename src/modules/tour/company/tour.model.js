@@ -38,6 +38,12 @@ const tourCompanySchema = new mongoose.Schema(
       lng: Number,
     },
 
+    logo: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
+
     images: [
       {
         url: String,
