@@ -402,6 +402,9 @@ exports.updateVendorLogo = async (req, res, next) => {
       });
     }
 
+    const oldPublicId = vendor.logo?.public_id;
+    const newPublicId = typeof logo === "object" ? logo?.public_id : null;
+
     if (typeof logo === "string") {
       vendor.logo = { url: logo, public_id: "", resource_type: "image" };
     } else if (logo && logo.url) {
@@ -411,6 +414,14 @@ exports.updateVendorLogo = async (req, res, next) => {
     }
 
     await vendor.save();
+
+    // If there was an old logo and it changed/removed, delete old from Cloudinary
+    if (oldPublicId && oldPublicId !== newPublicId) {
+      const uploadService = require("../upload/upload.service");
+      uploadService.deleteFile(oldPublicId, "image").catch((err) => {
+        logger.error("Failed to delete previous vendor logo from Cloudinary:", err);
+      });
+    }
 
     if (vendor.logo?.url) {
       const User = require("../../modules/auth/auth.model");

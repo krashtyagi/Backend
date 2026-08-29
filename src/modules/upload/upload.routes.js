@@ -10,6 +10,7 @@ router.post(
   uploadController.uploadMultiple
 );
 
+router.delete("/", uploadController.deleteFile);
 router.delete("/:public_id", uploadController.deleteFile);
 
 module.exports = router;
