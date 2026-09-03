@@ -11,9 +11,13 @@ const logger = require("../../shared/utils/logger");
 const { sendVendorBookingNotificationEmail } = require("../../shared/utils/sendEmail");
 
 const AdventureService = require("../adventure/service/service.model");
+const Adventure = require("../adventure/category/adventure.model");
 const CabService = require("../cab/service/cabService.model");
+const Cab = require("../cab/company/cab.model");
 const BikeService = require("../bike/service/bikeService.model");
+const Bike = require("../bike/company/bike.model");
 const TourService = require("../tour/service/tourService.model");
+const TourCompany = require("../tour/company/tour.model");
 
 exports.createBooking = async (data, userId) => {
   const session = await mongoose.startSession();
@@ -158,6 +162,12 @@ exports.createBooking = async (data, userId) => {
 
       quantity = participants.length || 1;
 
+      if (service.maxPeople && quantity > service.maxPeople) {
+        throw new Error(
+          `Maximum ${service.maxPeople} participants allowed for this tour package (requested: ${quantity})`
+        );
+      }
+
       duration = {
         startDate: meta.startDate,
         totalDays: service.duration.days,
@@ -229,11 +239,20 @@ exports.createBooking = async (data, userId) => {
     );
 
     //RAZORPAY ORDER
-    const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(totalAmount * 100),
-      currency: "INR",
-      receipt: bookingReference,
-    });
+    let razorpayOrder;
+    try {
+      razorpayOrder = await razorpay.orders.create({
+        amount: Math.round(totalAmount * 100),
+        currency: "INR",
+        receipt: bookingReference,
+      });
+    } catch (rzpErr) {
+      const msg =
+        rzpErr.error?.description ||
+        rzpErr.message ||
+        "Razorpay order creation failed";
+      throw new Error(`Payment Gateway Error: ${msg}`);
+    }
 
     const [payment] = await Payment.create(
       [

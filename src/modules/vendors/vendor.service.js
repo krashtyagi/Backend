@@ -171,8 +171,8 @@ exports.getVendorMe = async (userId) => {
 
             coordinates: serviceData.coordinates || {},
 
-            images: serviceData.images || [],
-            documents: serviceData.documents || [],
+            // images: serviceData.images || [],
+            // documents: serviceData.documents || [],
 
             features: serviceData.features || [],
             tags: serviceData.tags || [],
@@ -249,20 +249,20 @@ exports.getVendorMe = async (userId) => {
         country: vendor.country,
       },
 
-      documents: vendor.verificationDocs || [],
+      // documents: vendor.verificationDocs || [],
 
-      bankDetails: bank
-        ? {
-            accountHolderName: bank.accountHolderName,
-            bankName: bank.bankName,
-            accountNumber: bank.accountNumber,
-            ifscCode: bank.ifscCode,
-            branchName: bank.branchName,
-            upiId: bank.upiId,
+      // bankDetails: bank
+      //   ? {
+      //       accountHolderName: bank.accountHolderName,
+      //       bankName: bank.bankName,
+      //       accountNumber: bank.accountNumber,
+      //       ifscCode: bank.ifscCode,
+      //       branchName: bank.branchName,
+      //       upiId: bank.upiId,
 
-            verificationStatus: bank.verificationStatus,
-          }
-        : null,
+      //       verificationStatus: bank.verificationStatus,
+      //     }
+      //   : null,
 
       serviceDetails,
     };

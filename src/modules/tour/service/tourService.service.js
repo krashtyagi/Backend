@@ -60,6 +60,8 @@ exports.getTours = async (query, userId = null) => {
       features,
       tourType,
       amenities,
+      adults,
+      children,
       page = 1,
       limit = 10,
     } = query;
@@ -69,6 +71,11 @@ exports.getTours = async (query, userId = null) => {
     const matchStage = {
       isActive: true,
     };
+
+    const totalGuests = (Number(adults) || 0) + (Number(children) || 0);
+    if (totalGuests > 0) {
+      matchStage.maxPeople = { $gte: totalGuests };
+    }
 
     if (search && search.trim()) {
       matchStage.$or = [
@@ -228,6 +235,8 @@ exports.getTours = async (query, userId = null) => {
         duration: tour.duration ? `${tour.duration.days}D/${tour.duration.nights}N` : "1D/0N",
 
         price: effectivePrice,
+        totalPrice: effectivePrice,
+        totalTax,
         totalPriceWithTax,
         taxPercentage,
 
@@ -311,6 +320,8 @@ exports.getCompanyDetails = async (id, userId = null) => {
         duration: `${service.duration.days}D/${service.duration.nights}N`,
 
         price: effectivePrice,
+        totalPrice: effectivePrice,
+        totalTax,
         totalPriceWithTax,
         taxPercentage,
 
@@ -398,6 +409,8 @@ exports.getTourServiceDetails = async (id, userId = null) => {
       duration: `${service.duration.days}D/${service.duration.nights}N`,
 
       price: effectivePrice,
+      totalPrice: effectivePrice,
+      totalTax,
       totalPriceWithTax,
       taxPercentage,
 
@@ -454,7 +467,18 @@ exports.createTourService = async (data, vendorId) => {
       maxPeople = 10,
     } = data;
 
-    if (!tourId || !mongoose.Types.ObjectId.isValid(tourId)) {
+    let targetTourId = tourId;
+    if (!targetTourId || !mongoose.Types.ObjectId.isValid(targetTourId)) {
+      const company = await TourCompany.findOne({
+        vendorId: vendorId,
+        isActive: true,
+      });
+      if (company) {
+        targetTourId = company._id;
+      }
+    }
+
+    if (!targetTourId || !mongoose.Types.ObjectId.isValid(targetTourId)) {
       throw new Error("Valid tourId is required");
     }
 
@@ -473,7 +497,7 @@ exports.createTourService = async (data, vendorId) => {
     }
 
     const tourCompany = await TourCompany.findOne({
-      _id: tourId,
+      _id: targetTourId,
       vendorId: vendorId,
       isActive: true,
     });
