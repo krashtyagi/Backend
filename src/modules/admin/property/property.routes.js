@@ -21,6 +21,14 @@ router.patch(
   propertyController.updateBusinessRank,
 );
 
+// listings (rooms for hotel, packages for tour)
+router.get(
+  "/:vendorId/listings",
+  protect,
+  authorize("admin"),
+  propertyController.getPropertyListings,
+);
+
 router.get(
   "/:vendorId",
   protect,

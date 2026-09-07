@@ -43,9 +43,13 @@ exports.getAllPromotionRequests = async () => {
         plan: req.plan,
         status: req.status,
         rankAssigned: req.rankAssigned,
+        startDate: req.startDate || req.approvedAt || req.createdAt,
+        endDate: req.endDate || null,
         serviceType: req.serviceType,
         serviceId: req.serviceId,
+        vendorId: vendor._id || req.vendorId,
         createdAt: req.createdAt,
+        approvedAt: req.approvedAt,
       };
     });
 
@@ -56,15 +60,11 @@ exports.getAllPromotionRequests = async () => {
   }
 };
 
-exports.approvePromotion = async (promotionId, adminUserId, rank) => {
+exports.approvePromotion = async (promotionId, adminUserId, rank, startDate, endDate) => {
   try {
     const promotion = await Promotion.findById(promotionId);
     if (!promotion) {
       throw new Error("Promotion request not found");
-    }
-
-    if (promotion.status === "approved") {
-      throw new Error("Promotion request is already approved");
     }
 
     // Update promotion request
@@ -72,6 +72,8 @@ exports.approvePromotion = async (promotionId, adminUserId, rank) => {
     promotion.rankAssigned = rank;
     promotion.approvedBy = adminUserId;
     promotion.approvedAt = new Date();
+    if (startDate) promotion.startDate = new Date(startDate);
+    if (endDate) promotion.endDate = new Date(endDate);
     await promotion.save();
 
     // Dynamically update listing's rank
@@ -83,6 +85,137 @@ exports.approvePromotion = async (promotionId, adminUserId, rank) => {
     return promotion;
   } catch (error) {
     logger.error("Service Error: approvePromotion", error);
+    throw error;
+  }
+};
+
+exports.assignPropertyPromotion = async ({
+  vendorId,
+  serviceType,
+  serviceId,
+  rank,
+  startDate,
+  endDate,
+  adminUserId,
+}) => {
+  try {
+    if (!["A", "B", "C"].includes(rank)) {
+      throw new Error("Invalid rank. Must be A, B, or C");
+    }
+
+    let promotion = await Promotion.findOne({
+      serviceId,
+      status: { $in: ["approved", "pending"] },
+    });
+
+    if (promotion) {
+      promotion.status = "approved";
+      promotion.rankAssigned = rank;
+      promotion.plan = promotion.plan || "Admin";
+      promotion.startDate = startDate ? new Date(startDate) : new Date();
+      promotion.endDate = endDate ? new Date(endDate) : null;
+      promotion.approvedBy = adminUserId;
+      promotion.approvedAt = new Date();
+      await promotion.save();
+    } else {
+      promotion = await Promotion.create({
+        vendorId,
+        serviceType,
+        serviceId,
+        plan: "Admin",
+        status: "approved",
+        rankAssigned: rank,
+        startDate: startDate ? new Date(startDate) : new Date(),
+        endDate: endDate ? new Date(endDate) : null,
+        approvedBy: adminUserId,
+        approvedAt: new Date(),
+      });
+    }
+
+    // Dynamically update listing's rank in the business model
+    const ServiceModel = SERVICE_MODELS[serviceType];
+    if (ServiceModel && serviceId) {
+      await ServiceModel.findByIdAndUpdate(serviceId, { rank });
+    }
+
+    return promotion;
+  } catch (error) {
+    logger.error("Service Error: assignPropertyPromotion", error);
+    throw error;
+  }
+};
+
+exports.updatePromotionRank = async (promotionId, rank) => {
+  try {
+    if (!["A", "B", "C"].includes(rank)) {
+      throw new Error("Invalid rank value. Must be A, B, or C");
+    }
+
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      throw new Error("Promotion not found");
+    }
+
+    promotion.rankAssigned = rank;
+    promotion.status = "approved";
+    await promotion.save();
+
+    const ServiceModel = SERVICE_MODELS[promotion.serviceType];
+    if (ServiceModel && promotion.serviceId) {
+      await ServiceModel.findByIdAndUpdate(promotion.serviceId, { rank });
+    }
+
+    return promotion;
+  } catch (error) {
+    logger.error("Service Error: updatePromotionRank", error);
+    throw error;
+  }
+};
+
+exports.updatePromotionDuration = async (promotionId, startDate, endDate) => {
+  try {
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      throw new Error("Promotion not found");
+    }
+
+    if (startDate) promotion.startDate = new Date(startDate);
+    if (endDate !== undefined) {
+      promotion.endDate = endDate ? new Date(endDate) : null;
+    }
+    await promotion.save();
+
+    return promotion;
+  } catch (error) {
+    logger.error("Service Error: updatePromotionDuration", error);
+    throw error;
+  }
+};
+
+exports.removePromotion = async (promotionId) => {
+  try {
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      throw new Error("Promotion not found");
+    }
+
+    const oldServiceId = promotion.serviceId;
+    const oldServiceType = promotion.serviceType;
+
+    // Mark as rejected / remove rank
+    promotion.status = "rejected";
+    promotion.rankAssigned = null;
+    await promotion.save();
+
+    // Revert business model rank to default C
+    const ServiceModel = SERVICE_MODELS[oldServiceType];
+    if (ServiceModel && oldServiceId) {
+      await ServiceModel.findByIdAndUpdate(oldServiceId, { rank: "C" });
+    }
+
+    return promotion;
+  } catch (error) {
+    logger.error("Service Error: removePromotion", error);
     throw error;
   }
 };

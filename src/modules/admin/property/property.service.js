@@ -5,6 +5,8 @@ const Vendor = require("../../vendors/vendor.model");
 const User = require("../../auth/auth.model");
 const VendorBank = require("../../vendorBank/bank.model");
 const Hotel = require("../../hotels/hotel.model");
+const RoomType = require("../../rooms/roomType.model");
+const TourService = require("../../tour/service/tourService.model");
 
 const {
   sendVendorApprovalEmail,
@@ -15,6 +17,7 @@ const CabCompany = require("../../cab/company/cab.model");
 const BikeCompany = require("../../bike/company/bike.model");
 const TourCompany = require("../../tour/company/tour.model");
 const AdventureCompany = require("../../adventure/category/adventure.model");
+const Promotion = require("../promotion/promotion.model");
 
 const serviceModelMap = {
   hotel: Hotel,
@@ -333,7 +336,30 @@ exports.getPropertyDetail = async (vendorId) => {
         business = null;
     }
 
+    let promotion = null;
+    if (business?._id) {
+      const activePromo = await Promotion.findOne({
+        serviceId: business._id,
+        status: "approved",
+      })
+        .sort({ updatedAt: -1 })
+        .lean();
+
+      if (activePromo) {
+        promotion = {
+          id: activePromo._id,
+          rank: activePromo.rankAssigned,
+          startDate: activePromo.startDate,
+          endDate: activePromo.endDate,
+          status: activePromo.status,
+          plan: activePromo.plan,
+        };
+      }
+    }
+
     return {
+      businessId: business?._id || null,
+
       vendor: {
         _id: vendor._id,
 
@@ -402,6 +428,8 @@ exports.getPropertyDetail = async (vendorId) => {
 
       propertyDetails: business
         ? {
+            _id: business._id,
+
             name: business.name,
 
             description: business.description,
@@ -427,6 +455,8 @@ exports.getPropertyDetail = async (vendorId) => {
             isFeatured: business.isFeatured,
           }
         : null,
+
+      promotion,
     };
   } catch (error) {
     throw error;
@@ -795,6 +825,115 @@ exports.rejectVendor = async (vendorId, body) => {
     await vendor.save();
 
     return vendor;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getPropertyListings = async (vendorId) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+      throw new Error("Invalid vendor ID");
+    }
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    const { serviceType } = vendor;
+
+    // Get the business entity
+    const BusinessModel = serviceModelMap[serviceType];
+    if (!BusinessModel) {
+      return {
+        serviceType,
+        businessId: null,
+        businessName: null,
+        listings: [],
+        count: 0,
+      };
+    }
+
+    const business = await BusinessModel.findOne({ vendorId }).lean();
+    if (!business) {
+      return {
+        serviceType,
+        businessId: null,
+        businessName: null,
+        listings: [],
+        count: 0,
+      };
+    }
+
+    let listings = [];
+
+    if (serviceType === "hotel") {
+      const rooms = await RoomType.find({ hotelId: business._id })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      listings = rooms.map((room) => ({
+        id: room._id,
+        name: room.name,
+        description: room.description || "",
+        basePrice: room.basePrice,
+        discountPrice: room.discountPrice || 0,
+        effectivePrice:
+          room.discountPrice > 0 ? room.discountPrice : room.basePrice,
+        capacity: room.capacity || { adults: 2, children: 0 },
+        beds: room.beds || [],
+        roomSizeSqm: room.roomSizeSqm || null,
+        viewType: room.viewType || "none",
+        amenities: room.amenities || [],
+        totalRooms: room.totalRooms || 0,
+        isActive: room.isActive !== false,
+        images: (room.images || []).map((img) => ({
+          url: img.url,
+          public_id: img.public_id,
+        })),
+        createdAt: room.createdAt,
+      }));
+    } else if (serviceType === "tour") {
+      const packages = await TourService.find({ tour: business._id })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      listings = packages.map((pkg) => ({
+        id: pkg._id,
+        title: pkg.title,
+        description: pkg.description || "",
+        destinations: pkg.destinations || [],
+        duration: pkg.duration
+          ? `${pkg.duration.days}D/${pkg.duration.nights}N`
+          : "N/A",
+        durationRaw: pkg.duration || { days: 0, nights: 0 },
+        basePrice: pkg.basePrice,
+        discountPrice: pkg.discountPrice || 0,
+        effectivePrice:
+          pkg.discountPrice > 0 ? pkg.discountPrice : pkg.basePrice,
+        features: pkg.features || [],
+        tourType: pkg.tourType || [],
+        amenities: pkg.amenities || [],
+        maxPeople: pkg.maxPeople || 10,
+        isActive: pkg.isActive !== false,
+        images: (pkg.images || []).map((img) => ({
+          url: img.url,
+          public_id: img.public_id,
+        })),
+        itinerary: pkg.itinerary || [],
+        meta: pkg.meta || {},
+        createdAt: pkg.createdAt,
+      }));
+    }
+
+    return {
+      serviceType,
+      businessId: business._id,
+      businessName: business.name,
+      listings,
+      count: listings.length,
+    };
   } catch (error) {
     throw error;
   }

@@ -21,8 +21,8 @@ const promotionSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ["Boost", "Premium", "Elite"],
-      required: [true, "Plan is required"],
+      enum: ["Boost", "Premium", "Elite", "Admin", "Direct"],
+      default: "Admin",
     },
     status: {
       type: String,
@@ -34,6 +34,13 @@ const promotionSchema = new mongoose.Schema(
       type: String,
       enum: ["A", "B", "C"],
       default: null,
+    },
+    startDate: {
+      type: Date,
+      default: Date.now,
+    },
+    endDate: {
+      type: Date,
     },
     approvedAt: {
       type: Date,
@@ -54,6 +61,9 @@ const promotionSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+promotionSchema.index({ vendorId: 1, status: 1 });
+promotionSchema.index({ serviceId: 1, status: 1 });
 
 const Promotion = mongoose.model("Promotion", promotionSchema);
 

@@ -18,7 +18,7 @@ exports.getAllProperties = async (req, res, next) => {
 
 exports.updateBusinessRank = async (req, res, next) => {
   try {
-    const { rank } = req.body;
+    const { rank, serviceType = "hotel" } = req.body;
     const { id } = req.params;
 
     if (!rank) {
@@ -28,7 +28,7 @@ exports.updateBusinessRank = async (req, res, next) => {
       });
     }
 
-    const updatedHotel = await propertyService.updateBusinessRank(id, rank);
+    const updatedHotel = await propertyService.updateBusinessRank(serviceType, id, rank);
 
     res.status(200).json({
       success: true,
@@ -156,6 +156,23 @@ exports.approveVendor = async (req, res, next) => {
     });
   } catch (error) {
     logger.error("Controller Error: approveVendor", error);
+    next(error);
+  }
+};
+
+//get property listings (rooms for hotel, packages for tour)
+exports.getPropertyListings = async (req, res, next) => {
+  try {
+    const { vendorId } = req.params;
+
+    const data = await propertyService.getPropertyListings(vendorId);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getPropertyListings", error);
     next(error);
   }
 };
