@@ -1208,3 +1208,55 @@ exports.searchHotels = async (query = {}, userId = null) => {
 
   return updatedHotels;
 };
+
+// Get ranked hotels for banner slideshows (paginated)
+exports.getRankedHotels = async (rank, page = 1, limit = 10) => {
+  try {
+    if (!rank || !["A", "B", "C"].includes(rank)) {
+      return { items: [], total: 0, page: 1, limit: 10, hasMore: false };
+    }
+
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Number(limit) || 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = {
+      rank,
+      isActive: true,
+      verificationStatus: "verified",
+    };
+
+    const total = await Hotel.countDocuments(filter);
+
+    if (total === 0) {
+      return { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false };
+    }
+
+    const hotels = await Hotel.find(filter)
+      .select("name city images advertisementImage rating numReviews isFeatured")
+      .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    const items = hotels.map((hotel) => ({
+      _id: hotel._id,
+      name: hotel.name,
+      city: hotel.city,
+      rating: hotel.rating,
+      numReviews: hotel.numReviews,
+      image: hotel.advertisementImage?.url || hotel.images?.[0]?.url || null,
+    }));
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      hasMore: skip + limitNum < total,
+    };
+  } catch (error) {
+    logger.error("Service Error: getRankedHotels", error);
+    throw error;
+  }
+};

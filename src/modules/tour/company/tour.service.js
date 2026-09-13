@@ -144,7 +144,28 @@ exports.getAllTourCompanies = async (query = {}) => {
   try {
     const TourService = require("../service/tourService.model");
     const { city, search, featured, rank, page = 1, limit = 50 } = query;
-    const filter = {};
+
+    // STEP 1: Find all company IDs that have at least one active tour package (admin-approved)
+    const companiesWithActiveTours = await TourService.distinct("tour", {
+      isActive: true,
+    });
+
+    // If no companies have active tour packages, return empty
+    if (!companiesWithActiveTours || companiesWithActiveTours.length === 0) {
+      return {
+        companies: [],
+        total: 0,
+        page: Math.max(1, Number(page) || 1),
+        limit: Math.max(1, Number(limit) || 50),
+      };
+    }
+
+    // STEP 2: Build filter — only admin-verified, active companies WITH at least one active tour package
+    const filter = {
+      _id: { $in: companiesWithActiveTours },
+      verificationStatus: "verified",
+      isActive: true,
+    };
 
     if (city && city.trim()) {
       filter["location.city"] = { $regex: new RegExp(city.trim(), "i") };
@@ -181,12 +202,12 @@ exports.getAllTourCompanies = async (query = {}) => {
       .limit(limitNum)
       .lean();
 
-    // Attach lowest tour service starting price and total tour count for each company
+    // STEP 3: Attach lowest tour service starting price and total ACTIVE tour count for each company
     const companyIds = companies.map((c) => c._id);
     let minPrices = [];
     if (companyIds.length > 0) {
       minPrices = await TourService.aggregate([
-        { $match: { tour: { $in: companyIds } } },
+        { $match: { tour: { $in: companyIds }, isActive: true } },
         {
           $group: {
             _id: "$tour",
@@ -289,6 +310,80 @@ exports.getTourCompaniesGroupedByCity = async () => {
     return grouped;
   } catch (error) {
     logger.error("Service Error: getTourCompaniesGroupedByCity", error);
+    throw error;
+  }
+};
+
+// Get ranked tour companies for banner slideshows (paginated)
+exports.getRankedTourCompanies = async (rank, page = 1, limit = 10) => {
+  try {
+    const TourService = require("../service/tourService.model");
+
+    if (!rank || !["A", "B", "C"].includes(rank)) {
+      return { items: [], total: 0, page: 1, limit: 10, hasMore: false };
+    }
+
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Number(limit) || 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Only companies that have at least one active tour package
+    const companiesWithActiveTours = await TourService.distinct("tour", {
+      isActive: true,
+    });
+
+    if (!companiesWithActiveTours || companiesWithActiveTours.length === 0) {
+      return { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false };
+    }
+
+    const filter = {
+      _id: { $in: companiesWithActiveTours },
+      rank,
+      isActive: true,
+      verificationStatus: "verified",
+    };
+
+    const total = await TourCompany.countDocuments(filter);
+
+    if (total === 0) {
+      return { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false };
+    }
+
+    const companies = await TourCompany.find(filter)
+      .populate({
+        path: "vendorId",
+        select: "businessName logo",
+      })
+      .sort({ isFeatured: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    const items = companies.map((company) => {
+      const bannerImg =
+        company.advertisementImage?.url ||
+        company.images?.[0]?.url ||
+        company.logo?.url ||
+        company.vendorId?.logo?.url ||
+        `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
+
+      return {
+        _id: company._id,
+        name: company.name,
+        city: company.location?.city || "India",
+        image: bannerImg,
+      };
+    });
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      hasMore: skip + limitNum < total,
+    };
+  } catch (error) {
+    logger.error("Service Error: getRankedTourCompanies", error);
     throw error;
   }
 };

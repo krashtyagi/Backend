@@ -191,3 +191,19 @@ exports.searchHotels = async (req, res, next) => {
     next(err);
   }
 };
+
+// Get ranked hotels for banner slideshows
+exports.getRankedHotels = async (req, res, next) => {
+  try {
+    const { rank, page, limit } = req.query;
+    const result = await hotelService.getRankedHotels(rank, page, limit);
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getRankedHotels", error);
+    next(error);
+  }
+};

@@ -26,6 +26,29 @@ router.patch(
   vendorController.updateVendorLogo,
 );
 
+// Update listing advertisement banner image
+router.patch(
+  "/advertisement-image",
+  protect,
+  authorize("vendor"),
+  vendorController.updateAdvertisementImage,
+);
+
+// Property settings & location history
+router.get(
+  "/property-settings",
+  protect,
+  authorize("vendor"),
+  vendorController.getPropertySettings,
+);
+
+router.patch(
+  "/property-settings",
+  protect,
+  authorize("vendor"),
+  vendorController.updatePropertySettings,
+);
+
 // Get vendor's my listings data
 router.get(
   "/my-listing",

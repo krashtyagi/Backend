@@ -43,6 +43,12 @@ const bikeCompanySchema = new mongoose.Schema(
         resource_type: String,
       },
     ],
+
+    advertisementImage: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
     
     documents: [
       {

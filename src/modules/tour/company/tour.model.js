@@ -38,6 +38,20 @@ const tourCompanySchema = new mongoose.Schema(
       lng: Number,
     },
 
+    locationHistory: [
+      {
+        address: { type: String, trim: true },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        country: { type: String, trim: true },
+        coordinates: {
+          lat: Number,
+          lng: Number,
+        },
+        changedAt: { type: Date, default: Date.now },
+      },
+    ],
+
     logo: {
       url: String,
       public_id: String,
@@ -51,6 +65,12 @@ const tourCompanySchema = new mongoose.Schema(
         resource_type: String,
       },
     ],
+
+    advertisementImage: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
 
     documents: [
       {

@@ -15,6 +15,7 @@ router.get("/suggestions", hotelController.getSuggestions);
 router.get("/search", optionalProtect, hotelController.searchHotels);
 
 router.get("/nearby", hotelController.getNearbyHotels);
+router.get("/ranked", hotelController.getRankedHotels);
 router.get("/:id", optionalProtect, hotelController.getHotelDetails);
 router.get("/:id/availability", hotelController.getHotelAvailability);
 

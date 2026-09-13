@@ -9,6 +9,7 @@ router.get("/", tourController.getTourCompanies);
 router.get("/companies", tourController.getTourCompanies);
 router.get("/grouped-by-city", tourController.getTourCompaniesGroupedByCity);
 router.get("/companies/:id", tourController.getTourCompanyById);
+router.get("/ranked", tourController.getRankedTourCompanies);
 router.get("/:id", tourController.getTourCompanyById);
 
 // Vendor routes...

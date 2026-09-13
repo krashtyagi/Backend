@@ -75,3 +75,19 @@ exports.getTourCompaniesGroupedByCity = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get ranked tour companies for banner slideshows
+exports.getRankedTourCompanies = async (req, res, next) => {
+  try {
+    const { rank, page, limit } = req.query;
+    const result = await tourService.getRankedTourCompanies(rank, page, limit);
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getRankedTourCompanies", error);
+    next(error);
+  }
+};

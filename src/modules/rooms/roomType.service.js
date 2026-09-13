@@ -41,12 +41,21 @@ exports.updateRoomType = async (roomTypeId, hotelId, updateData) => {
     if (!existingRoomType)
       throw new Error("Room type not found or unauthorized");
 
-    if (updateData.images && updateData.images.length > 0) {
+    if (updateData.images && Array.isArray(updateData.images)) {
       if (existingRoomType.images?.length > 0) {
+        const remainingPublicIds = new Set(
+          updateData.images.map((img) => img.public_id).filter(Boolean)
+        );
         for (const img of existingRoomType.images) {
-          await cloudinary.uploader.destroy(img.public_id, {
-            resource_type: img.resource_type || "image",
-          });
+          if (img.public_id && !remainingPublicIds.has(img.public_id)) {
+            try {
+              await cloudinary.uploader.destroy(img.public_id, {
+                resource_type: img.resource_type || "image",
+              });
+            } catch (destroyErr) {
+              logger.warn("Could not delete removed room image", destroyErr);
+            }
+          }
         }
       }
     }
@@ -166,7 +175,7 @@ exports.getVendorRoomTypes = async (vendorId, queryParams) => {
 
   const roomTypes = await RoomType.find(filter)
     .select(
-      "name basePrice discountPrice capacity roomSizeSqm beds totalRooms images"
+      "name basePrice discountPrice capacity roomSizeSqm beds totalRooms images amenities description viewType isActive"
     )
     .sort("-createdAt")
     .skip(skip)
@@ -208,13 +217,21 @@ exports.getVendorRoomTypes = async (vendorId, queryParams) => {
     return {
       id: rt._id,
       name: rt.name,
+      description: rt.description || "",
+      basePrice: rt.basePrice || 0,
+      discountPrice: rt.discountPrice || 0,
+      effectivePrice: rt.discountPrice > 0 ? rt.discountPrice : rt.basePrice,
       price: rt.discountPrice > 0 ? rt.discountPrice : rt.basePrice,
       capacity: rt.capacity,
       roomSizeSqm: rt.roomSizeSqm,
-      beds: rt.beds,
+      beds: rt.beds || [],
       totalRooms: rt.totalRooms,
       availableRooms: available,
       status: available > 0 ? "available" : "occupied",
+      isActive: rt.isActive !== false,
+      viewType: rt.viewType || "none",
+      amenities: rt.amenities || [],
+      images: rt.images || [],
       image: rt.images?.[0]?.url || null,
     };
   });

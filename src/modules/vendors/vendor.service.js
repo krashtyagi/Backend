@@ -560,6 +560,8 @@ exports.getVendorMyListing = async (userId) => {
               : (serviceData.rating ? serviceData.rating.average : 0),
             verificationStatus: serviceData.verificationStatus,
             isActive: serviceData.isActive,
+            advertisementImage: serviceData.advertisementImage || null,
+            images: serviceData.images || [],
           }
         : null,
       subServices,
@@ -651,3 +653,150 @@ exports.getMyPromotionRequests = async (userId) => {
     throw error;
   }
 };
+
+exports.getPropertySettings = async (userId) => {
+  try {
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new Error("Vendor profile not found");
+    }
+
+    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    if (!ServiceModel) {
+      throw new Error(`Unsupported service type: ${vendor.serviceType}`);
+    }
+
+    const serviceData = await ServiceModel.findOne({
+      vendorId: vendor._id,
+      isActive: true,
+    });
+
+    if (!serviceData) {
+      throw new Error("Property listing not found for this vendor");
+    }
+
+    return {
+      serviceType: vendor.serviceType,
+      propertyId: serviceData._id,
+      name: serviceData.name,
+      description: serviceData.description || "",
+      address: serviceData.address || "",
+      city: serviceData.city || serviceData.location?.city || "",
+      state: serviceData.location?.state || "",
+      country: serviceData.location?.country || "India",
+      coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+      images: serviceData.images || [],
+      amenities: serviceData.amenities || serviceData.features || [],
+      locationHistory: serviceData.locationHistory || [],
+      advertisementImage: serviceData.advertisementImage || null,
+    };
+  } catch (error) {
+    logger.error("Service Error: getPropertySettings", error);
+    throw error;
+  }
+};
+
+exports.updatePropertySettings = async (userId, payload) => {
+  try {
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new Error("Vendor profile not found");
+    }
+
+    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    if (!ServiceModel) {
+      throw new Error(`Unsupported service type: ${vendor.serviceType}`);
+    }
+
+    const serviceData = await ServiceModel.findOne({
+      vendorId: vendor._id,
+      isActive: true,
+    });
+
+    if (!serviceData) {
+      throw new Error("Property listing not found for this vendor");
+    }
+
+    const { description, images, amenities, features, address, city, state, country, coordinates, lat, lng } = payload;
+
+    // Check if location changed to record in locationHistory
+    const currentAddress = (serviceData.address || "").trim();
+    const currentCity = (serviceData.city || serviceData.location?.city || "").trim();
+    const newAddress = address !== undefined ? address.trim() : currentAddress;
+    const newCity = city !== undefined ? city.trim() : currentCity;
+
+    const locationChanged = (address !== undefined && newAddress !== currentAddress) ||
+      (city !== undefined && newCity.toLowerCase() !== currentCity.toLowerCase());
+
+    if (locationChanged) {
+      if (!serviceData.locationHistory) {
+        serviceData.locationHistory = [];
+      }
+      serviceData.locationHistory.unshift({
+        address: currentAddress,
+        city: currentCity,
+        state: serviceData.location?.state || "",
+        country: serviceData.location?.country || "India",
+        coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+        changedAt: new Date(),
+      });
+    }
+
+    // Update fields if provided
+    if (description !== undefined) serviceData.description = description.trim();
+    if (images !== undefined) serviceData.images = images;
+    if (amenities !== undefined) serviceData.amenities = amenities;
+    if (features !== undefined) serviceData.features = features;
+
+    if (address !== undefined) serviceData.address = newAddress;
+
+    // Handle hotel vs tour vs other model specifics for city/coordinates
+    if (vendor.serviceType === "hotel") {
+      if (city !== undefined) serviceData.city = newCity;
+      if (coordinates && Array.isArray(coordinates)) {
+        serviceData.location = {
+          type: "Point",
+          coordinates: [Number(coordinates[0]) || 0, Number(coordinates[1]) || 0],
+        };
+      } else if (lat !== undefined && lng !== undefined) {
+        serviceData.location = {
+          type: "Point",
+          coordinates: [Number(lng) || 0, Number(lat) || 0],
+        };
+      }
+    } else {
+      // Tour, Cab, Bike, Adventure models
+      if (!serviceData.location) serviceData.location = {};
+      if (city !== undefined) serviceData.location.city = newCity;
+      if (state !== undefined) serviceData.location.state = state.trim();
+      if (country !== undefined) serviceData.location.country = country.trim();
+      if (lat !== undefined || lng !== undefined) {
+        serviceData.coordinates = {
+          lat: Number(lat) || serviceData.coordinates?.lat || null,
+          lng: Number(lng) || serviceData.coordinates?.lng || null,
+        };
+      }
+    }
+
+    await serviceData.save();
+
+    return {
+      serviceType: vendor.serviceType,
+      propertyId: serviceData._id,
+      name: serviceData.name,
+      description: serviceData.description,
+      address: serviceData.address,
+      city: serviceData.city || serviceData.location?.city || "",
+      state: serviceData.location?.state || "",
+      country: serviceData.location?.country || "India",
+      coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+      images: serviceData.images,
+      amenities: serviceData.amenities || serviceData.features || [],
+      locationHistory: serviceData.locationHistory || [],
+    };
+  } catch (error) {
+    logger.error("Service Error: updatePropertySettings", error);
+    throw error;
+  }
+};
+

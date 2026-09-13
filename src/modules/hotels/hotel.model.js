@@ -41,6 +41,15 @@ const hotelSchema = new mongoose.Schema(
       },
     },
 
+    locationHistory: [
+      {
+        address: { type: String, trim: true },
+        city: { type: String, trim: true },
+        coordinates: [Number],
+        changedAt: { type: Date, default: Date.now },
+      },
+    ],
+
     images: [
       {
         url: String,
@@ -48,6 +57,12 @@ const hotelSchema = new mongoose.Schema(
         resource_type: String,
       },
     ],
+
+    advertisementImage: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
 
     documents: [
       {

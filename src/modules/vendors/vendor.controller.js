@@ -438,3 +438,123 @@ exports.updateVendorLogo = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.updateAdvertisementImage = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { advertisementImage } = req.body;
+
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found",
+      });
+    }
+
+    const Hotel = require("../hotels/hotel.model");
+    const TourCompany = require("../tour/company/tour.model");
+    const CabCompany = require("../cab/company/cab.model");
+    const BikeCompany = require("../bike/company/bike.model");
+    const Adventure = require("../adventure/category/adventure.model");
+
+    const SERVICE_MODELS = {
+      hotel: Hotel,
+      tour: TourCompany,
+      cab: CabCompany,
+      bike: BikeCompany,
+      adventure: Adventure,
+    };
+
+    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    if (!ServiceModel) {
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported service type: ${vendor.serviceType}`,
+      });
+    }
+
+    const serviceData = await ServiceModel.findOne({
+      vendorId: vendor._id,
+      isActive: true,
+    });
+
+    if (!serviceData) {
+      return res.status(404).json({
+        success: false,
+        message: "Property listing not found for this vendor",
+      });
+    }
+
+    const oldPublicId = serviceData.advertisementImage?.public_id;
+    const newPublicId = typeof advertisementImage === "object" ? advertisementImage?.public_id : null;
+
+    if (typeof advertisementImage === "string") {
+      serviceData.advertisementImage = {
+        url: advertisementImage,
+        public_id: "",
+        resource_type: "image",
+      };
+    } else if (advertisementImage && advertisementImage.url) {
+      serviceData.advertisementImage = advertisementImage;
+    } else if (advertisementImage === null || advertisementImage === "") {
+      serviceData.advertisementImage = undefined;
+    }
+
+    await serviceData.save();
+
+    // Clean up old image if changed
+    if (oldPublicId && oldPublicId !== newPublicId) {
+      try {
+        const uploadService = require("../upload/upload.service");
+        uploadService.deleteFile(oldPublicId, "image").catch((err) => {
+          logger.error("Failed to delete previous advertisement image from Cloudinary:", err);
+        });
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Advertisement banner image updated successfully",
+      data: { advertisementImage: serviceData.advertisementImage || null },
+    });
+  } catch (error) {
+    logger.error("Controller Error: updateAdvertisementImage", error);
+    next(error);
+  }
+};
+
+exports.getPropertySettings = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const data = await vendorService.getPropertySettings(userId);
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: getPropertySettings", error);
+    next(error);
+  }
+};
+
+exports.updatePropertySettings = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const data = await vendorService.updatePropertySettings(userId, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Property settings updated successfully",
+      data,
+    });
+  } catch (error) {
+    logger.error("Controller Error: updatePropertySettings", error);
+    next(error);
+  }
+};
+
+

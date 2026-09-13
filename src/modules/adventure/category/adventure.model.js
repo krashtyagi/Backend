@@ -48,6 +48,12 @@ const adventureSchema = new mongoose.Schema(
       },
     ],
 
+    advertisementImage: {
+      url: String,
+      public_id: String,
+      resource_type: { type: String, default: "image" },
+    },
+
     documents: [
       {
         docName: String,
