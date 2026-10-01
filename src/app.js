@@ -59,12 +59,18 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.VENDOR_URL,
   process.env.ADMIN_URL,
-];
+].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        origin.includes("trivllo.com") ||
+        process.env.NODE_ENV !== "production"
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
