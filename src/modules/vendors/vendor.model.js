@@ -101,7 +101,7 @@ const vendorSchema = new mongoose.Schema(
     // Vendor approval flow
     status: {
       type: String,
-      enum: ["draft", "pending", "under_review", "approved", "rejected"],
+      enum: ["draft", "pending", "under_review", "approved", "rejected", "blocked"],
       default: "draft",
       index: true,
     },
@@ -136,6 +136,7 @@ const vendorSchema = new mongoose.Schema(
     submittedAt: Date,
     approvedAt: Date,
     rejectedAt: Date,
+    blockedAt: Date,
 
     isSubmitted: {
       type: Boolean,
@@ -146,6 +147,22 @@ const vendorSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       index: true,
+    },
+
+    isBlocked: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    blockReason: {
+      type: String,
+      trim: true,
+    },
+
+    blockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
 
     approvedBy: {

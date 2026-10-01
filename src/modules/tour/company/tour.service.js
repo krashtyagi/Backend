@@ -31,12 +31,80 @@ exports.createTourCompany = async (data, vendor) => {
     } = data;
 
     // VALIDATIONS
+    const city = (location?.city || data.city || data.hotelCity || "").trim();
     if (!name || !name.trim()) {
       throw new Error("Tour company name is required");
     }
 
-    if (!location || !location.city) {
+    if (!city) {
       throw new Error("Location city is required");
+    }
+
+    const state = (location?.state || data.state || "").trim();
+    const country = (location?.country || data.country || "India").trim();
+    const coords = {
+      lat: coordinates?.lat || data.lat || null,
+      lng: coordinates?.lng || data.lng || null,
+    };
+
+    let addressObj;
+    if (typeof address === "object" && address !== null) {
+      addressObj = {
+        buildingName: address.buildingName || data.buildingName || "",
+        doorNumber: address.doorNumber || data.doorNumber || "",
+        streetAddress: address.streetAddress || address.address || data.hotelAddress || "",
+        areaName: address.areaName || data.areaName || "",
+        city: address.city || city || "Default City",
+        district: address.district || data.district || "",
+        state: address.state || state || "",
+        postalCode: address.postalCode || data.postalCode || "",
+        country: address.country || country || "India",
+        countryCode: address.countryCode || "IN",
+        landmark: address.landmark || data.landmark || "",
+        directions: address.directions || data.directions || "",
+        formattedAddress: address.formattedAddress || "",
+        location: {
+          type: "Point",
+          coordinates: [coords.lng || 72.8777, coords.lat || 19.0760],
+        },
+      };
+    } else {
+      const rawAddr = (address || data.hotelAddress || "").trim();
+      addressObj = {
+        buildingName: data.buildingName || "",
+        doorNumber: data.doorNumber || "",
+        streetAddress: rawAddr,
+        areaName: data.areaName || "",
+        city: city || "Default City",
+        district: data.district || "",
+        state: state || "",
+        postalCode: data.postalCode || "",
+        country: country || "India",
+        countryCode: "IN",
+        landmark: data.landmark || "",
+        directions: data.directions || "",
+        formattedAddress: rawAddr || city,
+        location: {
+          type: "Point",
+          coordinates: [coords.lng || 72.8777, coords.lat || 19.0760],
+        },
+      };
+    }
+
+    if (!addressObj.formattedAddress) {
+      const parts = [
+        addressObj.doorNumber,
+        addressObj.buildingName,
+        addressObj.streetAddress,
+        addressObj.areaName,
+        addressObj.landmark,
+        addressObj.city,
+        addressObj.district,
+        addressObj.state,
+        addressObj.postalCode,
+        addressObj.country,
+      ].filter(Boolean);
+      addressObj.formattedAddress = parts.join(", ");
     }
 
     // CHECK EXISTING COMPANY
@@ -50,20 +118,14 @@ exports.createTourCompany = async (data, vendor) => {
         name: name.trim(),
 
         location: {
-          city: location.city.trim(),
-
-          state: location.state || "",
-
-          country: location.country || "India",
+          city: addressObj.city || city,
+          state: addressObj.state || state,
+          country: addressObj.country || country,
         },
 
-        address: address?.trim() || "",
+        address: addressObj,
 
-        coordinates: {
-          lat: coordinates?.lat || null,
-
-          lng: coordinates?.lng || null,
-        },
+        coordinates: coords,
 
         images,
 
@@ -85,20 +147,14 @@ exports.createTourCompany = async (data, vendor) => {
         name: name.trim(),
 
         location: {
-          city: location.city.trim(),
-
-          state: location.state || "",
-
-          country: location.country || "India",
+          city: addressObj.city || city,
+          state: addressObj.state || state,
+          country: addressObj.country || country,
         },
 
-        address: address?.trim() || "",
+        address: addressObj,
 
-        coordinates: {
-          lat: coordinates?.lat || null,
-
-          lng: coordinates?.lng || null,
-        },
+        coordinates: coords,
 
         images,
 
@@ -168,15 +224,34 @@ exports.getAllTourCompanies = async (query = {}) => {
     };
 
     if (city && city.trim()) {
-      filter["location.city"] = { $regex: new RegExp(city.trim(), "i") };
+      const cityRegex = { $regex: new RegExp(city.trim(), "i") };
+      filter.$or = [
+        { "location.city": cityRegex },
+        { "address.city": cityRegex },
+        { "address.areaName": cityRegex },
+        { "address.district": cityRegex },
+        { "address.streetAddress": cityRegex },
+        { "address.landmark": cityRegex },
+        { "address.formattedAddress": cityRegex },
+        { "address.state": cityRegex },
+      ];
     }
 
     if (search && search.trim()) {
-      filter.$or = [
-        { name: { $regex: search.trim(), $options: "i" } },
-        { "location.city": { $regex: search.trim(), $options: "i" } },
-        { description: { $regex: search.trim(), $options: "i" } },
+      const searchRegex = { $regex: search.trim(), $options: "i" };
+      const searchMatch = [
+        { name: searchRegex },
+        { "location.city": searchRegex },
+        { "address.city": searchRegex },
+        { "address.areaName": searchRegex },
+        { description: searchRegex },
       ];
+      if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, { $or: searchMatch }];
+        delete filter.$or;
+      } else {
+        filter.$or = searchMatch;
+      }
     }
 
     if (featured !== undefined) {
@@ -265,7 +340,11 @@ exports.getAllTourCompanies = async (query = {}) => {
 exports.getTourCompanyById = async (id) => {
   try {
     const TourService = require("../service/tourService.model");
-    const company = await TourCompany.findById(id)
+    const company = await TourCompany.findOne({
+      _id: id,
+      isActive: true,
+      verificationStatus: "verified",
+    })
       .populate({
         path: "vendorId",
         select: "businessName businessEmail logo currentStep status",
@@ -276,7 +355,7 @@ exports.getTourCompanyById = async (id) => {
       throw new Error("Tour company not found");
     }
 
-    const tours = await TourService.find({ tour: id }).lean();
+    const tours = await TourService.find({ tour: id, isActive: true }).lean();
     const resolvedLogo =
       company.logo?.url ||
       company.vendorId?.logo?.url ||

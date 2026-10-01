@@ -38,6 +38,13 @@ exports.createCabCompany = async (vendor, data) => {
       throw new Error("Location city is required");
     }
 
+    let addressValue;
+    if (typeof address === "object" && address !== null) {
+      addressValue = address;
+    } else {
+      addressValue = typeof address === "string" ? address.trim() : "";
+    }
+
     // CHECK EXISTING CAB COMPANY
     let cab = await CabCompany.findOne({
       vendorId: vendor._id,
@@ -54,7 +61,7 @@ exports.createCabCompany = async (vendor, data) => {
           country: location.country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,
@@ -82,7 +89,7 @@ exports.createCabCompany = async (vendor, data) => {
           country: location.country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,

@@ -295,6 +295,13 @@ exports.createAdventure = async (data, vendor) => {
 
    
 
+    let addressValue;
+    if (typeof address === "object" && address !== null) {
+      addressValue = address;
+    } else {
+      addressValue = typeof address === "string" ? address.trim() : "";
+    }
+
     // CHECK EXISTING ADVENTURE
     let adventure = await Adventure.findOne({
       vendorId: vendor._id,
@@ -316,7 +323,7 @@ exports.createAdventure = async (data, vendor) => {
           country: country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,
@@ -352,7 +359,7 @@ exports.createAdventure = async (data, vendor) => {
           country: country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,

@@ -9,17 +9,15 @@ const transports = [
   }),
 ];
 
-if (process.env.NODE_ENV === "development") {
-  transports.push(
-    new winston.transports.File({
-      filename: "logs/error.log",
-      level: "error",
-    }),
-    new winston.transports.File({
-      filename: "logs/combined.log",
-    })
-  );
-}
+transports.push(
+  new winston.transports.File({
+    filename: "logs/error.log",
+    level: "error",
+  }),
+  new winston.transports.File({
+    filename: "logs/combined.log",
+  })
+);
 
 const logger = winston.createLogger({
   level: "info",

@@ -18,6 +18,7 @@ const BikeCompany = require("../../bike/company/bike.model");
 const TourCompany = require("../../tour/company/tour.model");
 const AdventureCompany = require("../../adventure/category/adventure.model");
 const Promotion = require("../promotion/promotion.model");
+const DeletedProperty = require("./deletedProperty.model");
 
 const serviceModelMap = {
   hotel: Hotel,
@@ -35,8 +36,12 @@ exports.getAllProperties = async (query) => {
 
     const matchStage = {};
 
-    if (status) {
-      matchStage.status = status;
+    if (status && status !== "all") {
+      if (status === "active") {
+        matchStage.status = { $ne: "blocked" };
+      } else {
+        matchStage.status = status;
+      }
     }
 
     if (serviceType) {
@@ -938,3 +943,335 @@ exports.getPropertyListings = async (vendorId) => {
     throw error;
   }
 };
+
+exports.blockVendor = async (vendorId, adminId, reason = "") => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+      throw new Error("Invalid vendor ID");
+    }
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    vendor.status = "blocked";
+    vendor.isBlocked = true;
+    vendor.isActive = false;
+    vendor.blockedAt = new Date();
+    vendor.blockedBy = adminId;
+    vendor.blockReason = reason || "Blocked by administrator";
+
+    await vendor.save();
+
+    // Deactivate associated business and sub-services based on serviceType
+    switch (vendor.serviceType) {
+      case "hotel": {
+        const hotel = await Hotel.findOne({ vendorId });
+        if (hotel) {
+          hotel.isActive = false;
+          await hotel.save();
+          await RoomType.updateMany({ hotelId: hotel._id }, { isActive: false });
+        }
+        break;
+      }
+      case "tour": {
+        const tour = await TourCompany.findOne({ vendorId });
+        if (tour) {
+          tour.isActive = false;
+          await tour.save();
+          await TourService.updateMany({ tour: tour._id }, { isActive: false });
+        }
+        break;
+      }
+      case "cab": {
+        const cab = await CabCompany.findOne({ vendorId });
+        if (cab) {
+          cab.isActive = false;
+          await cab.save();
+          const CabService = require("../../cab/service/cabService.model");
+          await CabService.updateMany({ companyId: cab._id }, { isActive: false });
+        }
+        break;
+      }
+      case "bike": {
+        const bike = await BikeCompany.findOne({ vendorId });
+        if (bike) {
+          bike.isActive = false;
+          await bike.save();
+          const BikeService = require("../../bike/service/bikeService.model");
+          await BikeService.updateMany({ companyId: bike._id }, { isActive: false });
+        }
+        break;
+      }
+      case "adventure": {
+        const adv = await AdventureCompany.findOne({ vendorId });
+        if (adv) {
+          adv.isActive = false;
+          await adv.save();
+          const AdventureService = require("../../adventure/service/service.model");
+          await AdventureService.updateMany({ adventureId: adv._id }, { isActive: false });
+        }
+        break;
+      }
+    }
+
+    // Deactivate promotions
+    await Promotion.updateMany({ vendorId }, { isActive: false });
+
+    return vendor;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.unblockVendor = async (vendorId, adminId) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+      throw new Error("Invalid vendor ID");
+    }
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    vendor.status = "approved";
+    vendor.isBlocked = false;
+    vendor.isActive = true;
+    vendor.blockedAt = null;
+    vendor.blockedBy = null;
+    vendor.blockReason = null;
+
+    await vendor.save();
+
+    // Re-activate associated business and sub-services based on serviceType
+    switch (vendor.serviceType) {
+      case "hotel": {
+        const hotel = await Hotel.findOne({ vendorId });
+        if (hotel) {
+          hotel.isActive = true;
+          await hotel.save();
+          await RoomType.updateMany({ hotelId: hotel._id }, { isActive: true });
+        }
+        break;
+      }
+      case "tour": {
+        const tour = await TourCompany.findOne({ vendorId });
+        if (tour) {
+          tour.isActive = true;
+          await tour.save();
+          await TourService.updateMany({ tour: tour._id }, { isActive: true });
+        }
+        break;
+      }
+      case "cab": {
+        const cab = await CabCompany.findOne({ vendorId });
+        if (cab) {
+          cab.isActive = true;
+          await cab.save();
+          const CabService = require("../../cab/service/cabService.model");
+          await CabService.updateMany({ companyId: cab._id }, { isActive: true });
+        }
+        break;
+      }
+      case "bike": {
+        const bike = await BikeCompany.findOne({ vendorId });
+        if (bike) {
+          bike.isActive = true;
+          await bike.save();
+          const BikeService = require("../../bike/service/bikeService.model");
+          await BikeService.updateMany({ companyId: bike._id }, { isActive: true });
+        }
+        break;
+      }
+      case "adventure": {
+        const adv = await AdventureCompany.findOne({ vendorId });
+        if (adv) {
+          adv.isActive = true;
+          await adv.save();
+          const AdventureService = require("../../adventure/service/service.model");
+          await AdventureService.updateMany({ adventureId: adv._id }, { isActive: true });
+        }
+        break;
+      }
+    }
+
+    return vendor;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteProperty = async (vendorId, adminId = null, reason = "") => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(vendorId)) {
+      throw new Error("Invalid vendor ID");
+    }
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    const user = await User.findById(vendor.userId).select("firstName lastName email phoneNumber");
+    let businessDoc = null;
+
+    // Delete associated business and sub-services based on serviceType
+    switch (vendor.serviceType) {
+      case "hotel": {
+        const hotel = await Hotel.findOne({ vendorId });
+        if (hotel) {
+          businessDoc = hotel;
+          await RoomType.deleteMany({ hotelId: hotel._id });
+          const Availability = require("../../availability/availability.model");
+          await Availability.deleteMany({ hotelId: hotel._id });
+          await Hotel.findByIdAndDelete(hotel._id);
+        }
+        break;
+      }
+      case "tour": {
+        const tour = await TourCompany.findOne({ vendorId });
+        if (tour) {
+          businessDoc = tour;
+          await TourService.deleteMany({ tour: tour._id });
+          await TourCompany.findByIdAndDelete(tour._id);
+        }
+        break;
+      }
+      case "cab": {
+        const cab = await CabCompany.findOne({ vendorId });
+        if (cab) {
+          businessDoc = cab;
+          const CabService = require("../../cab/service/cabService.model");
+          await CabService.deleteMany({ companyId: cab._id });
+          await CabCompany.findByIdAndDelete(cab._id);
+        }
+        break;
+      }
+      case "bike": {
+        const bike = await BikeCompany.findOne({ vendorId });
+        if (bike) {
+          businessDoc = bike;
+          const BikeService = require("../../bike/service/bikeService.model");
+          await BikeService.deleteMany({ companyId: bike._id });
+          await BikeCompany.findByIdAndDelete(bike._id);
+        }
+        break;
+      }
+      case "adventure": {
+        const adv = await AdventureCompany.findOne({ vendorId });
+        if (adv) {
+          businessDoc = adv;
+          const AdventureService = require("../../adventure/service/service.model");
+          await AdventureService.deleteMany({ adventureId: adv._id });
+          await AdventureCompany.findByIdAndDelete(adv._id);
+        }
+        break;
+      }
+    }
+
+    // Archive basic details into DeletedProperty model
+    const vendorFullName = user
+      ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+      : (vendor.businessName || "N/A");
+
+    await DeletedProperty.create({
+      originalVendorId: vendor._id,
+      propertyId: vendor.propertyId || "",
+      propertyName: businessDoc?.name || vendor.businessName || "Unnamed Property",
+      businessName: vendor.businessName || businessDoc?.name || "N/A",
+      vendorName: vendorFullName || "N/A",
+      vendorEmail: user?.email || vendor.businessEmail || "",
+      vendorPhone: user?.phoneNumber || vendor.businessPhone || "",
+      serviceType: vendor.serviceType || "hotel",
+      city: vendor.city || businessDoc?.city || businessDoc?.location?.city || "N/A",
+      reason: reason || "Deleted by administrator",
+      deletedBy: adminId,
+      deletedAt: new Date(),
+    });
+
+    await VendorBank.deleteMany({ vendorId });
+    await Promotion.deleteMany({ vendorId });
+    await Vendor.findByIdAndDelete(vendorId);
+
+    return { success: true, message: "Property and vendor deleted successfully" };
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getDeletedProperties = async (query = {}) => {
+  try {
+    const { page = 1, limit = 10, search, serviceType } = query;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Number(limit) || 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = {};
+
+    if (serviceType && serviceType !== "all") {
+      filter.serviceType = serviceType;
+    }
+
+    if (search && search.trim()) {
+      const reg = { $regex: search.trim(), $options: "i" };
+      filter.$or = [
+        { propertyName: reg },
+        { businessName: reg },
+        { vendorName: reg },
+        { city: reg },
+        { propertyId: reg },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      DeletedProperty.find(filter)
+        .sort({ deletedAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      DeletedProperty.countDocuments(filter),
+    ]);
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum) || 1,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.cleanAllDeletedProperties = async () => {
+  try {
+    const result = await DeletedProperty.deleteMany({});
+    return {
+      success: true,
+      deletedCount: result.deletedCount || 0,
+      message: `Cleaned ${result.deletedCount || 0} deleted records`,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteDeletedPropertyRecord = async (id) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid record ID");
+    }
+    await DeletedProperty.findByIdAndDelete(id);
+    return {
+      success: true,
+      message: "Record permanently removed from trash",
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+

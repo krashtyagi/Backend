@@ -155,9 +155,13 @@ exports.getTours = async (query, userId = null) => {
     };
 
     if (city && city.trim()) {
+      const cityRegex = { $regex: city.trim(), $options: "i" };
       companyMatch.$or = [
-        { "company.location.city": { $regex: city.trim(), $options: "i" } },
-        { destinations: { $regex: city.trim(), $options: "i" } },
+        { "company.location.city": cityRegex },
+        { "company.address.city": cityRegex },
+        { "company.address.areaName": cityRegex },
+        { "company.address.district": cityRegex },
+        { destinations: cityRegex },
       ];
     }
 
@@ -378,9 +382,14 @@ exports.getTourServiceDetails = async (id, userId = null) => {
     const company = await TourCompany.findOne({
       _id: service.tour,
       isActive: true,
+      verificationStatus: "verified",
     })
       .select("name location rating images description")
       .lean();
+
+    if (!company) {
+      throw new Error("Tour company not found");
+    }
 
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;

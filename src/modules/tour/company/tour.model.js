@@ -1,5 +1,43 @@
 const mongoose = require("mongoose");
 
+// Deep, powerful address sub-schema
+const addressSchema = new mongoose.Schema(
+  {
+    buildingName: { type: String, trim: true, default: "" },
+    doorNumber: { type: String, trim: true, default: "" },
+    streetAddress: { type: String, trim: true, default: "" },
+    areaName: { type: String, trim: true, index: true, default: "" }, // Town / locality / neighborhood
+
+    city: { type: String, required: true, trim: true, index: true },
+    district: { type: String, trim: true, default: "" },
+    state: { type: String, trim: true, index: true, default: "" },
+    postalCode: { type: String, trim: true, index: true, default: "" },
+    country: { type: String, trim: true, default: "India", index: true },
+    countryCode: { type: String, uppercase: true, trim: true, maxlength: 2, default: "IN" },
+
+    landmark: { type: String, trim: true, default: "" },
+    directions: { type: String, trim: true, default: "" },
+
+    formattedAddress: { type: String, trim: true, default: "" },
+
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        default: [72.8777, 19.0760], // [lng, lat]
+      },
+    },
+
+    placeId: { type: String, trim: true, default: "" },
+    timeZone: { type: String, trim: true, default: "" },
+  },
+  { _id: false }
+);
+
 const tourCompanySchema = new mongoose.Schema(
   {
     vendorId: {
@@ -20,17 +58,19 @@ const tourCompanySchema = new mongoose.Schema(
         type: String,
         required: true,
         index: true,
+        trim: true,
       },
-      state: { type: String },
+      state: { type: String, trim: true },
       country: {
         type: String,
         default: "India",
+        trim: true,
       },
     },
 
+    // Embedded Powerful Address Schema (or string for legacy compatibility)
     address: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.Mixed,
     },
 
     coordinates: {
@@ -40,7 +80,7 @@ const tourCompanySchema = new mongoose.Schema(
 
     locationHistory: [
       {
-        address: { type: String, trim: true },
+        address: { type: mongoose.Schema.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -49,6 +89,7 @@ const tourCompanySchema = new mongoose.Schema(
           lng: Number,
         },
         changedAt: { type: Date, default: Date.now },
+        changedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       },
     ],
 
@@ -145,11 +186,86 @@ const tourCompanySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-tourCompanySchema.index({ "location.city": 1, isActive: 1 });
+// Pre-validation synchronization
+tourCompanySchema.pre("validate", function (next) {
+  if (typeof this.address === "string") {
+    const raw = this.address;
+    this.address = {
+      streetAddress: raw,
+      city: this.location?.city || "India",
+      state: this.location?.state || "",
+      country: this.location?.country || "India",
+      formattedAddress: raw,
+      location: {
+        type: "Point",
+        coordinates: [this.coordinates?.lng || 72.8777, this.coordinates?.lat || 19.0760],
+      },
+    };
+  } else if (!this.address && this.location?.city) {
+    this.address = {
+      streetAddress: "",
+      city: this.location.city,
+      state: this.location.state || "",
+      country: this.location.country || "India",
+      formattedAddress: this.location.city,
+      location: {
+        type: "Point",
+        coordinates: [this.coordinates?.lng || 72.8777, this.coordinates?.lat || 19.0760],
+      },
+    };
+  }
 
+  // Sync city, state, country
+  if (this.address?.city && (!this.location || !this.location.city)) {
+    if (!this.location) this.location = {};
+    this.location.city = this.address.city;
+  }
+  if (this.location?.city && this.address && !this.address.city) {
+    this.address.city = this.location.city;
+  }
+  if (this.address?.state && (!this.location || !this.location.state)) {
+    if (!this.location) this.location = {};
+    this.location.state = this.address.state;
+  }
+  if (this.address?.country && (!this.location || !this.location.country)) {
+    if (!this.location) this.location = {};
+    this.location.country = this.address.country;
+  }
+
+  // Sync coordinates
+  if (this.coordinates?.lat && this.coordinates?.lng) {
+    if (this.address && (!this.address.location || !this.address.location.coordinates?.length)) {
+      this.address.location = {
+        type: "Point",
+        coordinates: [this.coordinates.lng, this.coordinates.lat],
+      };
+    }
+  } else if (this.address?.location?.coordinates?.length === 2) {
+    this.coordinates = {
+      lat: this.address.location.coordinates[1],
+      lng: this.address.location.coordinates[0],
+    };
+  }
+
+  if (typeof next === "function") {
+    next();
+  }
+});
+
+tourCompanySchema.index({ "location.city": 1, isActive: 1 });
+tourCompanySchema.index({ "address.city": 1, "address.areaName": 1, isActive: 1 });
 tourCompanySchema.index({ vendorId: 1, createdAt: -1 });
-tourCompanySchema.index({ name: "text", description: "text" });
+tourCompanySchema.index({
+  name: "text",
+  description: "text",
+  "location.city": "text",
+  "address.city": "text",
+  "address.areaName": "text",
+  "address.district": "text",
+  "address.streetAddress": "text",
+});
 
 const TourCompany = mongoose.model("TourCompany", tourCompanySchema);
 
 module.exports = TourCompany;
+module.exports.addressSchema = addressSchema;

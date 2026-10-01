@@ -23,6 +23,7 @@ const TourService = require("../tour/company/tour.model");
 const CabService = require("../cab/company/cab.model");
 const BikeService = require("../bike/company/bike.model");
 const AdventureService = require("../adventure/category/adventure.model");
+const User = require("../auth/auth.model");
 
 //restore availability function
 async function restoreAvailability(booking, session) {
@@ -103,6 +104,15 @@ exports.createBooking = async (data, userId) => {
       ? additionalGuests
       : [];
 
+    const userDoc = await User.findById(userId).session(session);
+
+    const safePrimaryGuest = {
+      firstName: (primaryGuest?.firstName || "").trim() || userDoc?.firstName || "Guest",
+      lastName: (primaryGuest?.lastName || "").trim() || userDoc?.lastName || "User",
+      email: (primaryGuest?.email || "").trim() || userDoc?.email || "guest@trivllo.com",
+      phoneNumber: (primaryGuest?.phoneNumber || "").trim() || userDoc?.phoneNumber || "9999999999",
+    };
+
     const hotel = await Hotel.findById(hotelId).session(session);
     if (!hotel || !hotel.isActive) throw new Error("Hotel not available");
 
@@ -110,11 +120,9 @@ exports.createBooking = async (data, userId) => {
     if (!roomType || !roomType.isActive)
       throw new Error("Room type not available");
 
-    if (
-      guests.adults > roomType.capacity.adults ||
-      guests.children > roomType.capacity.children
-    ) {
-      throw new Error("Guest count exceeds room capacity");
+    const maxAdults = (roomType.capacity?.adults ?? 2) * rooms;
+    if (guests.adults > maxAdults) {
+      throw new Error(`Guest count (${guests.adults} adults) exceeds room capacity (${maxAdults} adults)`);
     }
 
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
@@ -188,7 +196,7 @@ exports.createBooking = async (data, userId) => {
           nights,
           guests,
           roomsBooked: rooms,
-          primaryGuest,
+          primaryGuest: safePrimaryGuest,
           additionalGuests: safeAdditionalGuests,
 
           pricePerNight: firstDayPrice,
@@ -205,7 +213,7 @@ exports.createBooking = async (data, userId) => {
 
     //RAZORPAY ORDER (WITH TAX)
     const razorpayOrder = await razorpay.orders.create({
-      amount: finalTotalAmount * 100,
+      amount: Math.round(finalTotalAmount * 100),
       currency: "INR",
       receipt: bookingReference,
     });
@@ -235,8 +243,15 @@ exports.createBooking = async (data, userId) => {
       razorpayOrder,
     };
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
+    try {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+    } catch (abortErr) {
+      logger.error("Error aborting transaction:", abortErr);
+    } finally {
+      session.endSession();
+    }
     logger.error("Service Error: createBooking", err);
     throw err;
   }
@@ -741,8 +756,10 @@ exports.userInvoiceDownload = async (booking, res) => {
 
   // Hotel Info
   doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("HOTEL DETAILS:", 300, infoY);
-  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(hotel.name, 300, infoY + 15);
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotel.address || ''}, ${hotel.city || ''}`, 300, infoY + 30);
+  const hotelAddrStr = typeof hotel.address === 'object' && hotel.address !== null
+    ? (hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || '')
+    : (hotel.address || '');
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotelAddrStr ? `${hotelAddrStr}, ` : ''}${hotel.city || ''}`, 300, infoY + 30);
 
   // --- STAY DETAILS ---
   const stayY = 300;
@@ -1362,11 +1379,14 @@ exports.generateInvoicePdf = async (bookingId, vendorId, res) => {
     .fontSize(12)
     .font("Helvetica-Bold")
     .text(hotel.name, 40, gridY);
+  const invoiceHotelAddr = typeof hotel.address === 'object' && hotel.address !== null
+    ? (hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || '')
+    : (hotel.address || '');
   doc
     .fillColor("#666")
     .fontSize(9)
     .font("Helvetica")
-    .text(`${hotel.address}, ${hotel.city}`, 40, gridY + 15, { width: 220 });
+    .text(`${invoiceHotelAddr ? `${invoiceHotelAddr}, ` : ''}${hotel.city || ''}`, 40, gridY + 15, { width: 220 });
 
   // Right: Guest
   doc

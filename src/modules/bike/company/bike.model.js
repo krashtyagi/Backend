@@ -27,14 +27,28 @@ const bikeCompanySchema = new mongoose.Schema(
     },
 
     address: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.Mixed,
     },
 
     coordinates: {
       lat: Number,
       lng: Number,
     },
+
+    locationHistory: [
+      {
+        address: { type: mongoose.Schema.Types.Mixed },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        country: { type: String, trim: true },
+        coordinates: {
+          lat: Number,
+          lng: Number,
+        },
+        changedAt: { type: Date, default: Date.now },
+        changedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
 
     images: [
       {

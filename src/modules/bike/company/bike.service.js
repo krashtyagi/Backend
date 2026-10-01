@@ -40,6 +40,13 @@ exports.createBikeCompany = async (data, vendor) => {
       throw new Error("Location city is required");
     }
 
+    let addressValue;
+    if (typeof address === "object" && address !== null) {
+      addressValue = address;
+    } else {
+      addressValue = typeof address === "string" ? address.trim() : "";
+    }
+
     // CHECK EXISTING COMPANY
     let bikeCompany = await BikeCompany.findOne({
       vendorId: vendor._id,
@@ -58,7 +65,7 @@ exports.createBikeCompany = async (data, vendor) => {
           country: location.country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,
@@ -93,7 +100,7 @@ exports.createBikeCompany = async (data, vendor) => {
           country: location.country || "India",
         },
 
-        address: address?.trim() || "",
+        address: addressValue,
 
         coordinates: {
           lat: coordinates?.lat || null,

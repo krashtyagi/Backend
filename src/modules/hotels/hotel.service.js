@@ -53,17 +53,88 @@ exports.createHotel = async (vendor, hotelData) => {
       throw new Error("Fix required step first");
     }
 
+    // Normalize rich address payload
+    const city = (hotelData.city || hotelData.hotelCity || "").trim();
+    const location = hotelData.location || {
+      type: "Point",
+      coordinates: [72.8777, 19.0760],
+    };
+
+    let addressObj;
+    if (typeof hotelData.address === "object" && hotelData.address !== null) {
+      addressObj = {
+        buildingName: hotelData.address.buildingName || hotelData.buildingName || "",
+        doorNumber: hotelData.address.doorNumber || hotelData.doorNumber || "",
+        streetAddress: hotelData.address.streetAddress || hotelData.address.address || hotelData.hotelAddress || "",
+        areaName: hotelData.address.areaName || hotelData.areaName || "",
+        city: hotelData.address.city || city || "Default City",
+        district: hotelData.address.district || hotelData.district || "",
+        state: hotelData.address.state || hotelData.state || "",
+        postalCode: hotelData.address.postalCode || hotelData.postalCode || "",
+        country: hotelData.address.country || hotelData.country || "India",
+        countryCode: hotelData.address.countryCode || hotelData.countryCode || "IN",
+        landmark: hotelData.address.landmark || hotelData.landmark || "",
+        directions: hotelData.address.directions || hotelData.directions || "",
+        formattedAddress: hotelData.address.formattedAddress || hotelData.formattedAddress || "",
+        location: hotelData.address.location || location,
+        placeId: hotelData.address.placeId || "",
+        timeZone: hotelData.address.timeZone || "",
+      };
+    } else {
+      const rawAddr = (hotelData.address || hotelData.hotelAddress || "").trim();
+      addressObj = {
+        buildingName: hotelData.buildingName || "",
+        doorNumber: hotelData.doorNumber || "",
+        streetAddress: rawAddr,
+        areaName: hotelData.areaName || "",
+        city: city || "Default City",
+        district: hotelData.district || "",
+        state: hotelData.state || "",
+        postalCode: hotelData.postalCode || "",
+        country: hotelData.country || "India",
+        countryCode: "IN",
+        landmark: hotelData.landmark || "",
+        directions: hotelData.directions || "",
+        formattedAddress: rawAddr || city,
+        location: location,
+      };
+    }
+
+    // Ensure formattedAddress is ready
+    if (!addressObj.formattedAddress) {
+      const parts = [
+        addressObj.doorNumber,
+        addressObj.buildingName,
+        addressObj.streetAddress,
+        addressObj.areaName,
+        addressObj.landmark,
+        addressObj.city,
+        addressObj.district,
+        addressObj.state,
+        addressObj.postalCode,
+        addressObj.country,
+      ].filter(Boolean);
+      addressObj.formattedAddress = parts.join(", ");
+    }
+
+    const cleanedPayload = {
+      ...hotelData,
+      address: addressObj,
+      city: addressObj.city || city,
+      location: addressObj.location || location,
+    };
+
     //CHECK EXISTING HOTEL
     let hotel = await Hotel.findOne({ vendorId: vendor._id });
 
     if (hotel) {
       // update existing
-      Object.assign(hotel, hotelData);
+      Object.assign(hotel, cleanedPayload);
       hotel.verificationStatus = "pending";
       await hotel.save();
     } else {
       hotel = await Hotel.create({
-        ...hotelData,
+        ...cleanedPayload,
         vendorId: vendor._id,
         verificationStatus: "pending",
         isActive: false,
@@ -142,12 +213,26 @@ exports.getAllHotels = async (query = {}, userId = null) => {
       );
     }
 
+    const cityRegex = { $regex: city.trim(), $options: "i" };
+    const locationMatch = {
+      $or: [
+        { "address.city": cityRegex },
+        { "address.areaName": cityRegex },
+        { "address.district": cityRegex },
+        { "address.streetAddress": cityRegex },
+        { "address.landmark": cityRegex },
+        { "address.formattedAddress": cityRegex },
+        { city: cityRegex },
+      ],
+    };
+
     if (startDate && endDate) {
       const basePipeline = [
         {
           $match: {
             isActive: true,
-            city: { $regex: city, $options: "i" },
+            verificationStatus: "verified",
+            ...locationMatch,
             ...(minRating && { rating: { $gte: Number(minRating) } }),
           },
         },
@@ -288,7 +373,8 @@ exports.getAllHotels = async (query = {}, userId = null) => {
           $group: {
             _id: "$_id",
             name: { $first: "$name" },
-            city: { $first: "$city" },
+            city: { $first: { $ifNull: ["$address.city", "$city"] } },
+            address: { $first: "$address" },
             rating: { $first: "$rating" },
             numReviews: { $first: "$numReviews" },
             isFeatured: { $first: "$isFeatured" },
@@ -349,7 +435,8 @@ exports.getAllHotels = async (query = {}, userId = null) => {
       {
         $match: {
           isActive: true,
-          city: { $regex: city, $options: "i" },
+          verificationStatus: "verified",
+          ...locationMatch,
           ...(minRating && { rating: { $gte: Number(minRating) } }),
         },
       },
@@ -431,7 +518,8 @@ exports.getAllHotels = async (query = {}, userId = null) => {
         $group: {
           _id: "$_id",
           name: { $first: "$name" },
-          city: { $first: "$city" },
+          city: { $first: { $ifNull: ["$address.city", "$city"] } },
+          address: { $first: "$address" },
           rating: { $first: "$rating" },
           numReviews: { $first: "$numReviews" },
           isFeatured: { $first: "$isFeatured" },
@@ -615,26 +703,37 @@ exports.getHomeHotels = async (query = {}, userId = null) => {
 
     const filter = {
       isActive: true,
-      isFeatured: true,
+      verificationStatus: "verified",
     };
 
-    if (city) filter.city = city;
+    if (city && city.trim()) {
+      const cityRegex = { $regex: city.trim(), $options: "i" };
+      filter.$or = [
+        { "address.city": cityRegex },
+        { "address.areaName": cityRegex },
+        { "address.district": cityRegex },
+        { "address.streetAddress": cityRegex },
+        { "address.landmark": cityRegex },
+        { "address.formattedAddress": cityRegex },
+        { city: cityRegex },
+      ];
+    }
 
     const hotels = await Hotel.find(filter)
-      .select("name city images")
-      .sort({ rank: 1, rating: -1 })
+      .select("name city address images rating numReviews isFeatured rank")
+      .sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 })
       .lean();
-    // .limit(Number(limit))
 
     const formattedHotels = hotels.map((hotel) => ({
       _id: hotel._id,
       name: hotel.name,
-      city: hotel.city,
+      city: hotel.address?.city || hotel.city,
+      address: hotel.address,
       rating: hotel.rating,
       numReviews: hotel.numReviews,
       image: hotel.images?.[0]?.url || null,
-
       rank: hotel?.rank || "C",
+      isFeatured: hotel.isFeatured || false,
     }));
 
     return formattedHotels;
@@ -648,6 +747,7 @@ exports.getHotelDetails = async (hotelId, userId = null) => {
   const hotel = await Hotel.findOne({
     _id: hotelId,
     isActive: true,
+    verificationStatus: "verified",
   }).lean();
 
   if (!hotel) throw new Error("Hotel not found");
@@ -993,40 +1093,130 @@ exports.getSuggestions = async (query) => {
     return [];
   }
 
+  const cleanQuery = query.trim();
+  const reg = { $regex: cleanQuery, $options: "i" };
+
   const results = await Hotel.find(
     {
-      $text: { $search: query },
       isActive: true,
+      verificationStatus: "verified",
+      $or: [
+        { name: reg },
+        { "address.city": reg },
+        { "address.areaName": reg },
+        { "address.district": reg },
+        { "address.streetAddress": reg },
+        { "address.landmark": reg },
+        { "address.formattedAddress": reg },
+        { "address.state": reg },
+        { city: reg },
+      ],
     },
     {
-      score: { $meta: "textScore" },
       name: 1,
       city: 1,
+      address: 1,
     },
   )
-    .sort({ score: { $meta: "textScore" } })
-    .limit(8)
+    .limit(30)
     .lean();
 
-  // Unique city suggestions
-  const uniqueCities = [...new Set(results.map((hotel) => hotel.city))].slice(
-    0,
-    3,
-  );
+  // Build unique location suggestions with counts
+  const locationMap = new Map();
 
-  const citySuggestions = uniqueCities.map((city) => ({
-    type: "city",
-    value: city,
-  }));
+  for (const hotel of results) {
+    const city = hotel.address?.city || hotel.city || "";
+    const area = hotel.address?.areaName || "";
+    const district = hotel.address?.district || "";
+    const state = hotel.address?.state || "";
+    const landmark = hotel.address?.landmark || "";
 
-  const hotelSuggestions = results.map((hotel) => ({
-    type: "hotel",
-    id: hotel._id,
-    name: hotel.name,
-    city: hotel.city,
-  }));
+    // Add city suggestion
+    if (city) {
+      const key = `city:${city.toLowerCase()}`;
+      if (!locationMap.has(key)) {
+        locationMap.set(key, {
+          type: "city",
+          value: city,
+          label: [city, state].filter(Boolean).join(", "),
+          state,
+          count: 0,
+        });
+      }
+      locationMap.get(key).count++;
+    }
 
-  return [...citySuggestions, ...hotelSuggestions];
+    // Add area/town suggestion (only if it matched the query)
+    if (area && reg.$regex && new RegExp(cleanQuery, "i").test(area)) {
+      const key = `town:${area.toLowerCase()}`;
+      if (!locationMap.has(key)) {
+        locationMap.set(key, {
+          type: "town",
+          value: area,
+          label: [area, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
+          city,
+          state,
+          count: 0,
+        });
+      }
+      locationMap.get(key).count++;
+    }
+
+    // Add district suggestion (only if it matched the query)
+    if (district && new RegExp(cleanQuery, "i").test(district)) {
+      const key = `district:${district.toLowerCase()}`;
+      if (!locationMap.has(key)) {
+        locationMap.set(key, {
+          type: "district",
+          value: district,
+          label: [district, state].filter(Boolean).join(", "),
+          state,
+          count: 0,
+        });
+      }
+      locationMap.get(key).count++;
+    }
+
+    // Add landmark suggestion (only if it matched the query)
+    if (landmark && new RegExp(cleanQuery, "i").test(landmark)) {
+      const key = `landmark:${landmark.toLowerCase()}`;
+      if (!locationMap.has(key)) {
+        locationMap.set(key, {
+          type: "landmark",
+          value: landmark,
+          label: [landmark, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
+          city,
+          state,
+          count: 0,
+        });
+      }
+      locationMap.get(key).count++;
+    }
+  }
+
+  // Sort: exact prefix matches first, then by count
+  const locationSuggestions = [...locationMap.values()]
+    .sort((a, b) => {
+      const aStarts = a.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
+      const bStarts = b.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return b.count - a.count;
+    })
+    .slice(0, 6);
+
+  // Hotel name suggestions
+  const hotelSuggestions = results
+    .filter((h) => new RegExp(cleanQuery, "i").test(h.name))
+    .slice(0, 3)
+    .map((hotel) => ({
+      type: "hotel",
+      id: hotel._id,
+      value: hotel.name,
+      label: hotel.address?.city || hotel.city || "",
+      city: hotel.address?.city || hotel.city,
+    }));
+
+  return [...locationSuggestions, ...hotelSuggestions];
 };
 
 exports.searchHotels = async (query = {}, userId = null) => {
@@ -1068,7 +1258,16 @@ exports.searchHotels = async (query = {}, userId = null) => {
     {
       $match: {
         isActive: true,
-        city: { $regex: destination, $options: "i" },
+        verificationStatus: "verified",
+        $or: [
+          { "address.city": { $regex: destination.trim(), $options: "i" } },
+          { "address.areaName": { $regex: destination.trim(), $options: "i" } },
+          { "address.district": { $regex: destination.trim(), $options: "i" } },
+          { "address.streetAddress": { $regex: destination.trim(), $options: "i" } },
+          { "address.landmark": { $regex: destination.trim(), $options: "i" } },
+          { "address.formattedAddress": { $regex: destination.trim(), $options: "i" } },
+          { city: { $regex: destination.trim(), $options: "i" } },
+        ],
       },
     },
 
@@ -1174,7 +1373,8 @@ exports.searchHotels = async (query = {}, userId = null) => {
       $group: {
         _id: "$_id",
         name: { $first: "$name" },
-        city: { $first: "$city" },
+        city: { $first: { $ifNull: ["$address.city", "$city"] } },
+        address: { $first: "$address" },
         rating: { $first: "$rating" },
         numReviews: { $first: "$numReviews" },
         isFeatured: { $first: "$isFeatured" },
@@ -1233,7 +1433,7 @@ exports.getRankedHotels = async (rank, page = 1, limit = 10) => {
     }
 
     const hotels = await Hotel.find(filter)
-      .select("name city images advertisementImage rating numReviews isFeatured")
+      .select("name city address images advertisementImage rating numReviews isFeatured")
       .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
       .skip(skip)
       .limit(limitNum)
@@ -1242,7 +1442,7 @@ exports.getRankedHotels = async (rank, page = 1, limit = 10) => {
     const items = hotels.map((hotel) => ({
       _id: hotel._id,
       name: hotel.name,
-      city: hotel.city,
+      city: hotel.address?.city || hotel.city,
       rating: hotel.rating,
       numReviews: hotel.numReviews,
       image: hotel.advertisementImage?.url || hotel.images?.[0]?.url || null,

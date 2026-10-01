@@ -29,6 +29,28 @@ router.get(
   propertyController.getPropertyListings,
 );
 
+// Deleted property archive / trash
+router.get(
+  "/deleted",
+  protect,
+  authorize("admin"),
+  propertyController.getDeletedProperties,
+);
+
+router.delete(
+  "/deleted/clean-all",
+  protect,
+  authorize("admin"),
+  propertyController.cleanAllDeletedProperties,
+);
+
+router.delete(
+  "/deleted/:id",
+  protect,
+  authorize("admin"),
+  propertyController.deleteDeletedPropertyRecord,
+);
+
 router.get(
   "/:vendorId",
   protect,
@@ -64,4 +86,29 @@ router.patch(
   propertyController.approveVendor,
 );
 
+// Block vendor / property
+router.patch(
+  "/:vendorId/block",
+  protect,
+  authorize("admin"),
+  propertyController.blockVendor,
+);
+
+// Unblock vendor / property
+router.patch(
+  "/:vendorId/unblock",
+  protect,
+  authorize("admin"),
+  propertyController.unblockVendor,
+);
+
+// Delete property / vendor
+router.delete(
+  "/:vendorId",
+  protect,
+  authorize("admin"),
+  propertyController.deleteProperty,
+);
+
 module.exports = router;
+

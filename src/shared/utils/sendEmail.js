@@ -127,7 +127,7 @@ const sendAdminVendorNotificationEmail = async (vendor, hotel = null) => {
           <h3>Hotel Info</h3>
           <p><b>Name:</b> ${hotel.name}</p>
           <p><b>City:</b> ${hotel.city}</p>
-          <p><b>Address:</b> ${hotel.address}</p>
+          <p><b>Address:</b> ${typeof hotel.address === 'object' && hotel.address !== null ? (hotel.address.formattedAddress || hotel.address.streetAddress || hotel.city || '') : (hotel.address || '')}</p>
         `
             : ""
         }

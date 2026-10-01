@@ -675,16 +675,28 @@ exports.getPropertySettings = async (userId) => {
       throw new Error("Property listing not found for this vendor");
     }
 
+    const addr = serviceData.address;
+    const addrString = typeof addr === "string" ? addr : (addr?.formattedAddress || addr?.streetAddress || "");
+
     return {
       serviceType: vendor.serviceType,
       propertyId: serviceData._id,
       name: serviceData.name,
       description: serviceData.description || "",
-      address: serviceData.address || "",
-      city: serviceData.city || serviceData.location?.city || "",
-      state: serviceData.location?.state || "",
-      country: serviceData.location?.country || "India",
-      coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+      address: addrString,
+      addressDetails: typeof addr === "object" ? addr : null,
+      city: addr?.city || serviceData.city || serviceData.location?.city || "",
+      areaName: addr?.areaName || "",
+      district: addr?.district || "",
+      state: addr?.state || serviceData.location?.state || "",
+      postalCode: addr?.postalCode || "",
+      country: addr?.country || serviceData.location?.country || "India",
+      landmark: addr?.landmark || "",
+      buildingName: addr?.buildingName || "",
+      doorNumber: addr?.doorNumber || "",
+      directions: addr?.directions || "",
+      formattedAddress: addr?.formattedAddress || addrString || "",
+      coordinates: serviceData.coordinates || serviceData.location?.coordinates || addr?.location?.coordinates || null,
       images: serviceData.images || [],
       amenities: serviceData.amenities || serviceData.features || [],
       locationHistory: serviceData.locationHistory || [],
@@ -717,65 +729,135 @@ exports.updatePropertySettings = async (userId, payload) => {
       throw new Error("Property listing not found for this vendor");
     }
 
-    const { description, images, amenities, features, address, city, state, country, coordinates, lat, lng } = payload;
+    const {
+      description,
+      images,
+      amenities,
+      features,
+      address,
+      city,
+      state,
+      country,
+      areaName,
+      district,
+      postalCode,
+      landmark,
+      buildingName,
+      doorNumber,
+      directions,
+      formattedAddress,
+      coordinates,
+      lat,
+      lng,
+    } = payload;
 
     // Check if location changed to record in locationHistory
-    const currentAddress = (serviceData.address || "").trim();
-    const currentCity = (serviceData.city || serviceData.location?.city || "").trim();
+    const currentAddrObj = typeof serviceData.address === "object" && serviceData.address !== null ? serviceData.address : null;
+    const currentAddress = (currentAddrObj?.formattedAddress || currentAddrObj?.streetAddress || serviceData.address || "").trim();
+    const currentCity = (currentAddrObj?.city || serviceData.city || serviceData.location?.city || "").trim();
     const newAddress = address !== undefined ? address.trim() : currentAddress;
     const newCity = city !== undefined ? city.trim() : currentCity;
 
-    const locationChanged = (address !== undefined && newAddress !== currentAddress) ||
-      (city !== undefined && newCity.toLowerCase() !== currentCity.toLowerCase());
+    const locationChanged =
+      (address !== undefined && newAddress !== currentAddress) ||
+      (city !== undefined && newCity.toLowerCase() !== currentCity.toLowerCase()) ||
+      areaName !== undefined ||
+      lat !== undefined ||
+      lng !== undefined;
 
     if (locationChanged) {
       if (!serviceData.locationHistory) {
         serviceData.locationHistory = [];
       }
       serviceData.locationHistory.unshift({
-        address: currentAddress,
+        address: currentAddrObj || currentAddress,
         city: currentCity,
-        state: serviceData.location?.state || "",
-        country: serviceData.location?.country || "India",
-        coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+        state: serviceData.location?.state || currentAddrObj?.state || "",
+        country: serviceData.location?.country || currentAddrObj?.country || "India",
+        coordinates: serviceData.coordinates || serviceData.location?.coordinates || currentAddrObj?.location?.coordinates || null,
         changedAt: new Date(),
       });
     }
 
-    // Update fields if provided
+    // Update basic fields if provided
     if (description !== undefined) serviceData.description = description.trim();
     if (images !== undefined) serviceData.images = images;
     if (amenities !== undefined) serviceData.amenities = amenities;
     if (features !== undefined) serviceData.features = features;
 
-    if (address !== undefined) serviceData.address = newAddress;
+    // Determine normalized coordinates
+    let resolvedLng = 72.8777;
+    let resolvedLat = 19.0760;
+    if (coordinates && Array.isArray(coordinates) && coordinates.length >= 2) {
+      resolvedLng = Number(coordinates[0]) || 72.8777;
+      resolvedLat = Number(coordinates[1]) || 19.0760;
+    } else if (lat !== undefined && lng !== undefined) {
+      resolvedLat = Number(lat) || 19.0760;
+      resolvedLng = Number(lng) || 72.8777;
+    } else if (serviceData.location?.coordinates?.length >= 2) {
+      resolvedLng = serviceData.location.coordinates[0];
+      resolvedLat = serviceData.location.coordinates[1];
+    } else if (serviceData.coordinates?.lat && serviceData.coordinates?.lng) {
+      resolvedLat = serviceData.coordinates.lat;
+      resolvedLng = serviceData.coordinates.lng;
+    }
+
+    // Build rich address object
+    const updatedAddrObj = {
+      buildingName: buildingName !== undefined ? buildingName : (currentAddrObj?.buildingName || ""),
+      doorNumber: doorNumber !== undefined ? doorNumber : (currentAddrObj?.doorNumber || ""),
+      streetAddress: address !== undefined ? address : (currentAddrObj?.streetAddress || currentAddress),
+      areaName: areaName !== undefined ? areaName : (currentAddrObj?.areaName || ""),
+      city: newCity || currentCity,
+      district: district !== undefined ? district : (currentAddrObj?.district || ""),
+      state: state !== undefined ? state : (currentAddrObj?.state || serviceData.location?.state || ""),
+      postalCode: postalCode !== undefined ? postalCode : (currentAddrObj?.postalCode || ""),
+      country: country !== undefined ? country : (currentAddrObj?.country || serviceData.location?.country || "India"),
+      countryCode: "IN",
+      landmark: landmark !== undefined ? landmark : (currentAddrObj?.landmark || ""),
+      directions: directions !== undefined ? directions : (currentAddrObj?.directions || ""),
+      formattedAddress: formattedAddress !== undefined ? formattedAddress : (address || currentAddress || newCity),
+      location: {
+        type: "Point",
+        coordinates: [resolvedLng, resolvedLat],
+      },
+    };
+
+    if (!updatedAddrObj.formattedAddress) {
+      const parts = [
+        updatedAddrObj.doorNumber,
+        updatedAddrObj.buildingName,
+        updatedAddrObj.streetAddress,
+        updatedAddrObj.areaName,
+        updatedAddrObj.landmark,
+        updatedAddrObj.city,
+        updatedAddrObj.district,
+        updatedAddrObj.state,
+        updatedAddrObj.postalCode,
+        updatedAddrObj.country,
+      ].filter(Boolean);
+      updatedAddrObj.formattedAddress = parts.join(", ");
+    }
+
+    serviceData.address = updatedAddrObj;
 
     // Handle hotel vs tour vs other model specifics for city/coordinates
     if (vendor.serviceType === "hotel") {
-      if (city !== undefined) serviceData.city = newCity;
-      if (coordinates && Array.isArray(coordinates)) {
-        serviceData.location = {
-          type: "Point",
-          coordinates: [Number(coordinates[0]) || 0, Number(coordinates[1]) || 0],
-        };
-      } else if (lat !== undefined && lng !== undefined) {
-        serviceData.location = {
-          type: "Point",
-          coordinates: [Number(lng) || 0, Number(lat) || 0],
-        };
-      }
+      serviceData.city = newCity;
+      serviceData.location = {
+        type: "Point",
+        coordinates: [resolvedLng, resolvedLat],
+      };
     } else {
       // Tour, Cab, Bike, Adventure models
       if (!serviceData.location) serviceData.location = {};
-      if (city !== undefined) serviceData.location.city = newCity;
+      serviceData.location.city = newCity;
       if (state !== undefined) serviceData.location.state = state.trim();
       if (country !== undefined) serviceData.location.country = country.trim();
-      if (lat !== undefined || lng !== undefined) {
-        serviceData.coordinates = {
-          lat: Number(lat) || serviceData.coordinates?.lat || null,
-          lng: Number(lng) || serviceData.coordinates?.lng || null,
-        };
-      }
+      serviceData.coordinates = {
+        lat: resolvedLat,
+        lng: resolvedLng,
+      };
     }
 
     await serviceData.save();
@@ -785,11 +867,15 @@ exports.updatePropertySettings = async (userId, payload) => {
       propertyId: serviceData._id,
       name: serviceData.name,
       description: serviceData.description,
-      address: serviceData.address,
-      city: serviceData.city || serviceData.location?.city || "",
-      state: serviceData.location?.state || "",
-      country: serviceData.location?.country || "India",
-      coordinates: serviceData.coordinates || serviceData.location?.coordinates || null,
+      address: updatedAddrObj.streetAddress || updatedAddrObj.formattedAddress,
+      addressDetails: updatedAddrObj,
+      city: newCity,
+      areaName: updatedAddrObj.areaName,
+      district: updatedAddrObj.district,
+      state: serviceData.location?.state || updatedAddrObj.state,
+      postalCode: updatedAddrObj.postalCode,
+      country: serviceData.location?.country || updatedAddrObj.country,
+      coordinates: serviceData.coordinates || serviceData.location?.coordinates || [resolvedLng, resolvedLat],
       images: serviceData.images,
       amenities: serviceData.amenities || serviceData.features || [],
       locationHistory: serviceData.locationHistory || [],

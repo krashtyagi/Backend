@@ -1,5 +1,49 @@
 const mongoose = require("mongoose");
 
+// Deep, powerful address sub-schema
+const addressSchema = new mongoose.Schema(
+  {
+    // 1. Street & Door Level Details
+    buildingName: { type: String, trim: true, default: "" },
+    doorNumber: { type: String, trim: true, default: "" },
+    streetAddress: { type: String, trim: true, default: "" },
+    areaName: { type: String, trim: true, index: true, default: "" }, // Town / locality / neighborhood
+
+    // 2. City & Administrative Hierarchy
+    city: { type: String, required: true, trim: true, index: true },
+    district: { type: String, trim: true, default: "" },
+    state: { type: String, trim: true, index: true, default: "" },
+    postalCode: { type: String, trim: true, index: true, default: "" },
+    country: { type: String, trim: true, default: "India", index: true },
+    countryCode: { type: String, uppercase: true, trim: true, maxlength: 2, default: "IN" },
+
+    // 3. Navigation & Local Context
+    landmark: { type: String, trim: true, default: "" },
+    directions: { type: String, trim: true, default: "" },
+
+    // 4. Pre-Formatted Address
+    formattedAddress: { type: String, trim: true, default: "" },
+
+    // 5. Native GeoJSON Location
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        default: [72.8777, 19.0760], // Default [lng, lat]
+      },
+    },
+
+    // 6. External Geocoding Provider References
+    placeId: { type: String, trim: true, default: "" },
+    timeZone: { type: String, trim: true, default: "" },
+  },
+  { _id: false }
+);
+
 const hotelSchema = new mongoose.Schema(
   {
     vendorId: {
@@ -13,22 +57,28 @@ const hotelSchema = new mongoose.Schema(
       type: String,
       required: true,
       index: true,
+      trim: true,
     },
     description: {
       type: String,
       required: true,
     },
 
+    // Embedded Powerful Address Schema
     address: {
-      type: String,
+      type: addressSchema,
       required: true,
     },
+
+    // Top-level city kept in sync for direct access & backward compatibility
     city: {
       type: String,
       required: true,
       index: true,
+      trim: true,
     },
 
+    // Top-level GeoJSON location kept in sync for 2dsphere indexing & queries
     location: {
       type: {
         type: String,
@@ -43,10 +93,13 @@ const hotelSchema = new mongoose.Schema(
 
     locationHistory: [
       {
-        address: { type: String, trim: true },
+        address: { type: mongoose.Schema.Types.Mixed },
         city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        country: { type: String, trim: true },
         coordinates: [Number],
         changedAt: { type: Date, default: Date.now },
+        changedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       },
     ],
 
@@ -104,6 +157,8 @@ const hotelSchema = new mongoose.Schema(
     rating: {
       type: Number,
       default: 0,
+      min: 0,
+      max: 5,
     },
     numReviews: {
       type: Number,
@@ -141,21 +196,103 @@ const hotelSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Pre-validation hook to synchronize address, city, and location bidirectionally
+hotelSchema.pre("validate", function (next) {
+  // If address is passed as a string (legacy data)
+  if (typeof this.address === "string") {
+    const rawAddress = this.address;
+    this.address = {
+      streetAddress: rawAddress,
+      city: this.city || "Default City",
+      formattedAddress: rawAddress,
+      location: this.location || { type: "Point", coordinates: [72.8777, 19.0760] },
+    };
+  } else if (!this.address && this.city) {
+    this.address = {
+      streetAddress: "",
+      city: this.city,
+      formattedAddress: this.city,
+      location: this.location || { type: "Point", coordinates: [72.8777, 19.0760] },
+    };
+  }
+
+  // Ensure city is synchronized
+  if (this.address?.city && !this.city) {
+    this.city = this.address.city;
+  }
+  if (this.city && this.address && !this.address.city) {
+    this.address.city = this.city;
+  }
+
+  // Ensure location coordinates are synchronized
+  if (
+    this.address?.location?.coordinates?.length &&
+    (!this.location || !this.location.coordinates?.length)
+  ) {
+    this.location = this.address.location;
+  }
+  if (
+    this.location?.coordinates?.length &&
+    this.address &&
+    (!this.address.location || !this.address.location.coordinates?.length)
+  ) {
+    this.address.location = this.location;
+  }
+
+  // Auto-compose formattedAddress if missing
+  if (this.address && !this.address.formattedAddress) {
+    const parts = [
+      this.address.doorNumber,
+      this.address.buildingName,
+      this.address.streetAddress,
+      this.address.areaName,
+      this.address.landmark,
+      this.address.city,
+      this.address.district,
+      this.address.state,
+      this.address.postalCode,
+      this.address.country,
+    ].filter(Boolean);
+    this.address.formattedAddress = parts.join(", ");
+  }
+
+  if (typeof next === "function") {
+    next();
+  }
+});
+
+// Indexes for ultra-fast queries & radius search
+hotelSchema.index({ "address.location": "2dsphere" });
 hotelSchema.index({ location: "2dsphere" });
+
+hotelSchema.index({ "address.city": 1, "address.state": 1, "address.country": 1 });
+hotelSchema.index({ city: 1 });
 
 hotelSchema.index(
   {
     name: "text",
     city: "text",
+    "address.city": "text",
+    "address.areaName": "text",
+    "address.district": "text",
+    "address.streetAddress": "text",
+    "address.landmark": "text",
+    "address.formattedAddress": "text",
     description: "text",
   },
   {
     weights: {
       name: 5,
-      city: 3,
+      "address.city": 4,
+      city: 4,
+      "address.areaName": 4,
+      "address.district": 3,
+      "address.streetAddress": 2,
+      "address.landmark": 2,
       description: 1,
     },
   },
 );
 
 module.exports = mongoose.model("Hotel", hotelSchema);
+module.exports.addressSchema = addressSchema;
