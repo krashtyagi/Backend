@@ -1,0 +1,365 @@
+import { Request, Response, NextFunction } from "express";
+import propertyService from "./property.service";
+import logger from "src/shared/utils/logger";
+
+export class PropertyController {
+  //all vendor property list
+  public async getAllProperties(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const result = await propertyService.getAllProperties(req.query);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      logger.error("Controller Error: getAllProperties", error);
+      next(error);
+    }
+  }
+
+  public async updateBusinessRank(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { rank, serviceType = "hotel" } = req.body;
+      const { id } = req.params;
+
+      if (!rank) {
+        res.status(400).json({
+          success: false,
+          message: "Rank is required",
+        });
+        return;
+      }
+
+      const updatedHotel = await propertyService.updateBusinessRank(
+        serviceType,
+        id,
+        rank,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Business rank updated successfully",
+        data: updatedHotel,
+      });
+    } catch (error) {
+      logger.error("Controller Error: updateBusinessRank", error);
+
+      next(error);
+    }
+  }
+
+  //vendor property detail
+  public async getPropertyDetail(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+
+      const data = await propertyService.getPropertyDetail(vendorId);
+
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      logger.error("Controller Error: getPropertyDetail", error);
+      next(error);
+    }
+  }
+
+  //mark issue
+  public async markIssue(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+      const { step, reason } = req.body;
+
+      const vendor = await propertyService.markIssue(
+        vendorId,
+        step,
+        reason,
+        (req as any).user._id,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Issue marked successfully",
+        data: {
+          rejectedSteps: vendor.rejectedSteps,
+          rejectionReasons: vendor.rejectionReasons,
+          status: vendor.status,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: markIssue", error);
+      next(error);
+    }
+  }
+
+  //verfiy the steps
+  public async verifySection(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+      const { step } = req.body;
+
+      const vendor = await propertyService.verifySection(
+        vendorId,
+        step,
+        (req as any).user._id,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Section verified successfully",
+        data: {
+          rejectedSteps: vendor.rejectedSteps,
+          rejectionReasons: vendor.rejectionReasons,
+          status: vendor.status,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: verifySection", error);
+      next(error);
+    }
+  }
+
+  //reject the steps
+  public async rejectVendor(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+
+      const vendor = await propertyService.rejectVendor(
+        vendorId,
+        req.body,
+        (req as any).user._id,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Vendor rejected successfully",
+        data: {
+          status: vendor.status,
+          rejectedSteps: vendor.rejectedSteps,
+          rejectionReasons: vendor.rejectionReasons,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: rejectVendor", error);
+      next(error);
+    }
+  }
+
+  //approve the vendor
+  public async approveVendor(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+
+      const vendor = await propertyService.approveVendor(
+        vendorId,
+        (req as any).user._id,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Vendor approved successfully",
+        data: {
+          status: vendor.status,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: approveVendor", error);
+      next(error);
+    }
+  }
+
+  //get property listings (rooms for hotel, packages for tour)
+  public async getPropertyListings(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+
+      const data = await propertyService.getPropertyListings(vendorId);
+
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      logger.error("Controller Error: getPropertyListings", error);
+      next(error);
+    }
+  }
+
+  //block vendor / property
+  public async blockVendor(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+      const { reason } = req.body || {};
+
+      const vendor = await propertyService.blockVendor(
+        vendorId,
+        (req as any).user._id,
+        reason,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Vendor blocked successfully",
+        data: {
+          status: vendor.status,
+          isBlocked: vendor.isBlocked,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: blockVendor", error);
+      next(error);
+    }
+  }
+
+  //unblock vendor / property
+  public async unblockVendor(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+
+      const vendor = await propertyService.unblockVendor(
+        vendorId,
+        (req as any).user._id,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Vendor unblocked successfully",
+        data: {
+          status: vendor.status,
+          isBlocked: vendor.isBlocked,
+        },
+      });
+    } catch (error) {
+      logger.error("Controller Error: unblockVendor", error);
+      next(error);
+    }
+  }
+
+  //delete property / vendor
+  public async deleteProperty(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { vendorId } = req.params;
+      const { reason } = req.body || {};
+
+      const result = await propertyService.deleteProperty(
+        vendorId,
+        (req as any).user?._id,
+        reason,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: result.message || "Property deleted successfully",
+      });
+    } catch (error) {
+      logger.error("Controller Error: deleteProperty", error);
+      next(error);
+    }
+  }
+
+  //get deleted properties list
+  public async getDeletedProperties(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const data = await propertyService.getDeletedProperties(req.query);
+
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      logger.error("Controller Error: getDeletedProperties", error);
+      next(error);
+    }
+  }
+
+  //clean all deleted records (trash empty)
+  public async cleanAllDeletedProperties(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const result = await propertyService.cleanAllDeletedProperties();
+
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: result.message,
+      });
+    } catch (error) {
+      logger.error("Controller Error: cleanAllDeletedProperties", error);
+      next(error);
+    }
+  }
+
+  //delete single deleted record permanently
+  public async deleteDeletedPropertyRecord(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const result = await propertyService.deleteDeletedPropertyRecord(id);
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      logger.error("Controller Error: deleteDeletedPropertyRecord", error);
+      next(error);
+    }
+  }
+}

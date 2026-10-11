@@ -1,0 +1,849 @@
+import mongoose from "mongoose";
+import TourService from "./tourService.model";
+import TourCompany from "../company/tour.model";
+import Tax from "../../admin/tax/tax.model";
+import Favorite from "../../favorites/favorite.model";
+
+//helper function to attach isFavorite flag to companies/services
+const attachFavoriteFlag = async (items: any[], userId: any, itemType: string) => {
+  if (!userId || items.length === 0) {
+    items.forEach((item: any) => (item.isFavorite = false));
+    return items;
+  }
+
+  const itemIds = items.map((i: any) => i.company?.companyId || i.companyId || i.serviceId || i._id);
+
+  const favorites = await Favorite.find({
+    user: userId,
+    itemType,
+    itemId: { $in: itemIds },
+  }).select("itemId");
+
+  const favoriteSet = new Set(favorites.map((f: any) => f.itemId.toString()));
+
+  items.forEach((item: any) => {
+    const id = item.company?.companyId || item.companyId || item.serviceId || item._id;
+    item.isFavorite = favoriteSet.has(id.toString());
+  });
+
+  return items;
+};
+
+const checkIsFavorite = async (itemId: any, userId: any, itemType: string) => {
+  if (!userId || !itemId) return false;
+  const fav = await Favorite.findOne({
+    user: userId,
+    itemType,
+    itemId,
+  }).select("_id");
+  return !!fav;
+};
+
+// Helper to build flexible regex for keys (matches "guided_tour", "guided tour", "Guided Tour")
+const buildFlexibleRegex = (term: any) => {
+  if (!term || typeof term !== "string") return null;
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = escaped.replace(/[_\s-]+/g, "[_\\s-]+");
+  return new RegExp(pattern, "i");
+};
+
+//user side
+export const getTours = async (query: any, userId: any = null) => {
+  try {
+    const {
+      search = "",
+      city = "",
+      minPrice,
+      maxPrice,
+      minRating,
+      score,
+      features,
+      tourType,
+      amenities,
+      adults,
+      children,
+      page = 1,
+      limit = 10,
+    } = query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const matchStage: any = {
+      isActive: true,
+    };
+
+    const totalGuests = (Number(adults) || 0) + (Number(children) || 0);
+    if (totalGuests > 0) {
+      matchStage.maxPeople = { $gte: totalGuests };
+    }
+
+    if (search && search.trim()) {
+      matchStage.$or = [
+        { title: { $regex: search.trim(), $options: "i" } },
+        { destinations: { $regex: search.trim(), $options: "i" } },
+        { description: { $regex: search.trim(), $options: "i" } },
+      ];
+    }
+
+    // Price filter on basePrice / discountPrice
+    const pMin = minPrice !== undefined && Number(minPrice) > 0 ? Number(minPrice) : null;
+    const pMax = maxPrice !== undefined && Number(maxPrice) > 0 ? Number(maxPrice) : null;
+
+    if (pMin !== null || pMax !== null) {
+      const priceCond: any = {};
+      if (pMin !== null) priceCond.$gte = pMin;
+      if (pMax !== null) priceCond.$lte = pMax;
+
+      const priceOr = [
+        { discountPrice: { $gt: 0, ...priceCond } },
+        {
+          $and: [
+            { $or: [{ discountPrice: 0 }, { discountPrice: null }, { discountPrice: { $exists: false } }] },
+            { basePrice: priceCond },
+          ],
+        },
+      ];
+
+      if (matchStage.$or) {
+        matchStage.$and = [{ $or: matchStage.$or }, { $or: priceOr }];
+        delete matchStage.$or;
+      } else {
+        matchStage.$or = priceOr;
+      }
+    }
+
+    // Features / Tour Types Filter
+    const featureTerms = [];
+    if (features) {
+      const arr = Array.isArray(features) ? features : [features];
+      featureTerms.push(...arr);
+    }
+    if (tourType) {
+      const arr = Array.isArray(tourType) ? tourType : [tourType];
+      featureTerms.push(...arr);
+    }
+
+    if (featureTerms.length > 0) {
+      const regexes = featureTerms.map(buildFlexibleRegex).filter(Boolean);
+      const featureConditions = [
+        { features: { $in: regexes } },
+        { tourType: { $in: regexes } },
+      ];
+      if (matchStage.$and) {
+        matchStage.$and.push({ $or: featureConditions });
+      } else if (matchStage.$or) {
+        matchStage.$and = [{ $or: matchStage.$or }, { $or: featureConditions }];
+        delete matchStage.$or;
+      } else {
+        matchStage.$or = featureConditions;
+      }
+    }
+
+    // Amenities Filter
+    if (amenities) {
+      const amenityTerms = Array.isArray(amenities) ? amenities : [amenities];
+      if (amenityTerms.length > 0) {
+        const regexes = amenityTerms.map(buildFlexibleRegex).filter(Boolean);
+        matchStage.amenities = { $in: regexes };
+      }
+    }
+
+    // Company match criteria
+    const companyMatch: any = {
+      "company.isActive": true,
+      "company.verificationStatus": "verified",
+    };
+
+    if (city && city.trim()) {
+      const cityRegex = { $regex: city.trim(), $options: "i" };
+      companyMatch.$or = [
+        { "company.location.city": cityRegex },
+        { "company.address.city": cityRegex },
+        { "company.address.areaName": cityRegex },
+        { "company.address.district": cityRegex },
+        { destinations: cityRegex },
+      ];
+    }
+
+    const effectiveMinRating = minRating !== undefined ? Number(minRating) : (score !== undefined ? Number(score) : null);
+    if (effectiveMinRating !== null && !isNaN(effectiveMinRating) && effectiveMinRating > 0) {
+      companyMatch["company.rating.average"] = { $gte: effectiveMinRating };
+    }
+
+    // Pipeline with count facet for accurate pagination
+    const pipeline: any[] = [
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: "tourcompanies",
+          localField: "tour",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      { $unwind: "$company" },
+      { $match: companyMatch },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            {
+              $project: {
+                _id: 1,
+                title: 1,
+                destinations: 1,
+                basePrice: 1,
+                discountPrice: 1,
+                images: 1,
+                duration: 1,
+                features: 1,
+                tourType: 1,
+                amenities: 1,
+                "company._id": 1,
+                "company.name": 1,
+                "company.rating": 1,
+                "company.location": 1,
+              },
+            },
+            { $sort: { basePrice: 1 } },
+            { $skip: Number(skip) },
+            { $limit: Number(limit) },
+          ],
+        },
+      },
+    ];
+
+    const results: any = await TourService.aggregate(pipeline);
+    const total = results[0]?.metadata[0]?.total || 0;
+    const tours = results[0]?.data || [];
+
+    const taxDoc = await Tax.findOne({ isActive: true }).lean();
+    const taxPercentage = taxDoc?.taxPercentage || 0;
+
+    const formattedTours = tours.map((tour: any) => {
+      const effectivePrice =
+        tour.discountPrice > 0 ? tour.discountPrice : tour.basePrice;
+
+      const totalTax = Number(
+        ((effectivePrice * taxPercentage) / 100).toFixed(2),
+      );
+
+      const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
+
+      return {
+        serviceId: tour._id,
+        serviceType: "tour",
+
+        title: tour.title,
+        destinations: tour.destinations || [],
+        duration: tour.duration ? `${tour.duration.days}D/${tour.duration.nights}N` : "1D/0N",
+
+        price: effectivePrice,
+        totalPrice: effectivePrice,
+        totalTax,
+        totalPriceWithTax,
+        taxPercentage,
+
+        thumbnail: tour.images?.[0] || null,
+        thumbnails: tour.images || [],
+
+        features: tour.features || [],
+        tourType: tour.tourType || [],
+        amenities: tour.amenities || [],
+
+        company: {
+          companyId: tour.company._id,
+          serviceType: "tour",
+          name: tour.company.name,
+          city: tour.company.location?.city,
+          rating: tour.company.rating?.average || 0,
+        },
+      };
+    });
+
+    const updatedTours = await attachFavoriteFlag(formattedTours, userId, "tour");
+
+    return {
+      tours: updatedTours,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        count: updatedTours.length,
+        total,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getCompanyDetails = async (id: any, userId: any = null) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid company id");
+    }
+
+    const company = await TourCompany.findOne({
+      _id: id,
+      isActive: true,
+      verificationStatus: "verified",
+    })
+      .select("name location description images rating features")
+      .lean();
+
+    if (!company) {
+      throw new Error("Tour company not found");
+    }
+
+    const services = await TourService.find({
+      tour: id,
+      isActive: true,
+    })
+      .select("title basePrice discountPrice duration images features")
+      .sort({ basePrice: 1 })
+      .lean();
+
+    const taxDoc = await Tax.findOne({ isActive: true }).lean();
+    const taxPercentage = taxDoc?.taxPercentage || 0;
+
+    const formattedServices = services.map((service: any) => {
+      const effectivePrice =
+        (service.discountPrice && service.discountPrice > 0) ? service.discountPrice : (service.basePrice || 0);
+
+      const totalTax = Number(
+        ((effectivePrice * taxPercentage) / 100).toFixed(2),
+      );
+
+      const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
+
+      return {
+        serviceId: service._id,
+        serviceType: "tour",
+
+        title: service.title,
+        duration: `${service.duration.days}D/${service.duration.nights}N`,
+
+        price: effectivePrice,
+        totalPrice: effectivePrice,
+        totalTax,
+        totalPriceWithTax,
+        taxPercentage,
+
+        thumbnail: service.images?.[0] || null,
+        thumbnails: service.images || [],
+
+        features: service.features || [],
+      };
+    });
+
+    const isFavorite = await checkIsFavorite(company._id, userId, "tour");
+
+    const formattedCompany = {
+      companyId: company._id,
+      serviceType: "tour",
+      isFavorite,
+      name: company.name,
+      description: company.description,
+      city: company.location?.city,
+      state: company.location?.state,
+      rating: company.rating?.average || 0,
+      reviews: company.rating?.count || 0,
+      images: company.images || [],
+      features: company.features || [],
+    };
+
+    return {
+      company: formattedCompany,
+      services: formattedServices,
+      isFavorite,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTourServiceDetails = async (id: any, userId: any = null) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid service id");
+    }
+
+    //  SERVICE FETCH
+    const service = await TourService.findOne({
+      _id: id,
+      isActive: true,
+    }).lean();
+
+    if (!service) {
+      throw new Error("Tour service not found");
+    }
+
+    //  COMPANY FETCH
+    const company = await TourCompany.findOne({
+      _id: service.tour,
+      isActive: true,
+      verificationStatus: "verified",
+    })
+      .select("name location rating images description")
+      .lean();
+
+    if (!company) {
+      throw new Error("Tour company not found");
+    }
+
+    const taxDoc = await Tax.findOne({ isActive: true }).lean();
+    const taxPercentage = taxDoc?.taxPercentage || 0;
+
+    //PRICE CALCULATION
+    const effectivePrice =
+      (service.discountPrice && service.discountPrice > 0) ? service.discountPrice : (service.basePrice || 0);
+
+    const totalTax = Number(
+      ((effectivePrice * taxPercentage) / 100).toFixed(2),
+    );
+
+    const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
+
+    const isFavorite = await checkIsFavorite(company?._id, userId, "tour");
+
+    const formattedService = {
+      serviceId: service._id,
+      serviceType: "tour",
+      isFavorite,
+
+      title: service.title,
+      description: service.description,
+      destinations: service.destinations,
+
+      duration: `${service.duration.days}D/${service.duration.nights}N`,
+
+      price: effectivePrice,
+      totalPrice: effectivePrice,
+      totalTax,
+      totalPriceWithTax,
+      taxPercentage,
+
+      images: service.images || [],
+      features: service.features || [],
+      tourType: service.tourType || [],
+      amenities: service.amenities || [],
+
+      maxPeople: service.maxPeople,
+
+      meta: service.meta || {},
+
+      itinerary: service.itinerary || [],
+    };
+
+    const formattedCompany = {
+      companyId: company?._id,
+      serviceType: "tour",
+      isFavorite,
+      name: company?.name,
+      city: company?.location?.city,
+      rating: company?.rating?.average || 0,
+      images: company?.images || [],
+      description: company?.description,
+    };
+
+    return {
+      company: formattedCompany,
+      service: formattedService,
+      isFavorite,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+//vendor side
+export const createTourService = async (data: any, vendorId: any) => {
+  try {
+    const {
+      tourId,
+      title,
+      destinations = [],
+      duration,
+      basePrice,
+      discountPrice = 0,
+      description,
+      features = [],
+      tourType = [],
+      amenities = [],
+      images = [],
+      itinerary = [],
+      meta = {},
+      maxPeople = 10,
+    } = data;
+
+    let targetTourId = tourId;
+    if (!targetTourId || !mongoose.Types.ObjectId.isValid(targetTourId)) {
+      const company = await TourCompany.findOne({
+        vendorId: vendorId,
+        isActive: true,
+      });
+      if (company) {
+        targetTourId = company._id;
+      }
+    }
+
+    if (!targetTourId || !mongoose.Types.ObjectId.isValid(targetTourId)) {
+      throw new Error("Valid tourId is required");
+    }
+
+    if (!title) throw new Error("Title is required");
+
+    if (!duration?.days || !duration?.nights) {
+      throw new Error("Duration (days & nights) is required");
+    }
+
+    if (!basePrice || basePrice < 0) {
+      throw new Error("Valid base price is required");
+    }
+
+    if (discountPrice > basePrice) {
+      throw new Error("Discount cannot exceed base price");
+    }
+
+    const tourCompany = await TourCompany.findOne({
+      _id: targetTourId,
+      vendorId: vendorId,
+      isActive: true,
+    });
+
+    if (!tourCompany) {
+      throw new Error("Tour company not found or unauthorized");
+    }
+
+    if (!Array.isArray(itinerary) || itinerary.length === 0) {
+      throw new Error("Itinerary is required");
+    }
+
+    if (itinerary.length !== duration.days) {
+      throw new Error("Itinerary days must match duration days");
+    }
+
+    itinerary.forEach((day, index) => {
+      if (!day.day || day.day !== index + 1) {
+        throw new Error("Invalid itinerary day sequence");
+      }
+    });
+
+    const service = await TourService.create({
+      tour: tourId,
+
+      title: title.trim(),
+      destinations,
+
+      duration,
+
+      basePrice,
+      discountPrice,
+
+      description: description?.trim() || "",
+      features,
+      tourType,
+      amenities,
+      images,
+
+      itinerary,
+      meta,
+      maxPeople,
+
+      isActive: true,
+    });
+
+    return service;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getVendorTourServices = async (query: any = {}, vendorId: any) => {
+  try {
+    const { tourId, search, page = 1, limit = 10 }: any = query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const companies = await TourCompany.find({
+      vendorId,
+    })
+      .select("_id")
+      .lean();
+
+    const tourIds = companies.map((c) => c._id);
+
+    const filter: any = {
+      tour: { $in: tourIds },
+    };
+ 
+    if (tourId) {
+      filter.tour = tourId;
+    }
+
+    if (search) {
+      filter.$or = [
+        {
+          title: { $regex: search, $options: "i" },
+        },
+        {
+          description: { $regex: search, $options: "i" },
+        },
+      ];
+    }
+
+    const services = await TourService.find(filter)
+      .populate("tour", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    const total = await TourService.countDocuments(filter);
+
+    const formatted = services.map((s: any) => ({
+      id: s._id,
+
+      title: s.title,
+
+      company: (s.tour as any)?.name || null,
+
+      destinations: s.destinations,
+      images: s.images,
+
+      duration: `${s.duration.days}D / ${s.duration.nights}N`,
+
+      pricing: {
+        basePrice: s.basePrice,
+        discountPrice: s.discountPrice,
+      },
+
+      isActive: s.isActive,
+    }));
+
+    return {
+      count: formatted.length,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+      data: formatted,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getVendorTourServiceById = async (serviceId: any, vendorId: any) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+      throw new Error("Invalid service id");
+    }
+
+    const service: any = await TourService.findById(serviceId)
+      .populate("tour", "name vendorId")
+      .lean();
+
+    if (!service) {
+      throw new Error("Tour service not found");
+    }
+
+    if (service.tour?.vendorId?.toString() !== vendorId.toString()) {
+      throw new Error("Unauthorized access");
+    }
+
+    const formatted = {
+      id: service._id,
+
+      company: {
+        id: service.tour?._id,
+        name: service.tour?.name,
+      },
+
+      title: service.title,
+
+      destinations: service.destinations || [],
+
+      duration: service.duration,
+
+      pricing: {
+        basePrice: service.basePrice,
+        discountPrice: service.discountPrice,
+      },
+
+      description: service.description || "",
+
+      features: service.features || [],
+      tourType: service.tourType || [],
+      amenities: service.amenities || [],
+
+      images: service.images || [],
+
+      itinerary: service.itinerary || [],
+
+      meta: service.meta || {},
+
+      maxPeople: service.maxPeople,
+
+      isActive: service.isActive,
+
+      createdAt: service.createdAt,
+      updatedAt: service.updatedAt,
+    };
+
+    return formatted;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateVendorTourService = async (serviceId: any, vendorId: any, data: any) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+      throw new Error("Invalid service id");
+    }
+
+    const service: any = await TourService.findById(serviceId).populate(
+      "tour",
+      "vendorId",
+    );
+
+    if (!service) {
+      throw new Error("Tour service not found");
+    }
+
+    if (service.tour?.vendorId?.toString() !== vendorId.toString()) {
+      throw new Error("Unauthorized access");
+    }
+
+    if (data.basePrice !== undefined && data.basePrice < 0) {
+      throw new Error("Invalid base price");
+    }
+
+    if (
+      data.discountPrice !== undefined &&
+      data.basePrice !== undefined &&
+      data.discountPrice > data.basePrice
+    ) {
+      throw new Error("Discount cannot exceed base price");
+    }
+
+    //ITINERARY + DURATION VALIDATION
+    if (data.itinerary || data.duration) {
+      const finalDays = data.duration?.days || service.duration?.days;
+      const itinerary = data.itinerary || service.itinerary;
+
+      if (itinerary.length !== finalDays) {
+        throw new Error("Itinerary days must match duration days");
+      }
+
+      itinerary.forEach((day: any, index: number) => {
+        if (!day.day || day.day !== index + 1) {
+          throw new Error("Invalid itinerary sequence");
+        }
+      });
+
+      service.itinerary = itinerary;
+      service.duration = data.duration || service.duration;
+    }
+
+    const allowedFields = [
+      "title",
+      "destinations",
+      "basePrice",
+      "discountPrice",
+      "description",
+      "features",
+      "tourType",
+      "amenities",
+      "images",
+      "meta",
+      "maxPeople",
+      "isActive",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (data[field] !== undefined) {
+        service[field] =
+          typeof data[field] === "string" ? data[field].trim() : data[field];
+      }
+    });
+
+    await service.save();
+
+    return service;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteVendorTourService = async (serviceId: any, vendorId: any) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+      throw new Error("Invalid service id");
+    }
+
+    const service: any = await TourService.findById(serviceId).populate(
+      "tour",
+      "vendorId",
+    );
+
+    if (!service) {
+      throw new Error("Tour service not found");
+    }
+
+    if (service.tour?.vendorId?.toString() !== vendorId.toString()) {
+      throw new Error("Unauthorized access");
+    }
+
+    // SOFT DELETE
+    service.isActive = false;
+    await service.save();
+
+    // Hard delete
+    // await TourService.findByIdAndDelete(serviceId);
+
+    return;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export class TourServiceService {
+  async getTours(query: any, userId: any = null) {
+    return getTours(query, userId);
+  }
+
+  async getCompanyDetails(id: any, userId: any = null) {
+    return getCompanyDetails(id, userId);
+  }
+
+  async getTourServiceDetails(id: any, userId: any = null) {
+    return getTourServiceDetails(id, userId);
+  }
+
+  async createTourService(data: any, vendorId: any) {
+    return createTourService(data, vendorId);
+  }
+
+  async getVendorTourServices(query: any = {}, vendorId: any) {
+    return getVendorTourServices(query, vendorId);
+  }
+
+  async getVendorTourServiceById(serviceId: any, vendorId: any) {
+    return getVendorTourServiceById(serviceId, vendorId);
+  }
+
+  async updateVendorTourService(serviceId: any, vendorId: any, data: any) {
+    return updateVendorTourService(serviceId, vendorId, data);
+  }
+
+  async deleteVendorTourService(serviceId: any, vendorId: any) {
+    return deleteVendorTourService(serviceId, vendorId);
+  }
+}
+
+export const tourServiceService = new TourServiceService();
+
+export default tourServiceService;
+
+

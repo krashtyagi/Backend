@@ -1,0 +1,385 @@
+src/modules/admin/account-deactivate/account.service.ts(122,41): error TS2769: No overload matches this call.
+src/modules/admin/account-deactivate/account.service.ts(179,26): error TS2339: Property 'updateMany' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(32,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(33,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(36,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(37,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(98,35): error TS2339: Property 'paymentStatus' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(99,44): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(102,37): error TS2339: Property 'paymentStatus' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(104,20): error TS2339: Property 'serviceType' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(105,46): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(106,50): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(107,51): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/booking/booking.service.ts(111,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(162,9): error TS2353: Object literal may only specify known properties, and '$lookup' does not exist in type '{ $match: {}; $sort?: undefined; } | { $match?: undefined; $sort: { createdAt: number; }; }'.
+src/modules/admin/booking/booking.service.ts(244,9): error TS2353: Object literal may only specify known properties, and '$lookup' does not exist in type '{ $sort?: undefined; $match: {}; } | { $match?: undefined; $sort: { createdAt: number; }; }'.
+src/modules/admin/booking/booking.service.ts(296,37): error TS2353: Object literal may only specify known properties, and '$limit' does not exist in type '{ $match: {}; $sort?: undefined; } | { $match?: undefined; $sort: { createdAt: number; }; }'.
+src/modules/admin/booking/booking.service.ts(299,39): error TS2353: Object literal may only specify known properties, and '$limit' does not exist in type '{ $sort?: undefined; $match: {}; } | { $match?: undefined; $sort: { createdAt: number; }; }'.
+src/modules/admin/booking/booking.service.ts(304,29): error TS2769: No overload matches this call.
+src/modules/admin/booking/booking.service.ts(307,26): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/booking/booking.service.ts(520,49): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(46,56): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(85,22): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(114,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(179,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(280,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(346,54): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(488,50): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/dashboard/dashboard.service.ts(546,23): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/dashboard/dashboard.service.ts(546,47): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(28,18): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/payment/payment.service.ts(32,18): error TS2339: Property 'paymentMethod' does not exist on type '{}'.
+src/modules/admin/payment/payment.service.ts(409,53): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/payment.model")'.
+src/modules/admin/payment/payment.service.ts(420,32): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(420,56): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(819,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/payment.model")'.
+src/modules/admin/payment/payment.service.ts(1033,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/payment.model")'.
+src/modules/admin/payment/payment.service.ts(1237,25): error TS2769: No overload matches this call.
+src/modules/admin/payment/payment.service.ts(1239,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/payment.model")'.
+src/modules/admin/payment/payment.service.ts(1761,7): error TS2304: Cannot find name 'GenericBooking'.
+src/modules/admin/payment/payment.service.ts(1765,17): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1765,41): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1810,38): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/payment.model")'.
+src/modules/admin/payment/payment.service.ts(1820,23): error TS2304: Cannot find name 'GenericBooking'.
+src/modules/admin/payment/payment.service.ts(1850,10): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1850,38): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1854,9): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1854,15): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/payment/payment.service.ts(1889,22): error TS2339: Property 'gatewayPaymentId' does not exist on type 'Document<unknown, {}, IPayment, {}, DefaultSchemaOptions> & IPayment & Required<{ _id: ObjectId; }> & { ...; } & { ...; }'.
+src/modules/admin/payment/payment.service.ts(1898,21): error TS2339: Property 'gatewayPaymentId' does not exist on type 'Document<unknown, {}, IPayment, {}, DefaultSchemaOptions> & IPayment & Required<{ _id: ObjectId; }> & { ...; } & { ...; }'.
+src/modules/admin/payment/payment.service.ts(1901,24): error TS2304: Cannot find name 'razorpay'.
+src/modules/admin/payment/payment.service.ts(1914,17): error TS2304: Cannot find name 'Availability'.
+src/modules/admin/promotion/promotion.service.ts(33,27): error TS2339: Property 'userId' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(38,28): error TS2339: Property 'propertyId' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(39,29): error TS2339: Property 'businessName' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(40,25): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(40,47): error TS2339: Property 'state' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(40,100): error TS2339: Property 'businessAddress' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(41,29): error TS2339: Property 'businessPhone' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(42,23): error TS2339: Property 'businessEmail' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(50,26): error TS2339: Property '_id' does not exist on type '{}'.
+src/modules/admin/promotion/promotion.service.ts(82,26): error TS2349: This expression is not callable.
+src/modules/admin/promotion/promotion.service.ts(165,26): error TS2349: This expression is not callable.
+src/modules/admin/promotion/promotion.service.ts(213,26): error TS2349: This expression is not callable.
+src/modules/admin/property/property.service.ts(41,20): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(43,20): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(48,18): error TS2339: Property 'serviceType' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(268,43): error TS2769: No overload matches this call.
+src/modules/admin/property/property.service.ts(490,16): error TS2339: Property 'toObject' does not exist on type 'IVendorDoc'.
+src/modules/admin/property/property.service.ts(680,12): error TS2339: Property 'reviewedBy' does not exist on type 'Document<unknown, {}, IVendor, {}, DefaultSchemaOptions> & IVendor & Required<{ _id: ObjectId; }> & { __v: number; } & { ...; }'.
+src/modules/admin/property/property.service.ts(682,12): error TS2339: Property 'reviewedAt' does not exist on type 'Document<unknown, {}, IVendor, {}, DefaultSchemaOptions> & IVendor & Required<{ _id: ObjectId; }> & { __v: number; } & { ...; }'.
+src/modules/admin/property/property.service.ts(720,18): error TS2339: Property 'toObject' does not exist on type 'IVendorDoc'.
+src/modules/admin/property/property.service.ts(743,46): error TS2349: This expression is not callable.
+src/modules/admin/property/property.service.ts(770,12): error TS2339: Property 'reviewedAt' does not exist on type 'Document<unknown, {}, IVendor, {}, DefaultSchemaOptions> & IVendor & Required<{ _id: ObjectId; }> & { __v: number; } & { ...; }'.
+src/modules/admin/property/property.service.ts(806,12): error TS2339: Property 'reviewedAt' does not exist on type 'Document<unknown, {}, IVendor, {}, DefaultSchemaOptions> & IVendor & Required<{ _id: ObjectId; }> & { __v: number; } & { ...; }'.
+src/modules/admin/property/property.service.ts(811,44): error TS2349: This expression is not callable.
+src/modules/admin/property/property.service.ts(863,42): error TS2349: This expression is not callable.
+src/modules/admin/property/property.service.ts(903,42): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/admin/property/property.service.ts(983,29): error TS2339: Property 'updateMany' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/admin/property/property.service.ts(1064,29): error TS2339: Property 'updateMany' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/admin/property/property.service.ts(1137,29): error TS2339: Property 'deleteMany' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/admin/property/property.service.ts(1206,13): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(1206,23): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(1206,35): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(1206,43): error TS2339: Property 'serviceType' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(1214,14): error TS2339: Property 'serviceType' does not exist on type '{}'.
+src/modules/admin/property/property.service.ts(1219,14): error TS2339: Property '$or' does not exist on type '{}'.
+src/modules/admin/review/review.service.ts(101,14): error TS2339: Property 'companyType' does not exist on type '{}'.
+src/modules/admin/review/review.service.ts(105,14): error TS2339: Property 'rating' does not exist on type '{}'.
+src/modules/admin/review/review.service.ts(109,14): error TS2339: Property 'isFlagged' does not exist on type '{}'.
+src/modules/admin/review/review.service.ts(120,14): error TS2339: Property '$or' does not exist on type '{}'.
+src/modules/admin/review/review.service.ts(141,45): error TS2339: Property 'businessName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(143,44): error TS2339: Property 'firstName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(144,26): error TS2339: Property 'lastName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(163,37): error TS2339: Property 'firstName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(164,26): error TS2339: Property 'lastName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(171,38): error TS2339: Property 'businessName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(224,35): error TS2339: Property 'firstName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(226,34): error TS2339: Property 'lastName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(228,31): error TS2339: Property 'email' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(230,37): error TS2339: Property 'phoneNumber' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(232,32): error TS2339: Property 'avatar' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(246,40): error TS2339: Property 'businessName' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(248,41): error TS2339: Property 'businessEmail' does not exist on type 'ObjectId'.
+src/modules/admin/review/review.service.ts(250,41): error TS2339: Property 'businessPhone' does not exist on type 'ObjectId'.
+src/modules/admin/support/support.service.ts(14,18): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/admin/support/support.service.ts(87,44): error TS2769: No overload matches this call.
+src/modules/admin/support/support.service.ts(125,33): error TS2339: Property 'firstName' does not exist on type 'ObjectId'.
+src/modules/admin/support/support.service.ts(126,26): error TS2339: Property 'lastName' does not exist on type 'ObjectId'.
+src/modules/admin/user/user.service.ts(31,18): error TS2339: Property 'isActive' does not exist on type '{ role: string; }'.
+src/modules/admin/user/user.service.ts(35,18): error TS2339: Property 'isActive' does not exist on type '{ role: string; }'.
+src/modules/admin/user/user.service.ts(187,41): error TS2769: No overload matches this call.
+src/modules/admin/user/user.service.ts(338,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/admin/user/user.service.ts(343,17): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/user/user.service.ts(343,41): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/admin/user/user.service.ts(774,22): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/adventure/category/adventure.service.ts(45,13): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/adventure/category/adventure.service.ts(108,13): error TS2339: Property 'category' does not exist on type '{}'.
+src/modules/adventure/category/adventure.service.ts(108,23): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/adventure/service/service.service.ts(77,34): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(79,38): error TS2339: Property 'category' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(81,34): error TS2339: Property 'location' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(83,35): error TS2339: Property 'images' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(162,33): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(163,37): error TS2339: Property 'category' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(205,25): error TS2339: Property 'vendorId' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(215,33): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/adventure/service/service.service.ts(216,37): error TS2339: Property 'category' does not exist on type 'ObjectId'.
+src/modules/auth/auth.service.ts(73,7): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(100,29): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(173,3): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(200,27): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(235,27): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(306,7): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(307,7): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(371,32): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(377,29): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(458,45): error TS2554: Expected 2 arguments, but got 1.
+src/modules/auth/auth.service.ts(463,5): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(486,7): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(504,7): error TS2365: Operator '>' cannot be applied to types 'number' and 'Date'.
+src/modules/auth/auth.service.ts(579,5): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/auth/auth.service.ts(607,7): error TS2365: Operator '<' cannot be applied to types 'Date' and 'number'.
+src/modules/auth/auth.service.ts(645,3): error TS2322: Type 'number' is not assignable to type 'Date'.
+src/modules/availability/availability.service.ts(282,18): error TS2339: Property 'blockedRooms' does not exist on type '{}'.
+src/modules/availability/availability.service.ts(286,18): error TS2339: Property 'priceOverride' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(54,37): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(171,40): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(257,39): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(356,22): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bike/service/bikeService.service.ts(356,28): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bike/service/bikeService.service.ts(359,39): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(450,39): error TS2339: Property 'create' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(480,13): error TS2339: Property 'bikeId' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(480,21): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(480,29): error TS2339: Property 'bikeType' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(480,39): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(480,49): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/bike/service/bikeService.service.ts(499,14): error TS2339: Property 'bikeType' does not exist on type '{ bike: { $in: ObjectId[]; }; }'.
+src/modules/bike/service/bikeService.service.ts(503,14): error TS2339: Property '$or' does not exist on type '{ bike: { $in: ObjectId[]; }; }'.
+src/modules/bike/service/bikeService.service.ts(509,40): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(516,37): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(557,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(619,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bike/service/bikeService.service.ts(681,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/bookings/booking.service.ts(94,21): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(94,31): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(300,22): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/bookings/booking.service.ts(366,7): error TS2769: No overload matches this call.
+src/modules/bookings/booking.service.ts(370,7): error TS2769: No overload matches this call.
+src/modules/bookings/booking.service.ts(374,7): error TS2769: No overload matches this call.
+src/modules/bookings/booking.service.ts(378,7): error TS2769: No overload matches this call.
+src/modules/bookings/booking.service.ts(444,17): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(444,41): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(530,39): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(531,42): error TS2339: Property 'address' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(532,46): error TS2339: Property 'location' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(533,44): error TS2339: Property 'images' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(537,42): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(538,47): error TS2339: Property 'amenities' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(539,45): error TS2339: Property 'bedType' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(540,49): error TS2339: Property 'roomSizeSqm' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(563,42): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/bookings/booking.service.ts(895,8): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(895,36): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(902,7): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(902,13): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(951,9): error TS2367: This comparison appears to be unintentional because the types '"confirmed"' and '"cancellation_requested"' have no overlap.
+src/modules/bookings/booking.service.ts(967,8): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(967,36): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(971,7): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(971,13): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/bookings/booking.service.ts(1000,13): error TS2339: Property 'policyApplied' does not exist on type 'Document<unknown, {}, IBooking, {}, DefaultSchemaOptions> & IBooking & Required<{ _id: ObjectId; }> & { ...; } & { ...; }'.
+src/modules/bookings/booking.service.ts(1091,12): error TS2339: Property 'status' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1095,12): error TS2339: Property 'checkIn' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1102,12): error TS2339: Property '$or' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1125,33): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1164,12): error TS2339: Property 'paymentStatus' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1168,12): error TS2339: Property 'createdAt' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1175,12): error TS2339: Property '$or' does not exist on type '{ hotelId: { $in: ObjectId[]; }; }'.
+src/modules/bookings/booking.service.ts(1208,28): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1363,16): error TS2367: This comparison appears to be unintentional because the types '"cancellation_requested" | "cancelled" | "checked_in" | "checked_out" | "completed" | "confirmed" | "pending" | "staying"' and '"Confirmed"' have no overlap.
+src/modules/bookings/booking.service.ts(1477,14): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1478,22): error TS2339: Property 'beds' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1483,30): error TS2339: Property 'roomSizeSqm' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1486,27): error TS2339: Property 'amenities' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1512,24): error TS2339: Property 'basePrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1513,27): error TS2339: Property 'basePrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1513,42): error TS2339: Property 'discountPrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1515,10): error TS2339: Property 'basePrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1515,25): error TS2339: Property 'discountPrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1515,45): error TS2339: Property 'basePrice' does not exist on type 'ObjectId'.
+src/modules/bookings/booking.service.ts(1550,14): error TS2339: Property 'totalTax' does not exist on type 'IBooking & Required<{ _id: ObjectId; }> & { __v: number; }'.
+src/modules/bookings/booking.service.ts(1763,28): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/cab/service/cabService.service.ts(57,35): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(180,39): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(263,38): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(403,38): error TS2339: Property 'create' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(436,13): error TS2339: Property 'cabId' does not exist on type '{}'.
+src/modules/cab/service/cabService.service.ts(436,20): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/cab/service/cabService.service.ts(436,28): error TS2339: Property 'cabType' does not exist on type '{}'.
+src/modules/cab/service/cabService.service.ts(436,37): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/cab/service/cabService.service.ts(436,47): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/cab/service/cabService.service.ts(455,14): error TS2339: Property 'cabType' does not exist on type '{ cab: { $in: ObjectId[]; }; }'.
+src/modules/cab/service/cabService.service.ts(460,14): error TS2339: Property '$or' does not exist on type '{ cab: { $in: ObjectId[]; }; }'.
+src/modules/cab/service/cabService.service.ts(467,39): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(474,36): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(520,38): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(586,38): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/cab/service/cabService.service.ts(650,38): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/favorites/favorite.service.ts(152,12): error TS2339: Property 'itemType' does not exist on type '{ user: any; }'.
+src/modules/favorites/favorite.service.ts(182,30): error TS2349: This expression is not callable.
+src/modules/favorites/favorite.service.ts(222,30): error TS2349: This expression is not callable.
+src/modules/hotels/hotel.service.ts(166,7): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(167,7): error TS2339: Property 'checkIn' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(168,7): error TS2339: Property 'checkOut' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(169,7): error TS2339: Property 'minRating' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(170,7): error TS2339: Property 'minPrice' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(171,7): error TS2339: Property 'maxPrice' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(172,7): error TS2339: Property 'amenities' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(173,7): error TS2339: Property 'minSize' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(174,7): error TS2339: Property 'maxSize' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(175,7): error TS2339: Property 'adults' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(176,7): error TS2339: Property 'children' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(177,7): error TS2339: Property 'lat' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(178,7): error TS2339: Property 'lng' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(179,7): error TS2339: Property 'maxDistance' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(180,7): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(181,7): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(416,48): error TS2769: No overload matches this call.
+src/modules/hotels/hotel.service.ts(425,44): error TS2769: No overload matches this call.
+src/modules/hotels/hotel.service.ts(550,46): error TS2769: No overload matches this call.
+src/modules/hotels/hotel.service.ts(559,42): error TS2769: No overload matches this call.
+src/modules/hotels/hotel.service.ts(699,13): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(708,14): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; verificationStatus: string; }'.
+src/modules/hotels/hotel.service.ts(929,19): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/hotels/hotel.service.ts(929,29): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/hotels/hotel.service.ts(1221,5): error TS2339: Property 'destination' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1222,5): error TS2339: Property 'checkIn' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1223,5): error TS2339: Property 'checkOut' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1224,5): error TS2339: Property 'adults' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1225,5): error TS2339: Property 'children' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1226,5): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1227,5): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/hotels/hotel.service.ts(1403,40): error TS2769: No overload matches this call.
+src/modules/multiServiceBookings/booking.service.ts(53,34): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/multiServiceBookings/booking.service.ts(59,35): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/multiServiceBookings/booking.service.ts(65,35): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/multiServiceBookings/booking.service.ts(139,31): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/multiServiceBookings/booking.service.ts(139,37): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/multiServiceBookings/booking.service.ts(356,9): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/modules/multiServiceBookings/booking.service.ts(364,5): error TS2322: Type 'string' is not assignable to type '"card" | "netbanking" | "unknown" | "upi" | "wallet"'.
+src/modules/multiServiceVendor/booking/booking.service.ts(6,13): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/multiServiceVendor/booking/booking.service.ts(6,21): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/multiServiceVendor/booking/booking.service.ts(6,29): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/multiServiceVendor/booking/booking.service.ts(6,39): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/multiServiceVendor/booking/booking.service.ts(16,14): error TS2339: Property 'status' does not exist on type '{ vendorId: any; serviceType: any; }'.
+src/modules/multiServiceVendor/booking/booking.service.ts(20,14): error TS2339: Property '$or' does not exist on type '{ vendorId: any; serviceType: any; }'.
+src/modules/multiServiceVendor/booking/booking.service.ts(27,36): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/booking/booking.service.ts(36,33): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/booking/booking.service.ts(100,35): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(16,42): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(22,40): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(28,46): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(34,36): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(72,13): error TS2339: Property 'revenueRange' does not exist on type '{}'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(72,34): error TS2339: Property 'bookingRange' does not exist on type '{}'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(89,39): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(126,39): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(169,13): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(169,21): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(169,31): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(179,14): error TS2339: Property 'status' does not exist on type '{ vendorId: any; serviceType: any; }'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(182,36): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/dashboard/dashboard.service.ts(191,33): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(7,7): error TS2339: Property 'status' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(8,7): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(9,7): error TS2339: Property 'fromDate' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(10,7): error TS2339: Property 'toDate' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(11,7): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(12,7): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(28,14): error TS2339: Property 'bookingDate' does not exist on type '{ vendorId: any; serviceType: any; paymentStatus: { $in: string[]; }; }'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(31,16): error TS2339: Property 'bookingDate' does not exist on type '{ vendorId: any; serviceType: any; paymentStatus: { $in: string[]; }; }'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(35,16): error TS2339: Property 'bookingDate' does not exist on type '{ vendorId: any; serviceType: any; paymentStatus: { $in: string[]; }; }'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(40,14): error TS2339: Property '$or' does not exist on type '{ vendorId: any; serviceType: any; paymentStatus: { $in: string[]; }; }'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(47,36): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(56,33): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/multiServiceVendor/invoice/invoice.service.ts(114,35): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/payments/payment.service.ts(70,5): error TS2322: Type 'string' is not assignable to type '"card" | "netbanking" | "unknown" | "upi" | "wallet"'.
+src/modules/reviews/review.service.ts(121,50): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/reviews/review.service.ts(135,39): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/reviews/review.service.ts(231,42): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/multiServiceBookings/booking.model")'.
+src/modules/reviews/review.service.ts(267,43): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/reviews/review.service.ts(287,42): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/reviews/review.service.ts(307,43): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/rooms/roomType.service.ts(134,37): error TS2339: Property 'name' does not exist on type 'ObjectId'.
+src/modules/rooms/roomType.service.ts(136,34): error TS2339: Property 'images' does not exist on type 'ObjectId'.
+src/modules/rooms/roomType.service.ts(173,12): error TS2339: Property 'name' does not exist on type '{ hotelId: any; }'.
+src/modules/rooms/roomType.service.ts(335,3): error TS1232: An import declaration can only be used at the top level of a namespace or module.
+src/modules/rooms/roomType.service.ts(335,20): error TS2307: Cannot find module './room.model' or its corresponding type declarations.
+src/modules/support/support.service.ts(48,14): error TS2339: Property 'status' does not exist on type '{ userId: any; }'.
+src/modules/task/task.service.ts(9,22): error TS2339: Property 'status' does not exist on type '{ vendorId: any; }'.
+src/modules/tour/company/tour.service.ts(202,13): error TS2339: Property 'city' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(202,19): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(202,27): error TS2339: Property 'featured' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(202,37): error TS2339: Property 'rank' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(202,43): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(202,53): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/tour/company/tour.service.ts(228,14): error TS2339: Property '$or' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(249,18): error TS2339: Property '$or' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(250,16): error TS2339: Property '$and' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(250,38): error TS2339: Property '$or' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(251,23): error TS2339: Property '$or' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(253,16): error TS2339: Property '$or' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(258,14): error TS2339: Property 'isFeatured' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(262,14): error TS2339: Property 'rank' does not exist on type '{ _id: { $in: ObjectId[]; }; verificationStatus: string; isActive: boolean; }'.
+src/modules/tour/company/tour.service.ts(315,27): error TS2339: Property 'logo' does not exist on type 'ObjectId'.
+src/modules/tour/company/tour.service.ts(361,25): error TS2339: Property 'logo' does not exist on type 'ObjectId'.
+src/modules/tour/company/tour.service.ts(446,27): error TS2339: Property 'logo' does not exist on type 'ObjectId'.
+src/modules/tour/service/tourService.service.ts(77,18): error TS2339: Property 'maxPeople' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(81,18): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(94,36): error TS2339: Property '$gte' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(95,36): error TS2339: Property '$lte' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(107,22): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(108,20): error TS2339: Property '$and' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(108,46): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(109,27): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(111,20): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(132,22): error TS2339: Property '$and' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(133,20): error TS2339: Property '$and' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(134,29): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(135,20): error TS2339: Property '$and' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(135,46): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(136,27): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(138,20): error TS2339: Property '$or' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(147,20): error TS2339: Property 'amenities' does not exist on type '{ isActive: boolean; }'.
+src/modules/tour/service/tourService.service.ts(159,20): error TS2339: Property '$or' does not exist on type '{ "company.isActive": boolean; "company.verificationStatus": string; }'.
+src/modules/tour/service/tourService.service.ts(216,39): error TS2339: Property 'aggregate' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(298,40): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(372,39): error TS2339: Property 'findOne' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(532,39): error TS2339: Property 'create' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(564,13): error TS2339: Property 'tourId' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(564,21): error TS2339: Property 'search' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(564,29): error TS2339: Property 'page' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(564,39): error TS2339: Property 'limit' does not exist on type '{}'.
+src/modules/tour/service/tourService.service.ts(586,14): error TS2339: Property '$or' does not exist on type '{ tour: { $in: ObjectId[]; }; }'.
+src/modules/tour/service/tourService.service.ts(596,40): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(603,37): error TS2339: Property 'countDocuments' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(643,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(706,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/tour/service/tourService.service.ts(786,39): error TS2339: Property 'findById' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/vendorAccountGroup/accountGroup.service.ts(196,22): error TS2339: Property 'status' does not exist on type 'ObjectId'.
+src/modules/vendorAccountGroup/accountGroup.service.ts(197,22): error TS2339: Property 'isActive' does not exist on type 'ObjectId'.
+src/modules/vendorAccountGroup/accountGroup.service.ts(202,34): error TS2339: Property 'businessName' does not exist on type 'ObjectId'.
+src/modules/vendorAccountGroup/accountGroup.service.ts(204,33): error TS2339: Property 'serviceType' does not exist on type 'ObjectId'.
+src/modules/vendorAccountGroup/accountGroup.service.ts(206,28): error TS2339: Property 'status' does not exist on type 'ObjectId'.
+src/modules/vendors/vendor.service.ts(62,40): error TS2349: This expression is not callable.
+src/modules/vendors/vendor.service.ts(272,16): error TS2339: Property 'approvedData' does not exist on type '{ vendor: { vendorId: ObjectId; propertyId: string; status: "approved" | "blocked" | "draft" | "pending" | "rejected" | "under_review"; currentStep: number; registrationStep: number; ... 4 more ...; serviceType: "adventure" | ... 3 more ... | "tour"; }; businessDetails: { ...; }; serviceDetails: any; }'.
+src/modules/vendors/vendor.service.ts(441,40): error TS2349: This expression is not callable.
+src/modules/vendors/vendor.service.ts(467,48): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/cab/service/cabService.model")'.
+src/modules/vendors/vendor.service.ts(483,50): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/bike/service/bikeService.model")'.
+src/modules/vendors/vendor.service.ts(512,50): error TS2339: Property 'find' does not exist on type 'typeof import("D:/vscodes/NISHANT_TYAGI/backend/src/modules/tour/service/tourService.model")'.
+src/modules/vendors/vendor.service.ts(592,44): error TS2349: This expression is not callable.
+src/modules/vendors/vendor.service.ts(669,44): error TS2349: This expression is not callable.
+src/modules/vendors/vendor.service.ts(723,44): error TS2349: This expression is not callable.

@@ -1,0 +1,36 @@
+import { Router } from "express";
+import { UserController } from "./user.controller";
+import { protect } from "src/shared/middlewares/verifyToken";
+import { authorize } from "src/shared/middlewares/roleMiddleware";
+
+const router = Router();
+const userController = new UserController();
+
+// GET all users (admin)
+router.get("/", protect, authorize("admin"), userController.getAllUsers);
+
+//Get user booking history list
+router.get(
+  "/:userId/bookings",
+  protect,
+  authorize("admin"),
+  userController.getUserBookings,
+);
+
+//booking detail page
+router.get(
+  "/:userId/bookings/:bookingId",
+  protect,
+  authorize("admin"),
+  userController.getBookingDetail,
+);
+
+// Block / Unblock user
+router.patch(
+  "/:userId/status",
+  protect,
+  authorize("admin"),
+  userController.updateUserStatus,
+);
+
+export default router;
