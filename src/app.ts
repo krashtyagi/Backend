@@ -5,8 +5,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import passport from "passport";
-import { RPCHandler } from "@orpc/server/node";
-import { appRouter } from "./rpc/router";
 
 import authRoutes from "./modules/auth/auth.routes";
 import userRoutes from "./modules/users/user.routes";
@@ -123,25 +121,6 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use("/api", limiter);
-
-// ── oRPC handler (must be BEFORE express.json so it reads the raw stream) ──
-const rpcHandler = new RPCHandler(appRouter);
-
-app.use(async (req, res, next) => {
-  if (req.url.startsWith("/rpc")) {
-    try {
-      const { matched } = await rpcHandler.handle(req, res, {
-        prefix: "/rpc",
-        context: {},
-      });
-      if (matched) return;
-    } catch (err) {
-      console.error("oRPC handler error:", err);
-      // Fall through to next middleware instead of crashing
-    }
-  }
-  next();
-});
 
 app.use(express.json({ limit: "10kb" }));
 

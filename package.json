@@ -13,8 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@orpc/client": "^2.0.0-beta.43",
-    "@orpc/server": "^2.0.0-beta.43",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
