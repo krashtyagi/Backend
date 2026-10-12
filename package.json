@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "build": "esbuild src/serverless.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=api/index.mjs --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "build": "esbuild src/serverless.ts --bundle --platform=node --target=node20 --format=cjs --packages=external --outfile=api/index.js",
     "start": "tsx server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

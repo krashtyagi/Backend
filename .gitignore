@@ -22,7 +22,6 @@ Thumbs.db
 
 dist/
 build/
-api/
 .cache/
 .tmp/
 .temp/
