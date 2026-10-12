@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "../vendors/vendor.model";
-import taskService from "./task.service";
+import Vendor from "../vendors/vendor.model.js";
+import taskService from "./task.service.js";
 
 export class TaskController {
   public async getTasks(

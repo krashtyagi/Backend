@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "../vendors/vendor.model";
-import Hotel from "../hotels/hotel.model";
-import policyService from "./policy.service";
-import logger from "src/shared/utils/logger";
+import Vendor from "../vendors/vendor.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import policyService from "./policy.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class PolicyController {
   //Vendor: set policy

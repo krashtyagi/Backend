@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { HotelController } from "./hotel.controller";
+import { HotelController } from "./hotel.controller.js";
 import {
   protect,
   optionalProtect,
-} from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+} from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const hotelController = new HotelController();

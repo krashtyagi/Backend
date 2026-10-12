@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { BikeServiceController } from "./bikeService.controller";
-import { protect, optionalProtect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { BikeServiceController } from "./bikeService.controller.js";
+import { protect, optionalProtect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const bikeServiceController = new BikeServiceController();

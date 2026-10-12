@@ -1,7 +1,7 @@
 import { Router } from "express";
-import dashboardRoutes from "./dashboard/dashboard.routes";
-import bookingRoutes from "./booking/booking.routes";
-import invoiceRoutes from "./invoice/invoice.routes";
+import dashboardRoutes from "./dashboard/dashboard.routes.js";
+import bookingRoutes from "./booking/booking.routes.js";
+import invoiceRoutes from "./invoice/invoice.routes.js";
 
 const router = Router();
 

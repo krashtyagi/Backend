@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { SupportController } from "./support.controller";
-import { protect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { SupportController } from "./support.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const supportController = new SupportController();

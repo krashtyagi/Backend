@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Support from "../../support/support.model";
+import Support from "../../support/support.model.js";
 
 export const getAllTickets = async (query: any) => {
   try {

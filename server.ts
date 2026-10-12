@@ -1,7 +1,7 @@
 import "dotenv/config";
-import connectDB from "./src/shared/config/db";
-import logger from "./src/shared/utils/logger";
-import app from "./src/app";
+import connectDB from "./src/shared/config/db.js";
+import logger from "./src/shared/utils/logger.js";
+import app from "./src/app.js";
 
 connectDB();
 

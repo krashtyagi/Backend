@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { AuthController } from "./auth.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import passport from "../../shared/config/passport";
+import { AuthController } from "./auth.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import passport from "../../shared/config/passport.js";
 import rateLimit from "express-rate-limit";
 
 const router = Router();

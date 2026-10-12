@@ -1,5 +1,5 @@
-import CabCompany from "./cab.model";
-import logger from "../../../shared/utils/logger";
+import CabCompany from "./cab.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 export const createCabCompany = async (vendor: any, data: any) => {
   try {

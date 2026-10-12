@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
-import Vendor from "../vendors/vendor.model";
-import Availability from "./availability.model";
-import Hotel from "../hotels/hotel.model";
-import RoomType from "../rooms/roomType.model";
+import Vendor from "../vendors/vendor.model.js";
+import Availability from "./availability.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import RoomType from "../rooms/roomType.model.js";
 
-import logger from "../../shared/utils/logger";
+import logger from "../../shared/utils/logger.js";
 
 // Create / Update availability for a date
 export const upsertAvailability = async (data: any) => {

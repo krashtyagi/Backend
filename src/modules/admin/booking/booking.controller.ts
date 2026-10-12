@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import bookingService from "./booking.service";
-import logger from "src/shared/utils/logger";
+import bookingService from "./booking.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class BookingController {
   // Get all bookings

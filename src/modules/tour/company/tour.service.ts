@@ -1,5 +1,5 @@
-import TourCompany from "./tour.model";
-import logger from "../../../shared/utils/logger";
+import TourCompany from "./tour.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 export const createTourCompany = async (data: any, vendor: any) => {
   try {
@@ -198,7 +198,7 @@ export const createTourCompany = async (data: any, vendor: any) => {
 
 export const getAllTourCompanies = async (query: any = {}) => {
   try {
-    const TourService = (await import("../service/tourService.model")).default;
+    const TourService = (await import("../service/tourService.model.js")).default;
     const { city, search, featured, rank, page = 1, limit = 50 }: any = query;
 
     // STEP 1: Find all company IDs that have at least one active tour package (admin-approved)
@@ -339,7 +339,7 @@ export const getAllTourCompanies = async (query: any = {}) => {
 
 export const getTourCompanyById = async (id: any) => {
   try {
-    const TourService = (await import("../service/tourService.model")).default;
+    const TourService = (await import("../service/tourService.model.js")).default;
     const company: any = await TourCompany.findOne({
       _id: id,
       isActive: true,
@@ -396,7 +396,7 @@ export const getTourCompaniesGroupedByCity = async () => {
 // Get ranked tour companies for banner slideshows (paginated)
 export const getRankedTourCompanies = async (rank: any, page: any = 1, limit: any = 10) => {
   try {
-    const TourService = (await import("../service/tourService.model")).default;
+    const TourService = (await import("../service/tourService.model.js")).default;
 
     if (!rank || !["A", "B", "C"].includes(rank)) {
       return { items: [], total: 0, page: 1, limit: 10, hasMore: false };

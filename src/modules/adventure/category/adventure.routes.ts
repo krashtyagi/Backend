@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { AdventureController } from "./adventure.controller";
-import { protect, optionalProtect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { AdventureController } from "./adventure.controller.js";
+import { protect, optionalProtect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const adventureController = new AdventureController();

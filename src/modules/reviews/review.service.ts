@@ -1,25 +1,25 @@
 import mongoose from "mongoose";
-import Review from "./review.model";
+import Review from "./review.model.js";
 
-import Hotel from "../hotels/hotel.model";
-import Booking from "../bookings/booking.model";
+import Hotel from "../hotels/hotel.model.js";
+import Booking from "../bookings/booking.model.js";
 
-import Adventure from "../adventure/category/adventure.model";
-import AdventureService from "../adventure/service/service.model";
+import Adventure from "../adventure/category/adventure.model.js";
+import AdventureService from "../adventure/service/service.model.js";
 
-import BikeCompany from "../bike/company/bike.model";
-import BikeService from "../bike/service/bikeService.model";
+import BikeCompany from "../bike/company/bike.model.js";
+import BikeService from "../bike/service/bikeService.model.js";
 
-import CabCompany from "../cab/company/cab.model";
-import CabService from "../cab/service/cabService.model";
+import CabCompany from "../cab/company/cab.model.js";
+import CabService from "../cab/service/cabService.model.js";
 
-import TourCompany from "../tour/company/tour.model";
-import TourService from "../tour/service/tourService.model";
+import TourCompany from "../tour/company/tour.model.js";
+import TourService from "../tour/service/tourService.model.js";
 
-import GenericBooking from "../multiServiceBookings/booking.model";
+import GenericBooking from "../multiServiceBookings/booking.model.js";
 
-import logger from "../../shared/utils/logger";
-import { updateCompanyRating } from "./helpers/updateCompanyRating";
+import logger from "../../shared/utils/logger.js";
+import { updateCompanyRating } from "./helpers/updateCompanyRating.js";
 
 export const getCompanyReviews = async (companyType: string, companyId: any, query: any = {}) => {
   try {

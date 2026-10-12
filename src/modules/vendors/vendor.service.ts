@@ -1,19 +1,19 @@
-import Vendor from "./vendor.model";
-import VendorBank from "../vendorBank/bank.model";
-import User from "../../modules/auth/auth.model";
+import Vendor from "./vendor.model.js";
+import VendorBank from "../vendorBank/bank.model.js";
+import User from "../../modules/auth/auth.model.js";
 
-import Hotel from "../hotels/hotel.model";
-import CabCompany from "../cab/company/cab.model";
-import BikeCompany from "../bike/company/bike.model";
-import TourCompany from "../tour/company/tour.model";
-import Adventure from "../adventure/category/adventure.model";
+import Hotel from "../hotels/hotel.model.js";
+import CabCompany from "../cab/company/cab.model.js";
+import BikeCompany from "../bike/company/bike.model.js";
+import TourCompany from "../tour/company/tour.model.js";
+import Adventure from "../adventure/category/adventure.model.js";
 
-import RoomType from "../rooms/roomType.model";
-import CabService from "../cab/service/cabService.model";
-import BikeService from "../bike/service/bikeService.model";
-import AdventureService from "../adventure/service/service.model";
-import TourService from "../tour/service/tourService.model";
-import Promotion from "../admin/promotion/promotion.model";
+import RoomType from "../rooms/roomType.model.js";
+import CabService from "../cab/service/cabService.model.js";
+import BikeService from "../bike/service/bikeService.model.js";
+import AdventureService from "../adventure/service/service.model.js";
+import TourService from "../tour/service/tourService.model.js";
+import Promotion from "../admin/promotion/promotion.model.js";
 
 const SERVICE_MODELS: Record<string, any> = {
   hotel: Hotel,
@@ -26,10 +26,10 @@ const SERVICE_MODELS: Record<string, any> = {
 import {
   sendAdminVendorNotificationEmail,
   sendVendorSubmissionConfirmationEmail,
-} from "../../shared/utils/sendEmail";
+} from "../../shared/utils/sendEmail.js";
 
-import logger from "../../shared/utils/logger";
-import cloudinary from "../../shared/config/cloudinary";
+import logger from "../../shared/utils/logger.js";
+import cloudinary from "../../shared/config/cloudinary.js";
 
 export const getVendorMe = async (userId: any) => {
   try {

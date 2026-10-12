@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { VendorAccountGroupController } from "./accountGroup.controller";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
-import { protect } from "../../shared/middlewares/verifyToken";
+import { VendorAccountGroupController } from "./accountGroup.controller.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
 
 const router = Router();
 const vendorAccountController = new VendorAccountGroupController();

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "../vendors/vendor.model";
-import Hotel from "../hotels/hotel.model";
-import roomService from "./room.service";
-import logger from "src/shared/utils/logger";
+import Vendor from "../vendors/vendor.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import roomService from "./room.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class RoomController {
   public async createRoom(

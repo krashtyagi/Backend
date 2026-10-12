@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { AccountController } from "./account.controller";
-import { protect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { AccountController } from "./account.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const accountController = new AccountController();

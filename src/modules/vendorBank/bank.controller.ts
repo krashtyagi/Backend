@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "../vendors/vendor.model";
-import bankService from "./bank.service";
-import logger from "src/shared/utils/logger";
+import Vendor from "../vendors/vendor.model.js";
+import bankService from "./bank.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class BankController {
   //Create vendor bank details

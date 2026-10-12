@@ -1,8 +1,8 @@
-import Adventure from "../category/adventure.model";
-import Service from "../service/service.model";
+import Adventure from "../category/adventure.model.js";
+import Service from "../service/service.model.js";
 import mongoose from "mongoose";
-import Tax from "../../admin/tax/tax.model";
-import Favorite from "../../favorites/favorite.model";
+import Tax from "../../admin/tax/tax.model.js";
+import Favorite from "../../favorites/favorite.model.js";
 
 const checkIsFavorite = async (itemId: any, userId: any, itemType: any) => {
   if (!userId || !itemId) return false;

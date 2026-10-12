@@ -1,5 +1,5 @@
-import Policy from "./policy.model";
-import logger from "../../shared/utils/logger";
+import Policy from "./policy.model.js";
+import logger from "../../shared/utils/logger.js";
 
 // Create or Update Hotel Policy
 export const upsertPolicy = async (hotelId: any, data: any) => {

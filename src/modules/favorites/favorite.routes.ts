@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { FavoriteController } from "./favorite.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
+import { FavoriteController } from "./favorite.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
 
 const router = Router();
 const favoriteController = new FavoriteController();

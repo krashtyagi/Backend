@@ -1,17 +1,17 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "./vendor.model";
-import bookingService from "../bookings/booking.service";
-import roomTypeService from "../rooms/roomType.service";
-import vendorService from "./vendor.service";
-import logger from "../../shared/utils/logger";
-import uploadService from "../upload/upload.service";
-import User from "../auth/auth.model";
+import Vendor from "./vendor.model.js";
+import bookingService from "../bookings/booking.service.js";
+import roomTypeService from "../rooms/roomType.service.js";
+import vendorService from "./vendor.service.js";
+import logger from "../../shared/utils/logger.js";
+import uploadService from "../upload/upload.service.js";
+import User from "../auth/auth.model.js";
 
-import Hotel from "../hotels/hotel.model";
-import TourCompany from "../tour/company/tour.model";
-import CabCompany from "../cab/company/cab.model";
-import BikeCompany from "../bike/company/bike.model";
-import Adventure from "../adventure/category/adventure.model";
+import Hotel from "../hotels/hotel.model.js";
+import TourCompany from "../tour/company/tour.model.js";
+import CabCompany from "../cab/company/cab.model.js";
+import BikeCompany from "../bike/company/bike.model.js";
+import Adventure from "../adventure/category/adventure.model.js";
 
 const SERVICE_MODELS: Record<string, any> = {
   hotel: Hotel,

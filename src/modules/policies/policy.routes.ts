@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { PolicyController } from "./policy.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+import { PolicyController } from "./policy.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const controller = new PolicyController();

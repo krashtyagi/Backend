@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import dashboardService from "./dashboard.service";
-import logger from "src/shared/utils/logger";
+import dashboardService from "./dashboard.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class DashboardController {
   //dashboard card and charts with filter days

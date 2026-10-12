@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Support from "./support.model";
+import Support from "./support.model.js";
 
 export const createTicket = async (data: any, userId: any) => {
   try {

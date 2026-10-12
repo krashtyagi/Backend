@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
-import Vendor from "../vendors/vendor.model";
-import Hotel from "../hotels/hotel.model";
-import roomTypeService from "./roomType.service";
-import RoomType from "./roomType.model";
-import Room from "./room.model";
-import logger from "src/shared/utils/logger";
+import Vendor from "../vendors/vendor.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import roomTypeService from "./roomType.service.js";
+import RoomType from "./roomType.model.js";
+import Room from "./room.model.js";
+import logger from "../../shared/utils/logger.js";
 
 export class RoomTypeController {
   public async createRoomType(

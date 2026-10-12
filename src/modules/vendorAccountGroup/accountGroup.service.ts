@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import Vendor from "../vendors/vendor.model";
-import User from "../auth/auth.model";
-import VendorAccountGroup from "./accountGroup.model";
+import Vendor from "../vendors/vendor.model.js";
+import User from "../auth/auth.model.js";
+import VendorAccountGroup from "./accountGroup.model.js";
 
 export const connectVendorAccounts = async (
   currentVendorId: any,

@@ -1,6 +1,6 @@
-import VendorBank from "./bank.model";
-import Vendor from "../vendors/vendor.model";
-import logger from "../../shared/utils/logger";
+import VendorBank from "./bank.model.js";
+import Vendor from "../vendors/vendor.model.js";
+import logger from "../../shared/utils/logger.js";
 
 //Create bank details
 export const createBankDetails = async (vendor: any, bankData: any) => {

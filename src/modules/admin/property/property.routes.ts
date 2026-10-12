@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { PropertyController } from "./property.controller";
-import { protect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { PropertyController } from "./property.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const propertyController = new PropertyController();

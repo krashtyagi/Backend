@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import CabService from "./cabService.model";
-import CabCompany from "../company/cab.model";
-import Tax from "../../admin/tax/tax.model";
-import Favorite from "../../favorites/favorite.model";
+import CabService from "./cabService.model.js";
+import CabCompany from "../company/cab.model.js";
+import Tax from "../../admin/tax/tax.model.js";
+import Favorite from "../../favorites/favorite.model.js";
 
 // helper function to attach isFavorite flag to companies/services
 const attachFavoriteFlag = async (items: any[], userId: any, itemType: string) => {

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import tourService from "./tourService.service";
-import logger from "../../../shared/utils/logger";
-import Vendor from "../../vendors/vendor.model";
+import tourService from "./tourService.service.js";
+import logger from "../../../shared/utils/logger.js";
+import Vendor from "../../vendors/vendor.model.js";
 
 export class TourServiceController {
   //user side

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import propertyService from "./property.service";
-import logger from "src/shared/utils/logger";
+import propertyService from "./property.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class PropertyController {
   //all vendor property list

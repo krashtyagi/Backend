@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Booking from "../../bookings/booking.model";
-import GenericBooking from "../../multiServiceBookings/booking.model";
+import Booking from "../../bookings/booking.model.js";
+import GenericBooking from "../../multiServiceBookings/booking.model.js";
 
 export const getBookingStats = async () => {
   try {

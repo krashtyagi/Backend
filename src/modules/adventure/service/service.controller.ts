@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import logger from "src/shared/utils/logger";
-import serviceService from "./service.service";
-import Vendor from "../../vendors/vendor.model";
+import logger from "../../../shared/utils/logger.js";
+import serviceService from "./service.service.js";
+import Vendor from "../../vendors/vendor.model.js";
 
 export class ServiceController {
   public async getServiceDetails(

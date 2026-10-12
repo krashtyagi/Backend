@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import userService from "./user.service";
-import logger from "src/shared/utils/logger";
+import userService from "./user.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class UserController {
   public async getMe(req: Request, res: Response): Promise<void> {

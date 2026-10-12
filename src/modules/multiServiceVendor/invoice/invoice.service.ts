@@ -1,4 +1,4 @@
-import Booking from "../../multiServiceBookings/booking.model";
+import Booking from "../../multiServiceBookings/booking.model.js";
 import PDFDocument from "pdfkit";
 
 export const getVendorInvoiceList = async (query: any = {}, vendor: any) => {

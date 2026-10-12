@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import cabService from "./cab.service";
-import Vendor from "../../vendors/vendor.model";
-import logger from "src/shared/utils/logger";
+import cabService from "./cab.service.js";
+import Vendor from "../../vendors/vendor.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class CabController {
   public async createCabCompany(

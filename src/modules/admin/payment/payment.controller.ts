@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import paymentService from "./payment.service";
-import logger from "src/shared/utils/logger";
+import paymentService from "./payment.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class PaymentController {
   // Get payment stats

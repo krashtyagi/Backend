@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { CabServiceController } from "./cabService.controller";
-import { protect, optionalProtect } from "src/shared/middlewares/verifyToken";
-import { authorize } from "src/shared/middlewares/roleMiddleware";
+import { CabServiceController } from "./cabService.controller.js";
+import { protect, optionalProtect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const cabServiceController = new CabServiceController();

@@ -1,6 +1,6 @@
-import User from "../auth/auth.model";
-import logger from "../../shared/utils/logger";
-import * as uploadService from "../upload/upload.service";
+import User from "../auth/auth.model.js";
+import logger from "../../shared/utils/logger.js";
+import * as uploadService from "../upload/upload.service.js";
 
 function getCloudinaryPublicId(url: string | null | undefined): string | null {
   if (!url || typeof url !== "string" || !url.includes("cloudinary.com")) return null;

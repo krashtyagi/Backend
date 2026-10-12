@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import cabServiceSvc from "./cabService.service";
-import logger from "src/shared/utils/logger";
-import Vendor from "../../vendors/vendor.model";
+import cabServiceSvc from "./cabService.service.js";
+import logger from "../../../shared/utils/logger.js";
+import Vendor from "../../vendors/vendor.model.js";
 
 export class CabServiceController {
   //user side...

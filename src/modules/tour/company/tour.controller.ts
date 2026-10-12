@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import Vendor from "src/modules/vendors/vendor.model";
-import tourService from "./tour.service";
-import logger from "src/shared/utils/logger";
+import Vendor from "../../vendors/vendor.model.js";
+import tourService from "./tour.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class TourController {
   public async createTourCompany(

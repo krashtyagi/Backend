@@ -442,7 +442,7 @@
 // };
 import nodemailer from "nodemailer";
 import axios, { AxiosError } from "axios";
-import logger from "../utils/logger";
+import logger from "../utils/logger.js";
 
 // Define company name constants or import from your config/constants file
 const trivlloData = {

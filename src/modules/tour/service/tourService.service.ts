@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import TourService from "./tourService.model";
-import TourCompany from "../company/tour.model";
-import Tax from "../../admin/tax/tax.model";
-import Favorite from "../../favorites/favorite.model";
+import TourService from "./tourService.model.js";
+import TourCompany from "../company/tour.model.js";
+import Tax from "../../admin/tax/tax.model.js";
+import Favorite from "../../favorites/favorite.model.js";
 
 //helper function to attach isFavorite flag to companies/services
 const attachFavoriteFlag = async (items: any[], userId: any, itemType: string) => {

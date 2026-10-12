@@ -1,4 +1,4 @@
-import Tax from "./tax.model";
+import Tax from "./tax.model.js";
 
 export const setTax = async (userId: any, taxPercentage: any) => {
   if (taxPercentage < 0 || taxPercentage > 100) {

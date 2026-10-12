@@ -1,20 +1,20 @@
-import User from "../../auth/auth.model";
+import User from "../../auth/auth.model.js";
 
-import Hotel from "../../hotels/hotel.model";
+import Hotel from "../../hotels/hotel.model.js";
 
-import CabCompany from "../../cab/company/cab.model";
+import CabCompany from "../../cab/company/cab.model.js";
 
-import BikeCompany from "../../bike/company/bike.model";
+import BikeCompany from "../../bike/company/bike.model.js";
 
-import TourCompany from "../../tour/company/tour.model";
+import TourCompany from "../../tour/company/tour.model.js";
 
-import Adventure from "../../adventure/category/adventure.model";
+import Adventure from "../../adventure/category/adventure.model.js";
 
 // HOTEL BOOKINGS
-import Booking from "../../bookings/booking.model";
+import Booking from "../../bookings/booking.model.js";
 
 // GENERIC BOOKINGS
-import GenericBooking from "../../multiServiceBookings/booking.model";
+import GenericBooking from "../../multiServiceBookings/booking.model.js";
 
 export const getDashboard = async ({
   bookingRange = 7,

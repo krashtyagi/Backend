@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import cloudinary from "../../shared/config/cloudinary";
-import Vendor from "../vendors/vendor.model";
-import Hotel from "./hotel.model";
-import RoomType from "../rooms/roomType.model";
-import Availability from "../availability/availability.model";
-import Tax from "../admin/tax/tax.model";
-import Booking from "../bookings/booking.model";
-import Favorite from "../favorites/favorite.model";
-import logger from "../../shared/utils/logger";
+import cloudinary from "../../shared/config/cloudinary.js";
+import Vendor from "../vendors/vendor.model.js";
+import Hotel from "./hotel.model.js";
+import RoomType from "../rooms/roomType.model.js";
+import Availability from "../availability/availability.model.js";
+import Tax from "../admin/tax/tax.model.js";
+import Booking from "../bookings/booking.model.js";
+import Favorite from "../favorites/favorite.model.js";
+import logger from "../../shared/utils/logger.js";
 
 // helper function to attach isFavorite flag to hotels
 const attachFavoriteFlag = async (hotels: any[], userId: any) => {

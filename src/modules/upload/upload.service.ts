@@ -1,4 +1,4 @@
-import cloudinary from "../../shared/config/cloudinary";
+import cloudinary from "../../shared/config/cloudinary.js";
 
 export const uploadFiles = async (files: any[], folder: string = "general") => {
   try {

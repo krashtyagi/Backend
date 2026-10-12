@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import taxService from "./tax.service";
+import taxService from "./tax.service.js";
 
 export class TaxController {
   public async setTax(

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import supportService from "./support.service";
-import logger from "src/shared/utils/logger";
+import supportService from "./support.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class SupportController {
   // Create ticket

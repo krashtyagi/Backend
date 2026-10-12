@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { VendorController } from "./vendor.controller";
-import { BookingController } from "../bookings/booking.controller";
-import { HotelController } from "../hotels/hotel.controller";
-import { TaskController } from "../task/task.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+import { VendorController } from "./vendor.controller.js";
+import { BookingController } from "../bookings/booking.controller.js";
+import { HotelController } from "../hotels/hotel.controller.js";
+import { TaskController } from "../task/task.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const vendorController = new VendorController();

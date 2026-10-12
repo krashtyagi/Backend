@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { UserController } from "./user.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
+import { UserController } from "./user.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
 
 const router = Router();
 const userController = new UserController();

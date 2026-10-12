@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import reviewService from "./review.service";
-import logger from "../../shared/utils/logger";
+import reviewService from "./review.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class ReviewController {
   // Public

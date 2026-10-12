@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { MSVDashboardController } from "./dashboard.controller";
-import { protect } from "../../../shared/middlewares/verifyToken";
-import { authorize } from "../../../shared/middlewares/roleMiddleware";
+import { MSVDashboardController } from "./dashboard.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const dashboardController = new MSVDashboardController();

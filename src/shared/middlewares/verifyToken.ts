@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import User from "../../modules/auth/auth.model";
-import logger from "../utils/logger";
+import User from "../../modules/auth/auth.model.js";
+import logger from "../utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 
 export const protect = async (req: any, res: any, next: NextFunction) => {

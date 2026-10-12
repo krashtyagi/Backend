@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { TourController } from "./tour.controller";
-import { protect } from "../../../shared/middlewares/verifyToken";
-import { authorize } from "../../../shared/middlewares/roleMiddleware";
+import { TourController } from "./tour.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const tourController = new TourController();

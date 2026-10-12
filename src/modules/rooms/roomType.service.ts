@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import Booking from "../bookings/booking.model";
-import Hotel from "../hotels/hotel.model";
-import Availability from "../availability/availability.model";
-import RoomType from "./roomType.model";
-import Room from "./room.model";
-import logger from "../../shared/utils/logger";
-import cloudinary from "../../shared/config/cloudinary";
+import Booking from "../bookings/booking.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import Availability from "../availability/availability.model.js";
+import RoomType from "./roomType.model.js";
+import Room from "./room.model.js";
+import logger from "../../shared/utils/logger.js";
+import cloudinary from "../../shared/config/cloudinary.js";
 
 export const createRoomType = async (data: any) => {
   try {

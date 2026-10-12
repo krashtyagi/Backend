@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import logger from "src/shared/utils/logger";
-import Vendor from "../../vendors/vendor.model";
-import adventureService from "./adventure.service";
+import logger from "../../../shared/utils/logger.js";
+import Vendor from "../../vendors/vendor.model.js";
+import adventureService from "./adventure.service.js";
 
 export class AdventureController {
   public async searchAdventures(

@@ -1,24 +1,24 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
 
-import Vendor from "../../vendors/vendor.model";
-import User from "../../auth/auth.model";
-import VendorBank from "../../vendorBank/bank.model";
-import Hotel from "../../hotels/hotel.model";
-import RoomType from "../../rooms/roomType.model";
-import TourService from "../../tour/service/tourService.model";
+import Vendor from "../../vendors/vendor.model.js";
+import User from "../../auth/auth.model.js";
+import VendorBank from "../../vendorBank/bank.model.js";
+import Hotel from "../../hotels/hotel.model.js";
+import RoomType from "../../rooms/roomType.model.js";
+import TourService from "../../tour/service/tourService.model.js";
 
 import {
   sendVendorApprovalEmail,
   sendVendorRejectionEmail,
-} from "../../../shared/utils/sendEmail";
+} from "../../../shared/utils/sendEmail.js";
 
-import CabCompany from "../../cab/company/cab.model";
-import BikeCompany from "../../bike/company/bike.model";
-import TourCompany from "../../tour/company/tour.model";
-import AdventureCompany from "../../adventure/category/adventure.model";
-import Promotion from "../promotion/promotion.model";
-import DeletedProperty from "./deletedProperty.model";
+import CabCompany from "../../cab/company/cab.model.js";
+import BikeCompany from "../../bike/company/bike.model.js";
+import TourCompany from "../../tour/company/tour.model.js";
+import AdventureCompany from "../../adventure/category/adventure.model.js";
+import Promotion from "../promotion/promotion.model.js";
+import DeletedProperty from "./deletedProperty.model.js";
 
 const serviceModelMap: Record<string, any> = {
   hotel: Hotel,
@@ -1029,7 +1029,7 @@ export const blockVendor = async (
           cab.isActive = false;
           await cab.save();
           const CabService = (
-            await import("../../cab/service/cabService.model")
+            await import("../../cab/service/cabService.model.js")
           ).default;
           await CabService.updateMany(
             { companyId: cab._id },
@@ -1044,7 +1044,7 @@ export const blockVendor = async (
           bike.isActive = false;
           await bike.save();
           const BikeService = (
-            await import("../../bike/service/bikeService.model")
+            await import("../../bike/service/bikeService.model.js")
           ).default;
           await BikeService.updateMany(
             { companyId: bike._id },
@@ -1059,7 +1059,7 @@ export const blockVendor = async (
           adv.isActive = false;
           await adv.save();
           const AdventureService = (
-            await import("../../adventure/service/service.model")
+            await import("../../adventure/service/service.model.js")
           ).default;
           await AdventureService.updateMany(
             { adventureId: adv._id },
@@ -1125,7 +1125,7 @@ export const unblockVendor = async (vendorId: any, adminId: any) => {
           cab.isActive = true;
           await cab.save();
           const CabService = (
-            await import("../../cab/service/cabService.model")
+            await import("../../cab/service/cabService.model.js")
           ).default;
           await CabService.updateMany(
             { companyId: cab._id },
@@ -1140,7 +1140,7 @@ export const unblockVendor = async (vendorId: any, adminId: any) => {
           bike.isActive = true;
           await bike.save();
           const BikeService = (
-            await import("../../bike/service/bikeService.model")
+            await import("../../bike/service/bikeService.model.js")
           ).default;
           await BikeService.updateMany(
             { companyId: bike._id },
@@ -1155,7 +1155,7 @@ export const unblockVendor = async (vendorId: any, adminId: any) => {
           adv.isActive = true;
           await adv.save();
           const AdventureService = (
-            await import("../../adventure/service/service.model")
+            await import("../../adventure/service/service.model.js")
           ).default;
           await AdventureService.updateMany(
             { adventureId: adv._id },
@@ -1200,7 +1200,7 @@ export const deleteProperty = async (
           businessDoc = hotel;
           await RoomType.deleteMany({ hotelId: hotel._id });
           const Availability = (
-            await import("../../availability/availability.model")
+            await import("../../availability/availability.model.js")
           ).default;
           await Availability.deleteMany({ hotelId: hotel._id });
           await Hotel.findByIdAndDelete(hotel._id);
@@ -1221,7 +1221,7 @@ export const deleteProperty = async (
         if (cab) {
           businessDoc = cab;
           const CabService = (
-            await import("../../cab/service/cabService.model")
+            await import("../../cab/service/cabService.model.js")
           ).default;
           await CabService.deleteMany({ companyId: cab._id });
           await CabCompany.findByIdAndDelete(cab._id);
@@ -1233,7 +1233,7 @@ export const deleteProperty = async (
         if (bike) {
           businessDoc = bike;
           const BikeService = (
-            await import("../../bike/service/bikeService.model")
+            await import("../../bike/service/bikeService.model.js")
           ).default;
           await BikeService.deleteMany({ companyId: bike._id });
           await BikeCompany.findByIdAndDelete(bike._id);
@@ -1245,7 +1245,7 @@ export const deleteProperty = async (
         if (adv) {
           businessDoc = adv;
           const AdventureService = (
-            await import("../../adventure/service/service.model")
+            await import("../../adventure/service/service.model.js")
           ).default;
           await AdventureService.deleteMany({ adventureId: adv._id });
           await AdventureCompany.findByIdAndDelete(adv._id);

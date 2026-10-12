@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import uploadService from "./upload.service";
+import uploadService from "./upload.service.js";
 
 export class UploadController {
   public async uploadMultiple(

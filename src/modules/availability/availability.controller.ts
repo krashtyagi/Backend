@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import availabilityService from "./availability.service";
-import Vendor from "../vendors/vendor.model";
-import RoomType from "../rooms/roomType.model";
-import Hotel from "../hotels/hotel.model";
-import logger from "../../shared/utils/logger";
+import availabilityService from "./availability.service.js";
+import Vendor from "../vendors/vendor.model.js";
+import RoomType from "../rooms/roomType.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import logger from "../../shared/utils/logger.js";
 
 export class AvailabilityController {
   //Vendor: Set availability for a date

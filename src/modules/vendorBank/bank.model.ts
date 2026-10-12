@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
-import { encrypt, decrypt } from "../../shared/utils/encryption";
+import { encrypt, decrypt } from "../../shared/utils/encryption.js";
 
 export interface IBankProof {
   url?: string;

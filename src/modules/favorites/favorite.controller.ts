@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import favoriteService from "./favorite.service";
-import logger from "../../shared/utils/logger";
+import favoriteService from "./favorite.service.js";
+import logger from "../../shared/utils/logger.js";
 
 export class FavoriteController {
   public async toggleFavorite(

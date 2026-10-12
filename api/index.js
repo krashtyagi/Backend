@@ -22876,7 +22876,10 @@ var rejectDeleteRequest = async (userId) => {
     await user.save();
     Promise.allSettled([
       sendAccountDeletionRejectedEmail(user.email || "", user.firstName || ""),
-      sendAccountDeletionRejectedWhatsApp(user.phoneNumber || "", user.firstName || "")
+      sendAccountDeletionRejectedWhatsApp(
+        user.phoneNumber || "",
+        user.firstName || ""
+      )
     ]).catch((err) => {
       logger_default.error(
         "Failed to send account deletion rejection notifications",

@@ -9,8 +9,8 @@ import {
   Profile as FacebookProfile,
 } from "passport-facebook";
 import AppleStrategy from "passport-apple";
-import User from "../../modules/auth/auth.model";
-import logger from "../utils/logger";
+import User from "../../modules/auth/auth.model.js";
+import logger from "../utils/logger.js";
 
 // Google Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

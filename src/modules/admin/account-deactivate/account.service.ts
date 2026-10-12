@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-import User from "../../auth/auth.model";
-import Booking from "../../bookings/booking.model";
-import GenericBooking from "../../multiServiceBookings/booking.model";
-import logger from "../../../shared/utils/logger";
+import User from "../../auth/auth.model.js";
+import Booking from "../../bookings/booking.model.js";
+import GenericBooking from "../../multiServiceBookings/booking.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 import {
   sendAccountDeletionApprovedEmail,
   sendAccountDeletionApprovedWhatsApp,
   sendAccountDeletionRejectedEmail,
   sendAccountDeletionRejectedWhatsApp,
-} from "../../../shared/utils/sendEmail";
+} from "../../../shared/utils/sendEmail.js";
 
 export const getDeleteRequests = async (query: any) => {
   try {
@@ -254,7 +254,10 @@ export const rejectDeleteRequest = async (userId: any) => {
 
     Promise.allSettled([
       sendAccountDeletionRejectedEmail(user.email || "", user.firstName || ""),
-      sendAccountDeletionRejectedWhatsApp(user.phoneNumber || "", user.firstName || ""),
+      sendAccountDeletionRejectedWhatsApp(
+        user.phoneNumber || "",
+        user.firstName || "",
+      ),
     ]).catch((err) => {
       logger.error(
         "Failed to send account deletion rejection notifications",

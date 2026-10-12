@@ -1,10 +1,10 @@
-import Promotion from "./promotion.model";
-import Hotel from "../../hotels/hotel.model";
-import CabCompany from "../../cab/company/cab.model";
-import BikeCompany from "../../bike/company/bike.model";
-import TourCompany from "../../tour/company/tour.model";
-import Adventure from "../../adventure/category/adventure.model";
-import logger from "../../../shared/utils/logger";
+import Promotion from "./promotion.model.js";
+import Hotel from "../../hotels/hotel.model.js";
+import CabCompany from "../../cab/company/cab.model.js";
+import BikeCompany from "../../bike/company/bike.model.js";
+import TourCompany from "../../tour/company/tour.model.js";
+import Adventure from "../../adventure/category/adventure.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 const SERVICE_MODELS: Record<string, any> = {
   hotel: Hotel,

@@ -1,23 +1,23 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
-import razorpay from "../../shared/config/razorpay";
-import Booking from "./booking.model";
-import Payment from "./payment.model";
-import Tax from "../admin/tax/tax.model";
-import Vendor from "../vendors/vendor.model";
-import User from "../auth/auth.model";
+import razorpay from "../../shared/config/razorpay.js";
+import Booking from "./booking.model.js";
+import Payment from "./payment.model.js";
+import Tax from "../admin/tax/tax.model.js";
+import Vendor from "../vendors/vendor.model.js";
+import User from "../auth/auth.model.js";
 
-import logger from "../../shared/utils/logger";
-import { sendVendorBookingNotificationEmail } from "../../shared/utils/sendEmail";
+import logger from "../../shared/utils/logger.js";
+import { sendVendorBookingNotificationEmail } from "../../shared/utils/sendEmail.js";
 
-import AdventureService from "../adventure/service/service.model";
-import Adventure from "../adventure/category/adventure.model";
-import CabService from "../cab/service/cabService.model";
-import Cab from "../cab/company/cab.model";
-import BikeService from "../bike/service/bikeService.model";
-import Bike from "../bike/company/bike.model";
-import TourService from "../tour/service/tourService.model";
-import TourCompany from "../tour/company/tour.model";
+import AdventureService from "../adventure/service/service.model.js";
+import Adventure from "../adventure/category/adventure.model.js";
+import CabService from "../cab/service/cabService.model.js";
+import Cab from "../cab/company/cab.model.js";
+import BikeService from "../bike/service/bikeService.model.js";
+import Bike from "../bike/company/bike.model.js";
+import TourService from "../tour/service/tourService.model.js";
+import TourCompany from "../tour/company/tour.model.js";
 
 export const createBooking = async (data: any, userId: any) => {
   const session = await mongoose.startSession();

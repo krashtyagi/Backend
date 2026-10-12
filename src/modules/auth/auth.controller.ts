@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import authService from "./auth.service";
-import Hotel from "../hotels/hotel.model";
-import Vendor from "../vendors/vendor.model";
-import CabCompany from "../cab/company/cab.model";
-import BikeCompany from "../bike/company/bike.model";
-import TourCompany from "../tour/company/tour.model";
-import Adventure from "../adventure/category/adventure.model";
-import logger from "../../shared/utils/logger";
-import { generateTokens } from "../../shared/utils/jwt";
+import authService from "./auth.service.js";
+import Hotel from "../hotels/hotel.model.js";
+import Vendor from "../vendors/vendor.model.js";
+import CabCompany from "../cab/company/cab.model.js";
+import BikeCompany from "../bike/company/bike.model.js";
+import TourCompany from "../tour/company/tour.model.js";
+import Adventure from "../adventure/category/adventure.model.js";
+import logger from "../../shared/utils/logger.js";
+import { generateTokens } from "../../shared/utils/jwt.js";
 
 export class AuthController {
   // Helper function to set refresh token cookie

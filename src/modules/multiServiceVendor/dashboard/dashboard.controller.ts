@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import dashboardService from "./dashboard.service";
-import logger from "../../../shared/utils/logger";
-import Vendor from "../../vendors/vendor.model";
+import dashboardService from "./dashboard.service.js";
+import logger from "../../../shared/utils/logger.js";
+import Vendor from "../../vendors/vendor.model.js";
 
 export class MSVDashboardController {
   public async getDashboardStats(

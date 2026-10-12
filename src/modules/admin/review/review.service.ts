@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import Review from "../../reviews/review.model";
-import { updateCompanyRating } from "../../reviews/helpers/updateCompanyRating";
-import logger from "../../../shared/utils/logger";
+import Review from "../../reviews/review.model.js";
+import { updateCompanyRating } from "../../reviews/helpers/updateCompanyRating.js";
+import logger from "../../../shared/utils/logger.js";
 
 export const getReviewStats = async () => {
   try {

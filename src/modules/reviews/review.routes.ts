@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { ReviewController } from "./review.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+import { ReviewController } from "./review.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const controller = new ReviewController();

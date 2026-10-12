@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as vendorAccountService from "./accountGroup.service";
+import * as vendorAccountService from "./accountGroup.service.js";
 
 export class VendorAccountGroupController {
   public async connectVendorAccounts(

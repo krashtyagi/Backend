@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { MSVInvoiceController } from "./invoice.controller";
-import { protect } from "../../../shared/middlewares/verifyToken";
-import { authorize } from "../../../shared/middlewares/roleMiddleware";
+import { MSVInvoiceController } from "./invoice.controller.js";
+import { protect } from "../../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const invoiceController = new MSVInvoiceController();

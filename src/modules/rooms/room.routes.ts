@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { RoomController } from "./room.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+import { RoomController } from "./room.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const roomController = new RoomController();

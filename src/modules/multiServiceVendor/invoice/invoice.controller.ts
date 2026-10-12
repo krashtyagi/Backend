@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import invoiceService from "./invoice.service";
-import Vendor from "../../vendors/vendor.model";
-import logger from "../../../shared/utils/logger";
+import invoiceService from "./invoice.service.js";
+import Vendor from "../../vendors/vendor.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class MSVInvoiceController {
   public async getVendorInvoiceList(

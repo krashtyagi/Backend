@@ -1,6 +1,6 @@
 ﻿import { Request, Response, NextFunction } from "express";
-import accountService from "./account.service";
-import logger from "src/shared/utils/logger";
+import accountService from "./account.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class AccountController {
   public async getDeleteRequests(

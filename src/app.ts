@@ -6,48 +6,49 @@ import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import passport from "passport";
 
-import authRoutes from "./modules/auth/auth.routes";
-import userRoutes from "./modules/users/user.routes";
-import hotelRoutes from "./modules/hotels/hotel.routes";
-import roomRoutes from "./modules/rooms/room.routes";
-import roomTypeRoutes from "./modules/rooms/roomType.routes";
-import availabilityRoutes from "./modules/availability/availability.routes";
-import vendorRoutes from "./modules/vendors/vendor.routes";
-import policyRoutes from "./modules/policies/policy.routes";
-import bookingRoutes from "./modules/bookings/booking.routes";
-import paymentRoutes from "./modules/payments/payment.routes";
-import reviewRoutes from "./modules/reviews/review.routes";
-import uploadRoutes from "./modules/upload/upload.routes";
-import favoriteRoutes from "./modules/favorites/favorite.routes";
-import vendorBankRoutes from "./modules/vendorBank/bank.routes";
-import supportRoutes from "./modules/support/support.routes";
+import authRoutes from "./modules/auth/auth.routes.js";
+import userRoutes from "./modules/users/user.routes.js";
+import hotelRoutes from "./modules/hotels/hotel.routes.js";
+import roomRoutes from "./modules/rooms/room.routes.js";
 
-import adventureRoutes from "./modules/adventure/category/adventure.routes";
-import serviceRoutes from "./modules/adventure/service/service.routes";
-import cabRoutes from "./modules/cab/company/cab.routes";
-import cabServiceRoutes from "./modules/cab/service/cabService.routes";
-import bikeRoutes from "./modules/bike/company/bike.routes";
-import bikeServiceRoutes from "./modules/bike/service/bikeService.routes";
-import tourRoutes from "./modules/tour/company/tour.routes";
-import tourServiceRoutes from "./modules/tour/service/tourService.routes";
+import roomTypeRoutes from "./modules/rooms/roomType.routes.js";
+import availabilityRoutes from "./modules/availability/availability.routes.js";
+import vendorRoutes from "./modules/vendors/vendor.routes.js";
+import policyRoutes from "./modules/policies/policy.routes.js";
+import bookingRoutes from "./modules/bookings/booking.routes.js";
+import paymentRoutes from "./modules/payments/payment.routes.js";
+import reviewRoutes from "./modules/reviews/review.routes.js";
+import uploadRoutes from "./modules/upload/upload.routes.js";
+import favoriteRoutes from "./modules/favorites/favorite.routes.js";
+import vendorBankRoutes from "./modules/vendorBank/bank.routes.js";
+import supportRoutes from "./modules/support/support.routes.js";
 
-import multiServiceBookingRoutes from "./modules/multiServiceBookings/booking.routes";
-import multiServiceVendorRoutes from "./modules/multiServiceVendor/vendor.routes";
+import adventureRoutes from "./modules/adventure/category/adventure.routes.js";
+import serviceRoutes from "./modules/adventure/service/service.routes.js";
+import cabRoutes from "./modules/cab/company/cab.routes.js";
+import cabServiceRoutes from "./modules/cab/service/cabService.routes.js";
+import bikeRoutes from "./modules/bike/company/bike.routes.js";
+import bikeServiceRoutes from "./modules/bike/service/bikeService.routes.js";
+import tourRoutes from "./modules/tour/company/tour.routes.js";
+import tourServiceRoutes from "./modules/tour/service/tourService.routes.js";
 
-import vendorAccountRoutes from "./modules/vendorAccountGroup/accountGroup.routes";
+import multiServiceBookingRoutes from "./modules/multiServiceBookings/booking.routes.js";
+import multiServiceVendorRoutes from "./modules/multiServiceVendor/vendor.routes.js";
 
-import adminRoutes from "./modules/admin/property/property.routes";
-import adminUserRoutes from "./modules/admin/user/user.routes";
-import adminBookingRoutes from "./modules/admin/booking/booking.routes";
-import adminReviewRoutes from "./modules/admin/review/review.routes";
-import adminPaymentRoutes from "./modules/admin/payment/payment.routes";
-import adminSupportRoutes from "./modules/admin/support/support.routes";
-import adminDashboardRoutes from "./modules/admin/dashboard/dashboard.routes";
-import adminTaxRoutes from "./modules/admin/tax/tax.routes";
-import adminAccountDeactivateRoutes from "./modules/admin/account-deactivate/account.routes";
-import adminPromotionRoutes from "./modules/admin/promotion/promotion.routes";
-import { errorHandler } from "./shared/middlewares/errorHandler";
-import "./shared/config/passport";
+import vendorAccountRoutes from "./modules/vendorAccountGroup/accountGroup.routes.js";
+
+import adminRoutes from "./modules/admin/property/property.routes.js";
+import adminUserRoutes from "./modules/admin/user/user.routes.js";
+import adminBookingRoutes from "./modules/admin/booking/booking.routes.js";
+import adminReviewRoutes from "./modules/admin/review/review.routes.js";
+import adminPaymentRoutes from "./modules/admin/payment/payment.routes.js";
+import adminSupportRoutes from "./modules/admin/support/support.routes.js";
+import adminDashboardRoutes from "./modules/admin/dashboard/dashboard.routes.js";
+import adminTaxRoutes from "./modules/admin/tax/tax.routes.js";
+import adminAccountDeactivateRoutes from "./modules/admin/account-deactivate/account.routes.js";
+import adminPromotionRoutes from "./modules/admin/promotion/promotion.routes.js";
+import { errorHandler } from "./shared/middlewares/errorHandler.js";
+import "./shared/config/passport.js";
 
 const app: Application = express();
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { BookingController } from "./booking.controller";
-import { protect } from "../../shared/middlewares/verifyToken";
-import { authorize } from "../../shared/middlewares/roleMiddleware";
+import { BookingController } from "./booking.controller.js";
+import { protect } from "../../shared/middlewares/verifyToken.js";
+import { authorize } from "../../shared/middlewares/roleMiddleware.js";
 
 const router = Router();
 const bookingController = new BookingController();

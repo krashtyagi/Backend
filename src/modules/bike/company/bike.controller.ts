@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import bikeService from "./bike.service";
-import logger from "src/shared/utils/logger";
-import Vendor from "../../vendors/vendor.model";
+import bikeService from "./bike.service.js";
+import logger from "../../../shared/utils/logger.js";
+import Vendor from "../../vendors/vendor.model.js";
 
 export class BikeController {
   public async createBikeCompany(

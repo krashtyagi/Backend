@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Booking from "../../multiServiceBookings/booking.model";
+import Booking from "../../multiServiceBookings/booking.model.js";
 
 export const getVendorBookings = async (query: any = {}, vendor: any) => {
   try {

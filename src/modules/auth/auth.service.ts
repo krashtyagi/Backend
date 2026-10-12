@@ -1,12 +1,12 @@
-import User from "./auth.model";
-import Vendor from "../vendors/vendor.model";
+import User from "./auth.model.js";
+import Vendor from "../vendors/vendor.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import logger from "../../shared/utils/logger";
+import logger from "../../shared/utils/logger.js";
 import {
   sendOTPEmail,
   sendWhatsAppOTP,
-} from "../../shared/utils/sendEmail";
+} from "../../shared/utils/sendEmail.js";
 
 // Helper to generate 6-digit OTP and its hash
 const generateOTP = async () => {

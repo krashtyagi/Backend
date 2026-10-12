@@ -1,5 +1,5 @@
-import Room from "./room.model";
-import logger from "../../shared/utils/logger";
+import Room from "./room.model.js";
+import logger from "../../shared/utils/logger.js";
 import mongoose from "mongoose";
 
 // Create a new room for a specific hotel

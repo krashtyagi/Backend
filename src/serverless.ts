@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import connectDB from "./shared/config/db";
-import app from "./app";
+
+import connectDB from "./shared/config/db.js";
+import app from "./app.js";
 
 let isDbConnected = false;
 

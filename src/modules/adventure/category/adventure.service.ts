@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Adventure from "./adventure.model";
-import Service from "../service/service.model";
+import Adventure from "./adventure.model.js";
+import Service from "../service/service.model.js";
 import slugify from "slugify";
-import Tax from "../../admin/tax/tax.model";
-import logger from "../../../shared/utils/logger";
-import Favorite from "../../favorites/favorite.model";
+import Tax from "../../admin/tax/tax.model.js";
+import logger from "../../../shared/utils/logger.js";
+import Favorite from "../../favorites/favorite.model.js";
 
 //helper function to attach isFavorite flag to companies/services
 const attachFavoriteFlag = async (items: any[], userId: any, itemType: any) => {

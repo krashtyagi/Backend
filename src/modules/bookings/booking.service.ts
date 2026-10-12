@@ -1,29 +1,29 @@
-import Booking from "./booking.model";
-import Availability from "../availability/availability.model";
+import Booking from "./booking.model.js";
+import Availability from "../availability/availability.model.js";
 import mongoose from "mongoose";
-import logger from "../../shared/utils/logger";
+import logger from "../../shared/utils/logger.js";
 import trivlloData from "../../../trivllo.json";
-import Payment from "../payments/payment.model";
-import Hotel from "../hotels/hotel.model";
-import Tax from "../admin/tax/tax.model";
+import Payment from "../payments/payment.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import Tax from "../admin/tax/tax.model.js";
 
-import razorpay from "../../shared/config/razorpay";
+import razorpay from "../../shared/config/razorpay.js";
 
-import Room from "../rooms/room.model";
+import Room from "../rooms/room.model.js";
 
 import crypto from "crypto";
 import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
 
-import RoomType from "../rooms/roomType.model";
+import RoomType from "../rooms/roomType.model.js";
 
-import GenericBooking from "../multiServiceBookings/booking.model";
-import TourService from "../tour/company/tour.model";
-import CabService from "../cab/company/cab.model";
-import BikeService from "../bike/company/bike.model";
-import AdventureService from "../adventure/category/adventure.model";
-import User from "../auth/auth.model";
+import GenericBooking from "../multiServiceBookings/booking.model.js";
+import TourService from "../tour/company/tour.model.js";
+import CabService from "../cab/company/cab.model.js";
+import BikeService from "../bike/company/bike.model.js";
+import AdventureService from "../adventure/category/adventure.model.js";
+import User from "../auth/auth.model.js";
 
 //restore availability function
 async function restoreAvailability(booking: any, session: any) {

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
-import Payment from "../../payments/payment.model";
-import GenericPayment from "../../multiServiceBookings/payment.model";
-import Booking from "../../bookings/booking.model";
-import GenericBooking from "../../multiServiceBookings/booking.model";
-import Availability from "../../availability/availability.model";
-import razorpay from "../../../shared/config/razorpay";
+import Payment from "../../payments/payment.model.js";
+import GenericPayment from "../../multiServiceBookings/payment.model.js";
+import Booking from "../../bookings/booking.model.js";
+import GenericBooking from "../../multiServiceBookings/booking.model.js";
+import Availability from "../../availability/availability.model.js";
+import razorpay from "../../../shared/config/razorpay.js";
 
 export const getAllPayments = async (query: any) => {
   try {

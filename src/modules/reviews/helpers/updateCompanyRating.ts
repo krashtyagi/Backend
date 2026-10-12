@@ -1,9 +1,9 @@
-import Review from "../review.model";
-import Hotel from "../../hotels/hotel.model";
-import Adventure from "../../adventure/category/adventure.model";
-import BikeCompany from "../../bike/company/bike.model";
-import CabCompany from "../../cab/company/cab.model";
-import TourCompany from "../../tour/company/tour.model";
+import Review from "../review.model.js";
+import Hotel from "../../hotels/hotel.model.js";
+import Adventure from "../../adventure/category/adventure.model.js";
+import BikeCompany from "../../bike/company/bike.model.js";
+import CabCompany from "../../cab/company/cab.model.js";
+import TourCompany from "../../tour/company/tour.model.js";
 
 export const updateCompanyRating = async (companyType: string, companyId: any) => {
   try {

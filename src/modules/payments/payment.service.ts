@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
-import razorpay from "../../shared/config/razorpay";
-import Booking from "../bookings/booking.model";
-import Payment from "./payment.model";
-import Availability from "../availability/availability.model";
-import Hotel from "../hotels/hotel.model";
-import RoomType from "../rooms/roomType.model";
-import Vendor from "../vendors/vendor.model";
-import User from "../auth/auth.model";
-import logger from "../../shared/utils/logger";
+import razorpay from "../../shared/config/razorpay.js";
+import Booking from "../bookings/booking.model.js";
+import Payment from "./payment.model.js";
+import Availability from "../availability/availability.model.js";
+import Hotel from "../hotels/hotel.model.js";
+import RoomType from "../rooms/roomType.model.js";
+import Vendor from "../vendors/vendor.model.js";
+import User from "../auth/auth.model.js";
+import logger from "../../shared/utils/logger.js";
 import {
   sendBookingConfirmationEmail,
   sendVendorBookingNotificationEmail,
-} from "../../shared/utils/sendEmail";
+} from "../../shared/utils/sendEmail.js";
 
 export const verifyPayment = async (data: any) => {
   const session = await mongoose.startSession();

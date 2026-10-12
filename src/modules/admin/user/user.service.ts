@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-import User from "../../auth/auth.model";
+import User from "../../auth/auth.model.js";
 
 // HOTEL BOOKINGS
-import Booking from "../../bookings/booking.model";
+import Booking from "../../bookings/booking.model.js";
 
 // GENERIC BOOKINGS
-import GenericBooking from "../../multiServiceBookings/booking.model";
+import GenericBooking from "../../multiServiceBookings/booking.model.js";
 
 export const getAllUsers = async (query: any) => {
   try {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import adminPromotionService from "./promotion.service";
-import logger from "src/shared/utils/logger";
+import adminPromotionService from "./promotion.service.js";
+import logger from "../../../shared/utils/logger.js";
 
 export class PromotionController {
   public async getAllPromotionRequests(

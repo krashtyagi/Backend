@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import paymentService from "./payment.service";
+import paymentService from "./payment.service.js";
 
 export class PaymentController {
   public async verifyPayment(

@@ -1,5 +1,5 @@
-import BikeCompany from "./bike.model";
-import logger from "../../../shared/utils/logger";
+import BikeCompany from "./bike.model.js";
+import logger from "../../../shared/utils/logger.js";
 
 export const createBikeCompany = async (data: any, vendor: any) => {
   try {
