@@ -1,7 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/index.ts", "use": "@vercel/node" }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
   ],
   "headers": [
     {
@@ -13,20 +16,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, X-CSRF-Token" }
       ]
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "methods": ["OPTIONS"],
-      "dest": "/api/index.ts",
-      "headers": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, X-CSRF-Token",
-        "Access-Control-Max-Age": "86400"
-      }
-    },
-    { "src": "/(.*)", "dest": "api/index.ts" }
   ]
 }
