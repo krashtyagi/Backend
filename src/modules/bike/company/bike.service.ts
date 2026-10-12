@@ -1,7 +1,7 @@
 import BikeCompany from "./bike.model";
 import logger from "../../../shared/utils/logger";
 
-export const createBikeCompany = async (data, vendor) => {
+export const createBikeCompany = async (data: any, vendor: any) => {
   try {
     // BLOCK IF ALREADY SUBMITTED
     if (vendor.isSubmitted && vendor.status !== "rejected") {

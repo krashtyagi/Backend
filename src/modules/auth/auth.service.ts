@@ -408,7 +408,7 @@ export const verifyOTP = async (email: any, inputOTP: any) => {
       if (!vendor) {
         vendor = await Vendor.create({
           userId: user._id,
-          serviceType: null,
+          serviceType: undefined,
           status: "draft",
           currentStep: 1,
           registrationStep: 1,
@@ -429,20 +429,17 @@ export const verifyOTP = async (email: any, inputOTP: any) => {
 const findUserByEmailOrPhoneWithSelect = async (emailOrPhone: any, selectFields: any = "") => {
   if (!emailOrPhone) throw new Error("Email or Phone number is required");
   const isEmail = emailOrPhone.includes("@");
-  if (isEmail) {
-    let query = User.findOne({ email: emailOrPhone });
-    if (selectFields) query = query.select(selectFields);
-    const user = await query;
-    if (!user) throw new Error("User not found");
-    return { user, isEmail, target: emailOrPhone };
-  } else {
-    const phoneNumber = normalizePhone(emailOrPhone);
-    let query = User.findOne({ phoneNumber });
-    if (selectFields) query = query.select(selectFields);
-    const user = await query;
-    if (!user) throw new Error("User not found");
-    return { user, isEmail, target: phoneNumber };
+  const target = isEmail ? emailOrPhone : normalizePhone(emailOrPhone);
+  const filter = isEmail ? { email: target } : { phoneNumber: target };
+
+  const query = User.findOne(filter);
+  if (selectFields) {
+    query.select(selectFields);
   }
+  const user = await query;
+  if (!user) throw new Error("User not found");
+
+  return { user, isEmail, target };
 };
 
 export const forgotPassword = async (emailOrPhone: any) => {

@@ -7,13 +7,13 @@ import logger from "../../../shared/utils/logger";
 import Favorite from "../../favorites/favorite.model";
 
 //helper function to attach isFavorite flag to companies/services
-const attachFavoriteFlag = async (items, userId, itemType) => {
+const attachFavoriteFlag = async (items: any[], userId: any, itemType: any) => {
   if (!userId || items.length === 0) {
-    items.forEach((item) => (item.isFavorite = false));
+    items.forEach((item: any) => (item.isFavorite = false));
     return items;
   }
 
-  const itemIds = items.map((i) => i._id);
+  const itemIds = items.map((i: any) => i._id);
 
   const favorites = await Favorite.find({
     user: userId,
@@ -21,16 +21,16 @@ const attachFavoriteFlag = async (items, userId, itemType) => {
     itemId: { $in: itemIds },
   }).select("itemId");
 
-  const favoriteSet = new Set(favorites.map((f) => f.itemId.toString()));
+  const favoriteSet = new Set(favorites.map((f: any) => f.itemId.toString()));
 
-  items.forEach((item) => {
+  items.forEach((item: any) => {
     item.isFavorite = favoriteSet.has(item._id.toString());
   });
 
   return items;
 };
 
-const checkIsFavorite = async (itemId, userId, itemType) => {
+const checkIsFavorite = async (itemId: any, userId: any, itemType: any) => {
   if (!userId || !itemId) return false;
   const fav = await Favorite.findOne({
     user: userId,
@@ -40,7 +40,7 @@ const checkIsFavorite = async (itemId, userId, itemType) => {
   return !!fav;
 };
 
-export const searchAdventures = async (query = {}, userId = null) => {
+export const searchAdventures = async (query: any = {}, userId: any = null) => {
   try {
     const { city } = query;
 
@@ -48,7 +48,7 @@ export const searchAdventures = async (query = {}, userId = null) => {
       throw new Error("City is required");
     }
 
-    const adventures = await Adventure.find({
+    const adventures: any[] = await Adventure.find({
       "location.city": city,
       isActive: true,
     })
@@ -57,16 +57,16 @@ export const searchAdventures = async (query = {}, userId = null) => {
 
     if (!adventures.length) return [];
 
-    const categoryMap = {};
+    const categoryMap: Record<string, any[]> = {};
 
-    adventures.forEach((adv) => {
+    adventures.forEach((adv: any) => {
       if (!categoryMap[adv.category]) {
         categoryMap[adv.category] = [];
       }
       categoryMap[adv.category].push(adv._id);
     });
 
-    const categoryConfig = {
+    const categoryConfig: Record<string, string> = {
       rafting: "River Rafting",
       paragliding: "Paragliding",
       bungee: "Bungee Jumping",
@@ -77,7 +77,7 @@ export const searchAdventures = async (query = {}, userId = null) => {
       Object.keys(categoryMap).map(async (category) => {
         const adventureIds = categoryMap[category];
 
-        const minService = await Service.find({
+        const minService: any = await Service.find({
           adventure: { $in: adventureIds },
           isActive: true,
         })
@@ -103,7 +103,7 @@ export const searchAdventures = async (query = {}, userId = null) => {
   }
 };
 
-export const getAdventures = async (query = {}, userId = null) => {
+export const getAdventures = async (query: any = {}, userId: any = null) => {
   try {
     const { category, city } = query;
 
@@ -179,13 +179,13 @@ export const getAdventures = async (query = {}, userId = null) => {
   }
 };
 
-export const getAdventureDetails = async (id, userId = null) => {
+export const getAdventureDetails = async (id: any, userId: any = null) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
 
-    const adventure = await Adventure.findOne({
+    const adventure: any = await Adventure.findOne({
       _id: id,
       isActive: true,
     })
@@ -196,7 +196,7 @@ export const getAdventureDetails = async (id, userId = null) => {
       throw new Error("Adventure not found");
     }
 
-    const services = await Service.find({
+    const services: any[] = await Service.find({
       adventure: id,
       isActive: true,
     })
@@ -207,9 +207,9 @@ export const getAdventureDetails = async (id, userId = null) => {
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
 
-    const formattedServices = services.map((service) => {
+    const formattedServices = services.map((service: any) => {
       const effectivePrice =
-        service.discountPrice > 0 ? service.discountPrice : service.basePrice;
+        (service.discountPrice ?? 0) > 0 ? service.discountPrice! : service.basePrice;
       const totalTax = Number(
         ((effectivePrice * taxPercentage) / 100).toFixed(2),
       );
@@ -249,7 +249,7 @@ export const getAdventureDetails = async (id, userId = null) => {
   }
 };
 
-export const createAdventure = async (data, vendor) => {
+export const createAdventure = async (data: any, vendor: any) => {
   try {
     // BLOCK IF ALREADY SUBMITTED
     if (vendor.isSubmitted && vendor.status !== "rejected") {
@@ -413,7 +413,7 @@ export const createAdventure = async (data, vendor) => {
   }
 };
 
-export const getVendorAdventures = async (vendorId) => {
+export const getVendorAdventures = async (vendorId: any) => {
   try {
     const adventures = await Adventure.aggregate([
       {
@@ -465,7 +465,7 @@ export const getVendorAdventures = async (vendorId) => {
   }
 };
 
-export const getVendorAdventureDetails = async (id, vendorId) => {
+export const getVendorAdventureDetails = async (id: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
@@ -483,7 +483,7 @@ export const getVendorAdventureDetails = async (id, vendorId) => {
       throw new Error("Adventure not found or unauthorized");
     }
 
-    const services = await Service.find({
+    const services: any[] = await Service.find({
       adventure: id,
       isActive: true,
     })
@@ -494,9 +494,9 @@ export const getVendorAdventureDetails = async (id, vendorId) => {
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
 
-    const formattedServices = services.map((service) => {
+    const formattedServices = services.map((service: any) => {
       const effectivePrice =
-        service.discountPrice > 0 ? service.discountPrice : service.basePrice;
+        (service.discountPrice ?? 0) > 0 ? service.discountPrice! : service.basePrice;
       const totalTax = Number(
         ((effectivePrice * taxPercentage) / 100).toFixed(2),
       );
@@ -532,7 +532,7 @@ export const getVendorAdventureDetails = async (id, vendorId) => {
   }
 };
 
-export const updateAdventure = async (id, data, vendorId) => {
+export const updateAdventure = async (id: any, data: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
@@ -590,7 +590,7 @@ export const updateAdventure = async (id, data, vendorId) => {
   }
 };
 
-export const deleteAdventure = async (id, vendorId) => {
+export const deleteAdventure = async (id: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");

@@ -54,7 +54,10 @@ export const getVendorMe = async (userId: any) => {
     }).select("+accountNumber +ifscCode +upiId");
 
     // SERVICE MODEL
-    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    // if (!vendor.serviceType) {
+    //   throw new Error("Vendor not found");
+    // }
+    const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
 
     let serviceData = null;
 
@@ -235,7 +238,9 @@ export const getVendorMe = async (userId: any) => {
         rejectedSteps: vendor.rejectedSteps || [],
         rejectionReasons: vendor.rejectionReasons || {},
         isSubmitted: vendor.isSubmitted,
-        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
+        logo:
+          vendor.logo?.url ||
+          (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
         serviceType: vendor.serviceType,
       },
 
@@ -243,7 +248,9 @@ export const getVendorMe = async (userId: any) => {
         businessName: vendor.businessName,
         businessEmail: vendor.businessEmail,
         businessPhone: vendor.businessPhone,
-        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
+        logo:
+          vendor.logo?.url ||
+          (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
         address: vendor.businessAddress,
         city: vendor.city,
         state: vendor.state,
@@ -279,7 +286,9 @@ export const getVendorMe = async (userId: any) => {
 
         businessName: vendor.businessName,
         businessEmail: vendor.businessEmail,
-        logo: vendor.logo?.url || (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
+        logo:
+          vendor.logo?.url ||
+          (typeof vendor.logo === "string" ? vendor.logo : user.avatar || null),
 
         serviceType: vendor.serviceType,
 
@@ -436,7 +445,7 @@ export const getVendorMyListing = async (userId: any) => {
     }).select("+accountNumber +ifscCode +upiId");
 
     // 4. Get main service data
-    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
     let serviceData: any = null;
     if (ServiceModel) {
       serviceData = await ServiceModel.findOne({
@@ -555,10 +564,15 @@ export const getVendorMyListing = async (userId: any) => {
             name: serviceData.name,
             description: serviceData.description,
             address: serviceData.address,
-            city: serviceData.city || (serviceData.location ? serviceData.location.city : null),
-            rating: typeof serviceData.rating === "number"
-              ? serviceData.rating
-              : (serviceData.rating ? serviceData.rating.average : 0),
+            city:
+              serviceData.city ||
+              (serviceData.location ? serviceData.location.city : null),
+            rating:
+              typeof serviceData.rating === "number"
+                ? serviceData.rating
+                : serviceData.rating
+                  ? serviceData.rating.average
+                  : 0,
             verificationStatus: serviceData.verificationStatus,
             isActive: serviceData.isActive,
             advertisementImage: serviceData.advertisementImage || null,
@@ -585,7 +599,7 @@ export const applyForPromotion = async (userId: any, plan: any) => {
     }
 
     // Find the vendor's active service listing
-    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
     if (!ServiceModel) {
       throw new Error("Invalid vendor service type");
     }
@@ -607,7 +621,9 @@ export const applyForPromotion = async (userId: any, plan: any) => {
     });
 
     if (existingPending) {
-      throw new Error("You already have a pending promotion request under review");
+      throw new Error(
+        "You already have a pending promotion request under review",
+      );
     }
 
     // Check if they already have an active promotion of this exact plan
@@ -662,7 +678,7 @@ export const getPropertySettings = async (userId: any) => {
       throw new Error("Vendor profile not found");
     }
 
-    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
     if (!ServiceModel) {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
@@ -677,7 +693,10 @@ export const getPropertySettings = async (userId: any) => {
     }
 
     const addr = serviceData.address;
-    const addrString = typeof addr === "string" ? addr : (addr?.formattedAddress || addr?.streetAddress || "");
+    const addrString =
+      typeof addr === "string"
+        ? addr
+        : addr?.formattedAddress || addr?.streetAddress || "";
 
     return {
       serviceType: vendor.serviceType,
@@ -697,7 +716,11 @@ export const getPropertySettings = async (userId: any) => {
       doorNumber: addr?.doorNumber || "",
       directions: addr?.directions || "",
       formattedAddress: addr?.formattedAddress || addrString || "",
-      coordinates: serviceData.coordinates || serviceData.location?.coordinates || addr?.location?.coordinates || null,
+      coordinates:
+        serviceData.coordinates ||
+        serviceData.location?.coordinates ||
+        addr?.location?.coordinates ||
+        null,
       images: serviceData.images || [],
       amenities: serviceData.amenities || serviceData.features || [],
       locationHistory: serviceData.locationHistory || [],
@@ -716,7 +739,7 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
       throw new Error("Vendor profile not found");
     }
 
-    const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+    const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
     if (!ServiceModel) {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
@@ -753,15 +776,29 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
     } = payload;
 
     // Check if location changed to record in locationHistory
-    const currentAddrObj = typeof serviceData.address === "object" && serviceData.address !== null ? serviceData.address : null;
-    const currentAddress = (currentAddrObj?.formattedAddress || currentAddrObj?.streetAddress || serviceData.address || "").trim();
-    const currentCity = (currentAddrObj?.city || serviceData.city || serviceData.location?.city || "").trim();
+    const currentAddrObj =
+      typeof serviceData.address === "object" && serviceData.address !== null
+        ? serviceData.address
+        : null;
+    const currentAddress = (
+      currentAddrObj?.formattedAddress ||
+      currentAddrObj?.streetAddress ||
+      serviceData.address ||
+      ""
+    ).trim();
+    const currentCity = (
+      currentAddrObj?.city ||
+      serviceData.city ||
+      serviceData.location?.city ||
+      ""
+    ).trim();
     const newAddress = address !== undefined ? address.trim() : currentAddress;
     const newCity = city !== undefined ? city.trim() : currentCity;
 
     const locationChanged =
       (address !== undefined && newAddress !== currentAddress) ||
-      (city !== undefined && newCity.toLowerCase() !== currentCity.toLowerCase()) ||
+      (city !== undefined &&
+        newCity.toLowerCase() !== currentCity.toLowerCase()) ||
       areaName !== undefined ||
       lat !== undefined ||
       lng !== undefined;
@@ -774,8 +811,13 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
         address: currentAddrObj || currentAddress,
         city: currentCity,
         state: serviceData.location?.state || currentAddrObj?.state || "",
-        country: serviceData.location?.country || currentAddrObj?.country || "India",
-        coordinates: serviceData.coordinates || serviceData.location?.coordinates || currentAddrObj?.location?.coordinates || null,
+        country:
+          serviceData.location?.country || currentAddrObj?.country || "India",
+        coordinates:
+          serviceData.coordinates ||
+          serviceData.location?.coordinates ||
+          currentAddrObj?.location?.coordinates ||
+          null,
         changedAt: new Date(),
       });
     }
@@ -783,9 +825,13 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
     // Update basic fields if provided
     if (description !== undefined) serviceData.description = description.trim();
     if (images !== undefined && Array.isArray(images)) {
-      if (serviceData.images && Array.isArray(serviceData.images) && serviceData.images.length > 0) {
+      if (
+        serviceData.images &&
+        Array.isArray(serviceData.images) &&
+        serviceData.images.length > 0
+      ) {
         const remainingPublicIds = new Set(
-          images.map((img: any) => img?.public_id).filter(Boolean)
+          images.map((img: any) => img?.public_id).filter(Boolean),
         );
         for (const img of serviceData.images) {
           if (img?.public_id && !remainingPublicIds.has(img.public_id)) {
@@ -794,7 +840,10 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
                 resource_type: (img as any).resource_type || "image",
               });
             } catch (destroyErr) {
-              logger.warn("Could not delete removed property image from Cloudinary", destroyErr);
+              logger.warn(
+                "Could not delete removed property image from Cloudinary",
+                destroyErr,
+              );
             }
           }
         }
@@ -806,12 +855,12 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
 
     // Determine normalized coordinates
     let resolvedLng = 72.8777;
-    let resolvedLat = 19.0760;
+    let resolvedLat = 19.076;
     if (coordinates && Array.isArray(coordinates) && coordinates.length >= 2) {
       resolvedLng = Number(coordinates[0]) || 72.8777;
-      resolvedLat = Number(coordinates[1]) || 19.0760;
+      resolvedLat = Number(coordinates[1]) || 19.076;
     } else if (lat !== undefined && lng !== undefined) {
-      resolvedLat = Number(lat) || 19.0760;
+      resolvedLat = Number(lat) || 19.076;
       resolvedLng = Number(lng) || 72.8777;
     } else if (serviceData.location?.coordinates?.length >= 2) {
       resolvedLng = serviceData.location.coordinates[0];
@@ -823,19 +872,46 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
 
     // Build rich address object
     const updatedAddrObj = {
-      buildingName: buildingName !== undefined ? buildingName : (currentAddrObj?.buildingName || ""),
-      doorNumber: doorNumber !== undefined ? doorNumber : (currentAddrObj?.doorNumber || ""),
-      streetAddress: address !== undefined ? address : (currentAddrObj?.streetAddress || currentAddress),
-      areaName: areaName !== undefined ? areaName : (currentAddrObj?.areaName || ""),
+      buildingName:
+        buildingName !== undefined
+          ? buildingName
+          : currentAddrObj?.buildingName || "",
+      doorNumber:
+        doorNumber !== undefined
+          ? doorNumber
+          : currentAddrObj?.doorNumber || "",
+      streetAddress:
+        address !== undefined
+          ? address
+          : currentAddrObj?.streetAddress || currentAddress,
+      areaName:
+        areaName !== undefined ? areaName : currentAddrObj?.areaName || "",
       city: newCity || currentCity,
-      district: district !== undefined ? district : (currentAddrObj?.district || ""),
-      state: state !== undefined ? state : (currentAddrObj?.state || serviceData.location?.state || ""),
-      postalCode: postalCode !== undefined ? postalCode : (currentAddrObj?.postalCode || ""),
-      country: country !== undefined ? country : (currentAddrObj?.country || serviceData.location?.country || "India"),
+      district:
+        district !== undefined ? district : currentAddrObj?.district || "",
+      state:
+        state !== undefined
+          ? state
+          : currentAddrObj?.state || serviceData.location?.state || "",
+      postalCode:
+        postalCode !== undefined
+          ? postalCode
+          : currentAddrObj?.postalCode || "",
+      country:
+        country !== undefined
+          ? country
+          : currentAddrObj?.country || serviceData.location?.country || "India",
       countryCode: "IN",
-      landmark: landmark !== undefined ? landmark : (currentAddrObj?.landmark || ""),
-      directions: directions !== undefined ? directions : (currentAddrObj?.directions || ""),
-      formattedAddress: formattedAddress !== undefined ? formattedAddress : (address || currentAddress || newCity),
+      landmark:
+        landmark !== undefined ? landmark : currentAddrObj?.landmark || "",
+      directions:
+        directions !== undefined
+          ? directions
+          : currentAddrObj?.directions || "",
+      formattedAddress:
+        formattedAddress !== undefined
+          ? formattedAddress
+          : address || currentAddress || newCity,
       location: {
         type: "Point",
         coordinates: [resolvedLng, resolvedLat],
@@ -894,7 +970,8 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
       state: serviceData.location?.state || updatedAddrObj.state,
       postalCode: updatedAddrObj.postalCode,
       country: serviceData.location?.country || updatedAddrObj.country,
-      coordinates: serviceData.coordinates || serviceData.location?.coordinates || [resolvedLng, resolvedLat],
+      coordinates: serviceData.coordinates ||
+        serviceData.location?.coordinates || [resolvedLng, resolvedLat],
       images: serviceData.images,
       amenities: serviceData.amenities || serviceData.features || [],
       locationHistory: serviceData.locationHistory || [],
@@ -904,8 +981,6 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
     throw error;
   }
 };
-
-
 
 export class VendorService {
   async getVendorMe(userId: any) {
@@ -948,4 +1023,3 @@ export class VendorService {
 export const vendorService = new VendorService();
 
 export default vendorService;
-

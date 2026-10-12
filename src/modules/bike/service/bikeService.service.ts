@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
-import * as BikeService from "./bikeService.model";
+import BikeService from "./bikeService.model";
 import BikeCompany from "../company/bike.model";
 import Tax from "../../admin/tax/tax.model";
 import Favorite from "../../favorites/favorite.model";
 
 //helper function to attach isFavorite flag to companies/services
-const attachFavoriteFlag = async (items, userId, itemType) => {
+const attachFavoriteFlag = async (items: any[], userId: any, itemType: any) => {
   if (!userId || items.length === 0) {
-    items.forEach((item) => (item.isFavorite = false));
+    items.forEach((item: any) => (item.isFavorite = false));
     return items;
   }
 
-  const itemIds = items.map((i) => i.company?.companyId || i.companyId || i.serviceId || i._id);
+  const itemIds = items.map((i: any) => i.company?.companyId || i.companyId || i.serviceId || i._id);
 
   const favorites = await Favorite.find({
     user: userId,
@@ -19,9 +19,9 @@ const attachFavoriteFlag = async (items, userId, itemType) => {
     itemId: { $in: itemIds },
   }).select("itemId");
 
-  const favoriteSet = new Set(favorites.map((f) => f.itemId.toString()));
+  const favoriteSet = new Set(favorites.map((f: any) => f.itemId.toString()));
 
-  items.forEach((item) => {
+  items.forEach((item: any) => {
     const id = item.company?.companyId || item.companyId || item.serviceId || item._id;
     item.isFavorite = favoriteSet.has(id.toString());
   });
@@ -29,7 +29,7 @@ const attachFavoriteFlag = async (items, userId, itemType) => {
   return items;
 };
 
-const checkIsFavorite = async (itemId, userId, itemType) => {
+const checkIsFavorite = async (itemId: any, userId: any, itemType: any) => {
   if (!userId || !itemId) return false;
   const fav = await Favorite.findOne({
     user: userId,
@@ -40,7 +40,7 @@ const checkIsFavorite = async (itemId, userId, itemType) => {
 };
 
 //user side
-export const getBikes = async (query, userId = null) => {
+export const getBikes = async (query: any, userId: any = null) => {
   try {
     const { city = "", page = 1, limit = 10 } = query;
 
@@ -101,7 +101,7 @@ export const getBikes = async (query, userId = null) => {
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
 
-    const formattedBikes = bikes.map((bike) => {
+    const formattedBikes = bikes.map((bike: any) => {
       const effectivePrice =
         bike.discountPrice > 0 ? bike.discountPrice : bike.pricePerDay;
 
@@ -149,7 +149,7 @@ export const getBikes = async (query, userId = null) => {
   }
 };
 
-export const getBikeCompanyDetails = async (id, userId = null) => {
+export const getBikeCompanyDetails = async (id: any, userId: any = null) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
@@ -168,7 +168,7 @@ export const getBikeCompanyDetails = async (id, userId = null) => {
     }
 
     //SERVICES FETCH (ALL BIKES OF THIS COMPANY)
-    const services = await BikeService.find({
+    const services: any[] = await BikeService.find({
       bike: id,
       isActive: true,
     })
@@ -181,7 +181,7 @@ export const getBikeCompanyDetails = async (id, userId = null) => {
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
 
-    const formattedServices = services.map((service) => {
+    const formattedServices = services.map((service: any) => {
       const effectivePrice =
         service.discountPrice > 0 ? service.discountPrice : service.pricePerDay;
 
@@ -248,13 +248,13 @@ export const getBikeCompanyDetails = async (id, userId = null) => {
   }
 };
 
-export const getBikeServiceDetails = async (id, userId = null) => {
+export const getBikeServiceDetails = async (id: any, userId: any = null) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await BikeService.findOne({
+    const service: any = await BikeService.findOne({
       _id: id,
       isActive: true,
     }).lean();
@@ -263,7 +263,7 @@ export const getBikeServiceDetails = async (id, userId = null) => {
       throw new Error("Bike service not found");
     }
 
-    const company = await BikeCompany.findOne({
+    const company: any = await BikeCompany.findOne({
       _id: service.bike,
       isActive: true,
     })
@@ -333,7 +333,7 @@ export const getBikeServiceDetails = async (id, userId = null) => {
   }
 };
 
-export const calculateBikePrice = async (body) => {
+export const calculateBikePrice = async (body: any) => {
   try {
     const { serviceId, startDate, endDate } = body;
 
@@ -353,10 +353,10 @@ export const calculateBikePrice = async (body) => {
     }
 
     //CALCULATE DAYS
-    const diffTime = end - start;
+    const diffTime = end.getTime() - start.getTime();
     const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    const service = await BikeService.findOne({
+    const service: any = await BikeService.findOne({
       _id: serviceId,
       isActive: true,
     }).lean();
@@ -403,7 +403,7 @@ export const calculateBikePrice = async (body) => {
 };
 
 //vendor side
-export const createBikeService = async (data, vendorId) => {
+export const createBikeService = async (data: any, vendorId: any) => {
   try {
     const {
       bikeId,
@@ -475,7 +475,7 @@ export const createBikeService = async (data, vendorId) => {
   }
 };
 
-export const getVendorBikeServices = async (query = {}, vendorId) => {
+export const getVendorBikeServices = async (query: any = {}, vendorId: any) => {
   try {
     const { bikeId, search, bikeType, page = 1, limit = 10 } = query;
 
@@ -485,9 +485,9 @@ export const getVendorBikeServices = async (query = {}, vendorId) => {
       .select("_id")
       .lean();
 
-    const bikeIds = companies.map((c) => c._id);
+    const bikeIds = companies.map((c: any) => c._id);
 
-    const filter = {
+    const filter: any = {
       bike: { $in: bikeIds },
     };
 
@@ -515,7 +515,7 @@ export const getVendorBikeServices = async (query = {}, vendorId) => {
 
     const total = await BikeService.countDocuments(filter);
 
-    const formatted = services.map((s) => ({
+    const formatted = services.map((s: any) => ({
       id: s._id,
 
       title: s.title,
@@ -548,13 +548,13 @@ export const getVendorBikeServices = async (query = {}, vendorId) => {
   }
 };
 
-export const getVendorBikeServiceById = async (serviceId, vendorId) => {
+export const getVendorBikeServiceById = async (serviceId: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await BikeService.findById(serviceId)
+    const service: any = await BikeService.findById(serviceId)
       .populate("bike", "name vendorId")
       .lean();
 
@@ -610,13 +610,13 @@ export const getVendorBikeServiceById = async (serviceId, vendorId) => {
   }
 };
 
-export const updateVendorBikeService = async (serviceId, vendorId, data) => {
+export const updateVendorBikeService = async (serviceId: any, vendorId: any, data: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await BikeService.findById(serviceId).populate(
+    const service: any = await BikeService.findById(serviceId).populate(
       "bike",
       "vendorId",
     );
@@ -672,13 +672,13 @@ export const updateVendorBikeService = async (serviceId, vendorId, data) => {
   }
 };
 
-export const deleteVendorBikeService = async (serviceId, vendorId) => {
+export const deleteVendorBikeService = async (serviceId: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await BikeService.findById(serviceId).populate(
+    const service: any = await BikeService.findById(serviceId).populate(
       "bike",
       "vendorId",
     );

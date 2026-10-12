@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import Tax from "../../admin/tax/tax.model";
 import Favorite from "../../favorites/favorite.model";
 
-const checkIsFavorite = async (itemId, userId, itemType) => {
+const checkIsFavorite = async (itemId: any, userId: any, itemType: any) => {
   if (!userId || !itemId) return false;
   const fav = await Favorite.findOne({
     user: userId,
@@ -14,13 +14,13 @@ const checkIsFavorite = async (itemId, userId, itemType) => {
   return !!fav;
 };
 
-export const getServiceDetails = async (id, userId = null) => {
+export const getServiceDetails = async (id: any, userId: any = null) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await Service.findOne({
+    const service: any = await Service.findOne({
       _id: id,
       isActive: true,
     })
@@ -136,9 +136,9 @@ export const getServiceDetails = async (id, userId = null) => {
   }
 };
 
-export const getVendorServices = async (vendorId) => {
+export const getVendorServices = async (vendorId: any) => {
   try {
-    const services = await Service.find({
+    const services: any[] = await Service.find({
       isActive: true,
     })
       .populate({
@@ -152,9 +152,9 @@ export const getVendorServices = async (vendorId) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const filteredServices = services.filter((service) => service.adventure);
+    const filteredServices = services.filter((service: any) => service.adventure);
 
-    return filteredServices.map((service) => ({
+    return filteredServices.map((service: any) => ({
       id: service._id,
 
       adventure: {
@@ -183,13 +183,13 @@ export const getVendorServices = async (vendorId) => {
   }
 };
 
-export const getVendorServiceById = async (serviceId, vendorId) => {
+export const getVendorServiceById = async (serviceId: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
 
-    const service = await Service.findById(serviceId)
+    const service: any = await Service.findById(serviceId)
       .populate({
         path: "adventure",
         select: "name category vendorId",
@@ -243,7 +243,7 @@ export const getVendorServiceById = async (serviceId, vendorId) => {
   }
 };
 
-export const createService = async (data, vendorId) => {
+export const createService = async (data: any, vendorId: any) => {
   try {
     const {
       adventureId,
@@ -312,7 +312,7 @@ export const createService = async (data, vendorId) => {
   }
 };
 
-export const updateService = async (id, data, vendorId) => {
+export const updateService = async (id: any, data: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
@@ -384,7 +384,7 @@ export const updateService = async (id, data, vendorId) => {
   }
 };
 
-export const deleteService = async (id, vendorId) => {
+export const deleteService = async (id: any, vendorId: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");

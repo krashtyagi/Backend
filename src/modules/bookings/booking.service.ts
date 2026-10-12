@@ -18,7 +18,7 @@ import PDFDocument from "pdfkit";
 
 import RoomType from "../rooms/roomType.model";
 
-import * as GenericBooking from "../multiServiceBookings/booking.model";
+import GenericBooking from "../multiServiceBookings/booking.model";
 import TourService from "../tour/company/tour.model";
 import CabService from "../cab/company/cab.model";
 import BikeService from "../bike/company/bike.model";
@@ -26,7 +26,7 @@ import AdventureService from "../adventure/category/adventure.model";
 import User from "../auth/auth.model";
 
 //restore availability function
-async function restoreAvailability(booking, session) {
+async function restoreAvailability(booking: any, session: any) {
   const currentDate = new Date(booking.checkIn);
 
   while (currentDate < booking.checkOut) {
@@ -44,13 +44,13 @@ async function restoreAvailability(booking, session) {
 }
 
 //process refund function
-async function processRefund(booking, session) {
+async function processRefund(booking: any, session: any) {
   const payment = await Payment.findById(booking.paymentId).session(session);
 
-  if (!payment || payment.status !== "captured")
+  if (!payment || payment.status !== "captured" || !payment.razorpayPaymentId)
     throw new Error("Payment not eligible for refund");
 
-  const refund = await razorpay.payments.refund(payment.razorpayPaymentId, {
+  const refund: any = await (razorpay.payments as any).refund(payment.razorpayPaymentId, {
     amount: booking.refundAmount * 100, // Razorpay expects paise
   });
 
@@ -63,7 +63,7 @@ async function processRefund(booking, session) {
   await payment.save({ session });
 }
 
-export const createBooking = async (data, userId) => {
+export const createBooking = async (data: any, userId: any) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -91,7 +91,7 @@ export const createBooking = async (data, userId) => {
     if (startDate >= endDate)
       throw new Error("Invalid check-in/check-out dates");
 
-    const nights = (endDate - startDate) / (1000 * 60 * 60 * 24);
+    const nights = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     if (nights <= 0) throw new Error("Invalid booking duration");
 
     const rooms = roomsBooked && roomsBooked > 0 ? roomsBooked : 1;
@@ -135,7 +135,7 @@ export const createBooking = async (data, userId) => {
     }).session(session);
 
     //MAP BUILD
-    const availabilityMap = {};
+    const availabilityMap: Record<string, any> = {};
     for (const doc of availabilityDocs) {
       const dateStr = doc.date.toISOString().split("T")[0];
       availabilityMap[dateStr] = doc;
@@ -164,8 +164,8 @@ export const createBooking = async (data, userId) => {
 
       const price =
         dayDoc?.priceOverride ??
-        (roomType.discountPrice > 0
-          ? roomType.discountPrice
+        ((roomType.discountPrice ?? 0) > 0
+          ? roomType.discountPrice!
           : roomType.basePrice);
 
       if (i === 0) firstDayPrice = price;
@@ -287,9 +287,9 @@ export const createBooking = async (data, userId) => {
 
 //Get booking detail by id
 
-export const getUserBookings = async (userId) => {
+export const getUserBookings = async (userId: any) => {
   try {
-    const [hotelBookings, genericBookings] = await Promise.all([
+    const [hotelBookings, genericBookings]: [any[], any[]] = await Promise.all([
       Booking.find({ userId })
         .populate({
           path: "hotelId",
@@ -301,12 +301,12 @@ export const getUserBookings = async (userId) => {
     ]);
 
     // Group serviceIds by type
-    const adventureIds = [];
-    const bikeIds = [];
-    const cabIds = [];
-    const tourIds = [];
+    const adventureIds: any[] = [];
+    const bikeIds: any[] = [];
+    const cabIds: any[] = [];
+    const tourIds: any[] = [];
 
-    genericBookings.forEach((booking) => {
+    genericBookings.forEach((booking: any) => {
       switch (booking.serviceType) {
         case "adventure":
           adventureIds.push(booking.serviceId);
@@ -363,23 +363,23 @@ export const getUserBookings = async (userId) => {
 
     // Create lookup maps
     const adventureMap = new Map(
-      adventureServices.map((item) => [item._id.toString(), item]),
+      adventureServices.map((item: any) => [item._id.toString(), item]),
     );
 
     const bikeMap = new Map(
-      bikeServices.map((item) => [item._id.toString(), item]),
+      bikeServices.map((item: any) => [item._id.toString(), item]),
     );
 
     const cabMap = new Map(
-      cabServices.map((item) => [item._id.toString(), item]),
+      cabServices.map((item: any) => [item._id.toString(), item]),
     );
 
     const tourMap = new Map(
-      tourServices.map((item) => [item._id.toString(), item]),
+      tourServices.map((item: any) => [item._id.toString(), item]),
     );
 
-    const formattedGenericBookings = genericBookings.map((booking) => {
-      let service = null;
+    const formattedGenericBookings = genericBookings.map((booking: any) => {
+      let service: any = null;
 
       switch (booking.serviceType) {
         case "adventure":
@@ -420,7 +420,7 @@ export const getUserBookings = async (userId) => {
       };
     });
 
-    const formattedHotelBookings = hotelBookings.map((booking) => ({
+    const formattedHotelBookings = hotelBookings.map((booking: any) => ({
       _id: booking._id,
       bookingReference: booking.bookingReference,
 
@@ -441,7 +441,7 @@ export const getUserBookings = async (userId) => {
     }));
 
     return [...formattedHotelBookings, ...formattedGenericBookings].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   } catch (error) {
     logger.error("Service Error: getUserBookings", error);
@@ -505,10 +505,10 @@ export const getUserBookings = async (userId) => {
 
 //download user invoice
 
-export const getBookingDetail = async (bookingId, userId) => {
+export const getBookingDetail = async (bookingId: any, userId: any) => {
   try {
     // HOTEL BOOKING
-    const hotelBooking = await Booking.findOne({
+    const hotelBooking: any = await Booking.findOne({
       _id: bookingId,
       userId,
     })
@@ -560,7 +560,7 @@ export const getBookingDetail = async (bookingId, userId) => {
     }
 
     // GENERIC BOOKING
-    const booking = await GenericBooking.findOne({
+    const booking: any = await GenericBooking.findOne({
       _id: bookingId,
       userId,
     }).lean();
@@ -569,7 +569,7 @@ export const getBookingDetail = async (bookingId, userId) => {
       throw new Error("Booking not found");
     }
 
-    let service = null;
+    let service: any = null;
 
     switch (booking.serviceType) {
       case "adventure":
@@ -643,7 +643,7 @@ export const getBookingDetail = async (bookingId, userId) => {
 };
 
 // const logoTrvllo = required("./logo")
-export const userInvoiceDownload = async (booking, res) => {
+export const userInvoiceDownload = async (booking: any, res: any) => {
   const hotel = await Hotel.findById(booking.hotelId).lean();
   if (!hotel) throw new Error("Hotel not found");
 
@@ -757,7 +757,7 @@ export const userInvoiceDownload = async (booking, res) => {
   // Hotel Info
   doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("HOTEL DETAILS:", 300, infoY);
   const hotelAddrStr = typeof hotel.address === 'object' && hotel.address !== null
-    ? (hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || '')
+    ? ((hotel.address as any).formattedAddress || (hotel.address as any).streetAddress || (hotel.address as any).city || '')
     : (hotel.address || '');
   doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotelAddrStr ? `${hotelAddrStr}, ` : ''}${hotel.city || ''}`, 300, infoY + 30);
 
@@ -788,7 +788,7 @@ export const userInvoiceDownload = async (booking, res) => {
   // --- TABLE ROW ---
   const rowY = tableTop + 40;
   const rt = booking.roomTypeId || {};
-  const bedInfo = rt.beds?.map((b) => `${b.quantity} ${b.type}`).join(", ") || "";
+  const bedInfo = rt.beds?.map((b: any) => `${b.quantity} ${b.type}`).join(", ") || "";
 
   doc.fillColor(brandDark).fontSize(11).font("Helvetica-Bold").text(rt.name || "Standard Room", 60, rowY);
   
@@ -828,7 +828,7 @@ export const userInvoiceDownload = async (booking, res) => {
     discountAmt = (rt.basePrice - rt.discountPrice) * nights;
   }
 
-  const drawRow = (label, value, isBold = false, isRed = false) => {
+  const drawRow = (label: string, value: string, isBold = false, isRed = false) => {
     doc
       .fillColor(isRed ? brandRed : brandDark)
       .fontSize(isBold ? 12 : 10)
@@ -872,7 +872,7 @@ export const userInvoiceDownload = async (booking, res) => {
 };
 
 // Refund Preview API
-export const getRefundPreview = async (bookingId, userId) => {
+export const getRefundPreview = async (bookingId: any, userId: any) => {
   try {
     const booking = await Booking.findOne({
       _id: bookingId,
@@ -892,14 +892,14 @@ export const getRefundPreview = async (bookingId, userId) => {
     }
 
     const daysBeforeCheckIn = Math.ceil(
-      (new Date(booking.checkIn) - now) / (1000 * 60 * 60 * 24),
+      (new Date(booking.checkIn).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     let refundPercentage = 0;
     let policyApplied = "";
 
     const isWithin24Hours =
-      now - new Date(booking.createdAt) <= 24 * 60 * 60 * 1000;
+      now.getTime() - new Date(booking.createdAt).getTime() <= 24 * 60 * 60 * 1000;
 
     if (isWithin24Hours) {
       refundPercentage = 100;
@@ -933,7 +933,7 @@ export const getRefundPreview = async (bookingId, userId) => {
 };
 
 // Cancel Booking Request
-export const cancelBooking = async (bookingId, userId, reason) => {
+export const cancelBooking = async (bookingId: any, userId: any, reason: any) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -948,7 +948,7 @@ export const cancelBooking = async (bookingId, userId, reason) => {
     if (booking.status !== "confirmed") {
       throw new Error("Only confirmed bookings can be cancelled");
     }
-    if (booking.status === "cancellation_requested") {
+    if ((booking.status as string) === "cancellation_requested") {
       throw new Error("Cancellation already requested");
     }
 
@@ -964,11 +964,11 @@ export const cancelBooking = async (bookingId, userId, reason) => {
 
     //days calculation
     const daysBeforeCheckIn = Math.ceil(
-      (new Date(booking.checkIn) - now) / (1000 * 60 * 60 * 24),
+      (new Date(booking.checkIn).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     const isWithin24Hours =
-      now - new Date(booking.createdAt) <= 24 * 60 * 60 * 1000;
+      now.getTime() - new Date(booking.createdAt).getTime() <= 24 * 60 * 60 * 1000;
 
     let refundPercentage = 0;
     let policyApplied = "";
@@ -1020,7 +1020,7 @@ export const cancelBooking = async (bookingId, userId, reason) => {
 };
 
 //admin approve or reject refund request
-export const adminHandleRefund = async (bookingId, action) => {
+export const adminHandleRefund = async (bookingId: any, action: any) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -1067,7 +1067,7 @@ export const adminHandleRefund = async (bookingId, action) => {
 //----------VENDOR Service----------
 
 //get vendor bookings for the dashboard
-export const getVendorBookings = async (vendorId, queryParams) => {
+export const getVendorBookings = async (vendorId: any, queryParams: any) => {
   const {
     page = 1,
     limit = 10,
@@ -1081,9 +1081,9 @@ export const getVendorBookings = async (vendorId, queryParams) => {
   const skip = (page - 1) * limit;
 
   const hotels = await Hotel.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h) => h._id);
+  const hotelIds = hotels.map((h: any) => h._id);
 
-  const filter = {
+  const filter: any = {
     hotelId: { $in: hotelIds },
   };
 
@@ -1118,7 +1118,7 @@ export const getVendorBookings = async (vendorId, queryParams) => {
 
   const total = await Booking.countDocuments(filter);
 
-  const formatted = bookings.map((b) => ({
+  const formatted = bookings.map((b: any) => ({
     bookingId: b._id,
     bookingReference: b.bookingReference,
     guestName: `${b.primaryGuest.firstName} ${b.primaryGuest.lastName}`,
@@ -1140,7 +1140,7 @@ export const getVendorBookings = async (vendorId, queryParams) => {
 };
 
 //invoice
-export const getVendorInvoices = async (vendorId, queryParams) => {
+export const getVendorInvoices = async (vendorId: any, queryParams: any) => {
   const {
     page = 1,
     limit = 10,
@@ -1154,9 +1154,9 @@ export const getVendorInvoices = async (vendorId, queryParams) => {
   const skip = (page - 1) * limit;
 
   const hotels = await Hotel.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h) => h._id);
+  const hotelIds = hotels.map((h: any) => h._id);
 
-  const filter = {
+  const filter: any = {
     hotelId: { $in: hotelIds },
   };
 
@@ -1201,7 +1201,7 @@ export const getVendorInvoices = async (vendorId, queryParams) => {
 
   const total = await Booking.countDocuments(filter);
 
-  const data = bookings.map((b) => ({
+  const data = bookings.map((b: any) => ({
     bookingId: b._id,
     bookingReference: b.bookingReference,
     guestName: `${b.primaryGuest.firstName} ${b.primaryGuest.lastName}`,
@@ -1288,12 +1288,12 @@ export const getVendorInvoices = async (vendorId, queryParams) => {
 //   doc.end();
 // };
 
-export const generateInvoicePdf = async (bookingId, vendorId, res) => {
+export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any) => {
   if (!mongoose.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
 
-  const booking = await Booking.findById(bookingId)
+  const booking: any = await Booking.findById(bookingId)
     .populate({
       path: "roomTypeId",
       select: "name basePrice discountPrice roomSizeSqm beds amenities",
@@ -1302,7 +1302,7 @@ export const generateInvoicePdf = async (bookingId, vendorId, res) => {
 
   if (!booking) throw new Error("Booking not found");
 
-  const hotel = await Hotel.findOne({
+  const hotel: any = await Hotel.findOne({
     _id: booking.hotelId,
     vendorId,
   }).lean();
@@ -1360,7 +1360,7 @@ export const generateInvoicePdf = async (bookingId, vendorId, res) => {
     .fontSize(10)
     .font("Helvetica-Bold")
     .text("BOOKING STATUS:", statusX + 15, statusY + 12)
-    .fillColor(booking.status === "Confirmed" ? "#f5a623" : "orange") // Orange/Amber
+    .fillColor((booking.status as string) === "confirmed" ? "#f5a623" : "orange") // Orange/Amber
     .text(booking.status.toUpperCase(), statusX + 115, statusY + 12);
 
   doc
@@ -1474,16 +1474,16 @@ export const generateInvoicePdf = async (bookingId, vendorId, res) => {
     .fillColor(textColor)
     .font("Helvetica-Bold")
     .fontSize(11)
-    .text(rt.name, 50, rowY);
-  const bedInfo = rt.beds.map((b) => `${b.quantity} ${b.type}`).join(", ");
+    .text(rt.name || "Room", 50, rowY);
+  const bedInfo = (rt.beds || []).map((b: any) => `${b.quantity} ${b.type}`).join(", ");
   doc
     .fillColor("#666")
     .fontSize(9)
     .font("Helvetica")
-    .text(`${bedInfo} | ${rt.roomSizeSqm} m²`, 50, rowY + 15);
+    .text(`${bedInfo} | ${rt.roomSizeSqm || ""} m²`, 50, rowY + 15);
 
   // Amenities bar
-  const amenitiesTxt = rt.amenities.slice(0, 4).join(" • ");
+  const amenitiesTxt = (rt.amenities || []).slice(0, 4).join(" • ");
   doc
     .fillColor(primaryBlue)
     .fontSize(8)
@@ -1509,13 +1509,13 @@ export const generateInvoicePdf = async (bookingId, vendorId, res) => {
   const valueX = 555;
 
   //Logic
-  const baseTotal = rt.basePrice * booking.nights;
-  const discountAmt = (rt.basePrice - rt.discountPrice) * booking.nights;
-  const discountPercent = Math.round(
-    ((rt.basePrice - rt.discountPrice) / rt.basePrice) * 100,
-  );
+  const baseTotal = (rt.basePrice || 0) * booking.nights;
+  const discountAmt = ((rt.basePrice || 0) - (rt.discountPrice || 0)) * booking.nights;
+  const discountPercent = (rt.basePrice || 0) > 0 ? Math.round(
+    (((rt.basePrice || 0) - (rt.discountPrice || 0)) / rt.basePrice) * 100,
+  ) : 0;
 
-  const drawPriceRow = (label, value, isTotal = false, isDisc = false) => {
+  const drawPriceRow = (label: string, value: string, isTotal = false, isDisc = false) => {
     const currentY = doc.y;
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
@@ -1571,9 +1571,9 @@ export const generateInvoicePdf = async (bookingId, vendorId, res) => {
 };
 
 export const getVendorDashboard = async (
-  vendorId,
-  reservationDays = 7,
-  revenueMonths = 6,
+  vendorId: any,
+  reservationDays: any = 7,
+  revenueMonths: any = 6,
 ) => {
   const hotels = await Hotel.find({ vendorId }, "_id").lean();
   const hotelIds = hotels.map((h) => h._id);
@@ -1757,7 +1757,7 @@ export const getVendorDashboard = async (
   }
 
   //Recent Bookings formating
-  const formattedRecent = recentBookings.map((b) => ({
+  const formattedRecent = recentBookings.map((b: any) => ({
     bookingReference: b.bookingReference,
     guestName: `${b.primaryGuest.firstName} ${b.primaryGuest.lastName}`,
     room: `${b.roomTypeId?.name || ""} ${b.roomNumber || ""}`,
@@ -1789,7 +1789,7 @@ export const getVendorDashboard = async (
 };
 
 //helper function
-const validateOwnership = async (bookingId, vendorId) => {
+const validateOwnership = async (bookingId: any, vendorId: any) => {
   if (!mongoose.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
@@ -1807,7 +1807,7 @@ const validateOwnership = async (bookingId, vendorId) => {
   return booking;
 };
 
-export const checkInBooking = async (bookingId, vendorId) => {
+export const checkInBooking = async (bookingId: any, vendorId: any) => {
   const booking = await validateOwnership(bookingId, vendorId);
 
   if (booking.status !== "confirmed") {
@@ -1829,7 +1829,7 @@ export const checkInBooking = async (bookingId, vendorId) => {
   return booking;
 };
 
-export const markBookingStaying = async (bookingId, vendorId) => {
+export const markBookingStaying = async (bookingId: any, vendorId: any) => {
   const booking = await validateOwnership(bookingId, vendorId);
 
   if (booking.status !== "checked_in") {
@@ -1842,7 +1842,7 @@ export const markBookingStaying = async (bookingId, vendorId) => {
   return booking;
 };
 
-export const checkOutBooking = async (bookingId, vendorId) => {
+export const checkOutBooking = async (bookingId: any, vendorId: any) => {
   const booking = await validateOwnership(bookingId, vendorId);
 
   if (!["checked_in", "staying"].includes(booking.status)) {

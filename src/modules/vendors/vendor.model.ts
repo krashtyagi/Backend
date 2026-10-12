@@ -16,10 +16,10 @@ export interface IVendor extends Document {
   userId: Types.ObjectId;
   propertyId?: string;
   linkedGroupId?: Types.ObjectId | null;
-  serviceType: "hotel" | "adventure" | "cab" | "bike" | "tour";
+  serviceType?: "hotel" | "adventure" | "cab" | "bike" | "tour";
   businessName?: string;
   logo?: IVendorLogo;
-  businessEmail: string;
+  businessEmail?: string;
   businessPhone?: string;
   businessAddress?: string;
   city?: string;
@@ -43,6 +43,8 @@ export interface IVendor extends Document {
   approvedAt?: Date;
   rejectedAt?: Date;
   blockedAt?: Date;
+  reviewedAt?: Date;
+  reviewedBy?: Types.ObjectId;
   isSubmitted: boolean;
   isActive: boolean;
   isBlocked: boolean;
@@ -192,6 +194,11 @@ const vendorSchema = new Schema<IVendor>(
     approvedAt: Date,
     rejectedAt: Date,
     blockedAt: Date,
+    reviewedAt: Date,
+    reviewedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
 
     isSubmitted: {
       type: Boolean,
@@ -242,4 +249,3 @@ const Vendor: Model<IVendor> = mongoose.model<IVendor>("Vendor", vendorSchema);
 
 export default Vendor;
 export { Vendor };
-

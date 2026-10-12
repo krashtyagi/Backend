@@ -53,6 +53,8 @@ export interface IBooking extends Document {
   refundProcessedAt?: Date;
   cancelledAt?: Date;
   cancellationReason?: string;
+  policyApplied?: string;
+  totalTax?: number;
   actualCheckInAt?: Date;
   actualCheckOutAt?: Date;
   specialRequest?: string;

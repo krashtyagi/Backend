@@ -481,7 +481,7 @@ export class VendorController {
         return;
       }
 
-      const ServiceModel = SERVICE_MODELS[vendor.serviceType];
+      const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
       if (!ServiceModel) {
         res.status(400).json({
           success: false,

@@ -456,17 +456,17 @@ export const getPropertyDetail = async (vendorId: any) => {
 
             address: business.address,
 
-            city: business.city || business?.location?.city,
+            city: (business as any).city || (business as any)?.location?.city,
 
             images: business.images,
 
             documents: business.documents || [],
 
-            features: business.features || [],
+            features: (business as any).features || [],
 
-            amenities: business.amenities || [],
+            amenities: (business as any).amenities || [],
 
-            accessibility: business.accessibility || {},
+            accessibility: (business as any).accessibility || {},
 
             verificationStatus: business.verificationStatus,
 
@@ -713,7 +713,11 @@ export const markIssue = async (
   }
 };
 
-export const verifySection = async (vendorId: any, step: any) => {
+export const verifySection = async (
+  vendorId: any,
+  step: any,
+  adminId?: any,
+) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
@@ -760,8 +764,8 @@ export const verifySection = async (vendorId: any, step: any) => {
       );
     }
 
-    if (step === 4) {
-      const BusinessModel = serviceModelMap[vendor.serviceType];
+    if (step === 4 && vendor.serviceType) {
+      const BusinessModel = serviceModelMap[vendor.serviceType as keyof typeof serviceModelMap];
 
       if (BusinessModel) {
         const business = await BusinessModel.findOne({
@@ -801,7 +805,11 @@ export const verifySection = async (vendorId: any, step: any) => {
   }
 };
 
-export const rejectVendor = async (vendorId: any, body: any) => {
+export const rejectVendor = async (
+  vendorId: any,
+  body: any,
+  adminId?: any,
+) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
@@ -829,7 +837,7 @@ export const rejectVendor = async (vendorId: any, body: any) => {
 
     vendor.reviewedAt = new Date();
 
-    const BusinessModel = serviceModelMap[vendor.serviceType];
+    const BusinessModel = vendor.serviceType ? serviceModelMap[vendor.serviceType as keyof typeof serviceModelMap] : null;
 
     if (BusinessModel) {
       const business = await BusinessModel.findOne({
@@ -846,7 +854,7 @@ export const rejectVendor = async (vendorId: any, body: any) => {
     }
 
     if (vendor.businessEmail) {
-      sendVendorRejectionEmail(vendor).catch((err: any) => {
+      sendVendorRejectionEmail(vendor as any).catch((err: any) => {
         console.error("Rejection email failed:", err.message);
       });
     }
@@ -873,7 +881,7 @@ export const getPropertyListings = async (vendorId: any) => {
     const { serviceType } = vendor;
 
     // Get the business entity
-    const BusinessModel = serviceModelMap[serviceType];
+    const BusinessModel = serviceType ? serviceModelMap[serviceType as keyof typeof serviceModelMap] : null;
     if (!BusinessModel) {
       return {
         serviceType,
@@ -1085,9 +1093,9 @@ export const unblockVendor = async (vendorId: any, adminId: any) => {
     vendor.status = "approved";
     vendor.isBlocked = false;
     vendor.isActive = true;
-    vendor.blockedAt = null;
-    vendor.blockedBy = null;
-    vendor.blockReason = null;
+    vendor.blockedAt = undefined;
+    vendor.blockedBy = undefined;
+    vendor.blockReason = undefined;
 
     await vendor.save();
 
@@ -1263,8 +1271,8 @@ export const deleteProperty = async (
       serviceType: vendor.serviceType || "hotel",
       city:
         vendor.city ||
-        businessDoc?.city ||
-        businessDoc?.location?.city ||
+        (businessDoc as any)?.city ||
+        (businessDoc as any)?.location?.city ||
         "N/A",
       reason: reason || "Deleted by administrator",
       deletedBy: adminId,
