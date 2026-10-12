@@ -6660,10 +6660,13 @@ async function processRefund(booking, session) {
   const payment = await payment_model_default.findById(booking.paymentId).session(session);
   if (!payment || payment.status !== "captured" || !payment.razorpayPaymentId)
     throw new Error("Payment not eligible for refund");
-  const refund = await razorpay_default.payments.refund(payment.razorpayPaymentId, {
-    amount: booking.refundAmount * 100
-    // Razorpay expects paise
-  });
+  const refund = await razorpay_default.payments.refund(
+    payment.razorpayPaymentId,
+    {
+      amount: booking.refundAmount * 100
+      // Razorpay expects paise
+    }
+  );
   payment.status = "refunded";
   payment.refundStatus = "processed";
   payment.refundAmount = booking.refundAmount;
@@ -6713,7 +6716,9 @@ var createBooking = async (data, userId) => {
       throw new Error("Room type not available");
     const maxAdults = (roomType.capacity?.adults ?? 2) * rooms;
     if (guests.adults > maxAdults) {
-      throw new Error(`Guest count (${guests.adults} adults) exceeds room capacity (${maxAdults} adults)`);
+      throw new Error(
+        `Guest count (${guests.adults} adults) exceeds room capacity (${maxAdults} adults)`
+      );
     }
     const taxDoc = await tax_model_default.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
@@ -7052,16 +7057,26 @@ var userInvoiceDownload = async (booking, res) => {
     } catch (err) {
       logger_default.error("Error loading logo image into invoice PDF:", err);
       doc.circle(70, 70, 20).fill(brandColor);
-      doc.fillColor("#FFFFFF").fontSize(20).font("Helvetica-Bold").text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+      doc.fillColor("#FFFFFF").fontSize(20).font("Helvetica-Bold").text(companyName.charAt(0).toUpperCase(), 60, 62, {
+        width: 20,
+        align: "center"
+      });
       doc.fillColor(brandDark).fontSize(24).font("Helvetica-Bold").text(companyName, 100, 60);
     }
   } else {
     doc.circle(70, 70, 20).fill(brandColor);
-    doc.fillColor("#FFFFFF").fontSize(20).font("Helvetica-Bold").text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+    doc.fillColor("#FFFFFF").fontSize(20).font("Helvetica-Bold").text(companyName.charAt(0).toUpperCase(), 60, 62, {
+      width: 20,
+      align: "center"
+    });
     doc.fillColor(brandDark).fontSize(24).font("Helvetica-Bold").text(companyName, 100, 60);
   }
   doc.fillColor(brandColor).fontSize(28).font("Helvetica-Bold").text("INVOICE", 50, 55, { align: "right" });
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`Booking Ref: ${booking.bookingReference}`, 50, 85, { align: "right" }).text(`Date: ${(/* @__PURE__ */ new Date()).toLocaleDateString()}`, 50, 100, { align: "right" });
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`Booking Ref: ${booking.bookingReference}`, 50, 85, {
+    align: "right"
+  }).text(`Date: ${(/* @__PURE__ */ new Date()).toLocaleDateString()}`, 50, 100, {
+    align: "right"
+  });
   doc.moveTo(50, 130).lineTo(545, 130).strokeColor(borderLight).lineWidth(1).stroke();
   doc.moveDown(2);
   const statusY = 150;
@@ -7074,12 +7089,20 @@ var userInvoiceDownload = async (booking, res) => {
   doc.fillColor(paymentColor).fontSize(12).font("Helvetica-Bold").text(booking.paymentStatus?.toUpperCase() || "PENDING", 430, statusY + 13);
   const infoY = 220;
   doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("BILLED TO:", 50, infoY);
-  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(`${booking.primaryGuest?.firstName || ""} ${booking.primaryGuest?.lastName || ""}`.trim() || "Guest", 50, infoY + 15);
+  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(
+    `${booking.primaryGuest?.firstName || ""} ${booking.primaryGuest?.lastName || ""}`.trim() || "Guest",
+    50,
+    infoY + 15
+  );
   doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(booking.primaryGuest?.email || "", 50, infoY + 30);
   doc.text(booking.primaryGuest?.phoneNumber || "", 50, infoY + 45);
   doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("HOTEL DETAILS:", 300, infoY);
   const hotelAddrStr = typeof hotel.address === "object" && hotel.address !== null ? hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || "" : hotel.address || "";
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotelAddrStr ? `${hotelAddrStr}, ` : ""}${hotel.city || ""}`, 300, infoY + 30);
+  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(
+    `${hotelAddrStr ? `${hotelAddrStr}, ` : ""}${hotel.city || ""}`,
+    300,
+    infoY + 30
+  );
   const stayY = 300;
   doc.roundedRect(50, stayY, 495, 60, 6).strokeColor(borderLight).stroke();
   doc.moveTo(297, stayY).lineTo(297, stayY + 60).strokeColor(borderLight).stroke();
@@ -7094,12 +7117,19 @@ var userInvoiceDownload = async (booking, res) => {
   const rt = booking.roomTypeId || {};
   const bedInfo = rt.beds?.map((b) => `${b.quantity} ${b.type}`).join(", ") || "";
   doc.fillColor(brandDark).fontSize(11).font("Helvetica-Bold").text(rt.name || "Standard Room", 60, rowY);
-  doc.fillColor(textMuted).fontSize(9).font("Helvetica").text(`${bedInfo}${bedInfo && rt.roomSizeSqm ? " | " : ""}${rt.roomSizeSqm ? rt.roomSizeSqm + " m\xB2" : ""}`, 60, rowY + 15).text(rt.amenities?.slice(0, 4).join(" \u2022 ") || "", 60, rowY + 28);
+  doc.fillColor(textMuted).fontSize(9).font("Helvetica").text(
+    `${bedInfo}${bedInfo && rt.roomSizeSqm ? " | " : ""}${rt.roomSizeSqm ? rt.roomSizeSqm + " m\xB2" : ""}`,
+    60,
+    rowY + 15
+  ).text(rt.amenities?.slice(0, 4).join(" \u2022 ") || "", 60, rowY + 28);
   doc.fillColor(brandDark).fontSize(10).font("Helvetica").text(`${booking.nights || 1}`, 250, rowY);
   const adultCount = booking.guests?.adults || 0;
   const childCount = booking.guests?.children || 0;
   doc.text(`${adultCount}A, ${childCount}C`, 350, rowY);
-  doc.fontSize(11).font("Helvetica-Bold").text(`Rs. ${(booking.totalAmount || 0).toFixed(2)}`, 450, rowY, { width: 85, align: "right" });
+  doc.fontSize(11).font("Helvetica-Bold").text(`Rs. ${(booking.totalAmount || 0).toFixed(2)}`, 450, rowY, {
+    width: 85,
+    align: "right"
+  });
   const rowBottom = rowY + 50;
   doc.moveTo(50, rowBottom).lineTo(545, rowBottom).strokeColor(borderLight).stroke();
   const calcX = 350;
@@ -7124,7 +7154,12 @@ var userInvoiceDownload = async (booking, res) => {
   drawRow("Base Price", `Rs. ${baseTotal.toFixed(2)}`);
   if (discountAmt > 0) {
     const discountPercent = baseTotal > 0 ? Math.round(discountAmt / baseTotal * 100) : 0;
-    drawRow(`Discount (${discountPercent}%)`, `- Rs. ${discountAmt.toFixed(2)}`, false, true);
+    drawRow(
+      `Discount (${discountPercent}%)`,
+      `- Rs. ${discountAmt.toFixed(2)}`,
+      false,
+      true
+    );
   }
   const taxes = booking.taxAmount || booking.totalTax || 0;
   drawRow("Taxes & Fees", `Rs. ${taxes.toFixed(2)}`);
@@ -7137,7 +7172,12 @@ var userInvoiceDownload = async (booking, res) => {
   drawRow("GRAND TOTAL", `Rs. ${(booking.totalAmount || 0).toFixed(2)}`, true);
   const footerY = 780;
   doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor(borderLight).stroke();
-  doc.fillColor(textMuted).fontSize(9).font("Helvetica").text(`Thank you for choosing ${companyName}! For support, please contact us.`, 50, footerY + 15, { align: "center" });
+  doc.fillColor(textMuted).fontSize(9).font("Helvetica").text(
+    `Thank you for choosing ${companyName}! For support, please contact us.`,
+    50,
+    footerY + 15,
+    { align: "center" }
+  );
   doc.end();
 };
 var getRefundPreview = async (bookingId, userId) => {
@@ -7443,13 +7483,20 @@ var generateInvoicePdf = async (bookingId, vendorId, res) => {
   const statusX = 40;
   const statusY = 110;
   doc.roundedRect(statusX, statusY, 515, 35, 3).fill(lightBg);
-  doc.fillColor(primaryBlue).fontSize(10).font("Helvetica-Bold").text("BOOKING STATUS:", statusX + 15, statusY + 12).fillColor(booking.status === "confirmed" ? "#f5a623" : "orange").text(booking.status.toUpperCase(), statusX + 115, statusY + 12);
+  doc.fillColor(primaryBlue).fontSize(10).font("Helvetica-Bold").text("BOOKING STATUS:", statusX + 15, statusY + 12).fillColor(
+    booking.status === "confirmed" ? "#f5a623" : "orange"
+  ).text(booking.status.toUpperCase(), statusX + 115, statusY + 12);
   doc.fillColor(primaryBlue).text("PAYMENT:", statusX + 280, statusY + 12).fillColor(textColor).text(booking.paymentStatus.toUpperCase(), statusX + 340, statusY + 12);
   doc.moveDown(3.5);
   const gridY = doc.y;
   doc.fillColor(primaryBlue).fontSize(12).font("Helvetica-Bold").text(hotel.name, 40, gridY);
   const invoiceHotelAddr = typeof hotel.address === "object" && hotel.address !== null ? hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || "" : hotel.address || "";
-  doc.fillColor("#666").fontSize(9).font("Helvetica").text(`${invoiceHotelAddr ? `${invoiceHotelAddr}, ` : ""}${hotel.city || ""}`, 40, gridY + 15, { width: 220 });
+  doc.fillColor("#666").fontSize(9).font("Helvetica").text(
+    `${invoiceHotelAddr ? `${invoiceHotelAddr}, ` : ""}${hotel.city || ""}`,
+    40,
+    gridY + 15,
+    { width: 220 }
+  );
   doc.fillColor(primaryBlue).fontSize(12).font("Helvetica-Bold").text("PRIMARY GUEST", 320, gridY);
   doc.fillColor(textColor).fontSize(10).font("Helvetica").text(
     `${booking.primaryGuest.firstName} ${booking.primaryGuest.lastName}`,
@@ -7516,9 +7563,14 @@ var generateInvoicePdf = async (bookingId, vendorId, res) => {
   doc.moveTo(calcX, doc.y).lineTo(valueX, doc.y).stroke(borderColor);
   doc.moveDown(0.5);
   drawPriceRow("GRAND TOTAL", booking.totalAmount.toFixed(2), true);
-  doc.fontSize(8).fillColor("gray").text(`Thank you for booking with ${trivllo_default.company_name}! Have a great stay.`, 40, 760, {
-    align: "center"
-  }).text("Carry a valid Govt. ID (Aadhar/Passport) for check-in.", {
+  doc.fontSize(8).fillColor("gray").text(
+    `Thank you for booking with ${trivllo_default.company_name}! Have a great stay.`,
+    40,
+    760,
+    {
+      align: "center"
+    }
+  ).text("Carry a valid Govt. ID (Aadhar/Passport) for check-in.", {
     align: "center"
   });
   doc.end();

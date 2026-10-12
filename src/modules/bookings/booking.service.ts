@@ -2,7 +2,7 @@ import Booking from "./booking.model.js";
 import Availability from "../availability/availability.model.js";
 import mongoose from "mongoose";
 import logger from "../../shared/utils/logger.js";
-import trivlloData from "../../../trivllo.json";
+import trivlloData from "../../../trivllo.json" with { type: "json" };
 import Payment from "../payments/payment.model.js";
 import Hotel from "../hotels/hotel.model.js";
 import Tax from "../admin/tax/tax.model.js";
@@ -50,9 +50,12 @@ async function processRefund(booking: any, session: any) {
   if (!payment || payment.status !== "captured" || !payment.razorpayPaymentId)
     throw new Error("Payment not eligible for refund");
 
-  const refund: any = await (razorpay.payments as any).refund(payment.razorpayPaymentId, {
-    amount: booking.refundAmount * 100, // Razorpay expects paise
-  });
+  const refund: any = await (razorpay.payments as any).refund(
+    payment.razorpayPaymentId,
+    {
+      amount: booking.refundAmount * 100, // Razorpay expects paise
+    },
+  );
 
   payment.status = "refunded";
   payment.refundStatus = "processed";
@@ -91,7 +94,8 @@ export const createBooking = async (data: any, userId: any) => {
     if (startDate >= endDate)
       throw new Error("Invalid check-in/check-out dates");
 
-    const nights = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+    const nights =
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     if (nights <= 0) throw new Error("Invalid booking duration");
 
     const rooms = roomsBooked && roomsBooked > 0 ? roomsBooked : 1;
@@ -107,10 +111,18 @@ export const createBooking = async (data: any, userId: any) => {
     const userDoc = await User.findById(userId).session(session);
 
     const safePrimaryGuest = {
-      firstName: (primaryGuest?.firstName || "").trim() || userDoc?.firstName || "Guest",
-      lastName: (primaryGuest?.lastName || "").trim() || userDoc?.lastName || "User",
-      email: (primaryGuest?.email || "").trim() || userDoc?.email || "guest@trivllo.com",
-      phoneNumber: (primaryGuest?.phoneNumber || "").trim() || userDoc?.phoneNumber || "9999999999",
+      firstName:
+        (primaryGuest?.firstName || "").trim() || userDoc?.firstName || "Guest",
+      lastName:
+        (primaryGuest?.lastName || "").trim() || userDoc?.lastName || "User",
+      email:
+        (primaryGuest?.email || "").trim() ||
+        userDoc?.email ||
+        "guest@trivllo.com",
+      phoneNumber:
+        (primaryGuest?.phoneNumber || "").trim() ||
+        userDoc?.phoneNumber ||
+        "9999999999",
     };
 
     const hotel = await Hotel.findById(hotelId).session(session);
@@ -122,7 +134,9 @@ export const createBooking = async (data: any, userId: any) => {
 
     const maxAdults = (roomType.capacity?.adults ?? 2) * rooms;
     if (guests.adults > maxAdults) {
-      throw new Error(`Guest count (${guests.adults} adults) exceeds room capacity (${maxAdults} adults)`);
+      throw new Error(
+        `Guest count (${guests.adults} adults) exceeds room capacity (${maxAdults} adults)`,
+      );
     }
 
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
@@ -441,7 +455,8 @@ export const getUserBookings = async (userId: any) => {
     }));
 
     return [...formattedHotelBookings, ...formattedGenericBookings].sort(
-      (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      (a: any, b: any) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   } catch (error) {
     logger.error("Service Error: getUserBookings", error);
@@ -664,7 +679,10 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
   const brandRed = "#EF4444"; // Red-500
   const bgLight = "#F8FAFC"; // Slate-50
 
-  const companyName = typeof trivlloData !== "undefined" && trivlloData.company_name ? trivlloData.company_name : "Trivllo";
+  const companyName =
+    typeof trivlloData !== "undefined" && trivlloData.company_name
+      ? trivlloData.company_name
+      : "Trivllo";
 
   // --- HEADER ---
   // Logo
@@ -691,7 +709,10 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
         .fillColor("#FFFFFF")
         .fontSize(20)
         .font("Helvetica-Bold")
-        .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+        .text(companyName.charAt(0).toUpperCase(), 60, 62, {
+          width: 20,
+          align: "center",
+        });
 
       doc
         .fillColor(brandDark)
@@ -705,7 +726,10 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
       .fillColor("#FFFFFF")
       .fontSize(20)
       .font("Helvetica-Bold")
-      .text(companyName.charAt(0).toUpperCase(), 60, 62, { width: 20, align: "center" });
+      .text(companyName.charAt(0).toUpperCase(), 60, 62, {
+        width: 20,
+        align: "center",
+      });
 
     doc
       .fillColor(brandDark)
@@ -725,52 +749,130 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
     .fillColor(textMuted)
     .fontSize(10)
     .font("Helvetica")
-    .text(`Booking Ref: ${booking.bookingReference}`, 50, 85, { align: "right" })
-    .text(`Date: ${new Date().toLocaleDateString()}`, 50, 100, { align: "right" });
+    .text(`Booking Ref: ${booking.bookingReference}`, 50, 85, {
+      align: "right",
+    })
+    .text(`Date: ${new Date().toLocaleDateString()}`, 50, 100, {
+      align: "right",
+    });
 
   // Divider
-  doc.moveTo(50, 130).lineTo(545, 130).strokeColor(borderLight).lineWidth(1).stroke();
+  doc
+    .moveTo(50, 130)
+    .lineTo(545, 130)
+    .strokeColor(borderLight)
+    .lineWidth(1)
+    .stroke();
 
   // --- STATUS BANNER ---
   doc.moveDown(2);
   const statusY = 150;
 
   doc.roundedRect(50, statusY, 495, 40, 6).fill(bgLight);
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("BOOKING STATUS", 70, statusY + 14);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("BOOKING STATUS", 70, statusY + 14);
 
   const statusColor = booking.status === "confirmed" ? "#10B981" : "#F59E0B";
-  doc.fillColor(statusColor).fontSize(12).font("Helvetica-Bold").text(booking.status?.toUpperCase() || "PENDING", 180, statusY + 13);
+  doc
+    .fillColor(statusColor)
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(booking.status?.toUpperCase() || "PENDING", 180, statusY + 13);
 
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("PAYMENT STATUS", 320, statusY + 14);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("PAYMENT STATUS", 320, statusY + 14);
   const paymentColor = booking.paymentStatus === "paid" ? "#10B981" : "#F59E0B";
-  doc.fillColor(paymentColor).fontSize(12).font("Helvetica-Bold").text(booking.paymentStatus?.toUpperCase() || "PENDING", 430, statusY + 13);
+  doc
+    .fillColor(paymentColor)
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(booking.paymentStatus?.toUpperCase() || "PENDING", 430, statusY + 13);
 
   // --- INFO SECTIONS (Guest & Hotel) ---
   const infoY = 220;
 
   // Bill To (Guest)
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("BILLED TO:", 50, infoY);
-  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(`${booking.primaryGuest?.firstName || ''} ${booking.primaryGuest?.lastName || ''}`.trim() || "Guest", 50, infoY + 15);
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(booking.primaryGuest?.email || "", 50, infoY + 30);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("BILLED TO:", 50, infoY);
+  doc
+    .fillColor(brandDark)
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(
+      `${booking.primaryGuest?.firstName || ""} ${booking.primaryGuest?.lastName || ""}`.trim() ||
+        "Guest",
+      50,
+      infoY + 15,
+    );
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica")
+    .text(booking.primaryGuest?.email || "", 50, infoY + 30);
   doc.text(booking.primaryGuest?.phoneNumber || "", 50, infoY + 45);
 
   // Hotel Info
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("HOTEL DETAILS:", 300, infoY);
-  const hotelAddrStr = typeof hotel.address === 'object' && hotel.address !== null
-    ? ((hotel.address as any).formattedAddress || (hotel.address as any).streetAddress || (hotel.address as any).city || '')
-    : (hotel.address || '');
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica").text(`${hotelAddrStr ? `${hotelAddrStr}, ` : ''}${hotel.city || ''}`, 300, infoY + 30);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("HOTEL DETAILS:", 300, infoY);
+  const hotelAddrStr =
+    typeof hotel.address === "object" && hotel.address !== null
+      ? (hotel.address as any).formattedAddress ||
+        (hotel.address as any).streetAddress ||
+        (hotel.address as any).city ||
+        ""
+      : hotel.address || "";
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica")
+    .text(
+      `${hotelAddrStr ? `${hotelAddrStr}, ` : ""}${hotel.city || ""}`,
+      300,
+      infoY + 30,
+    );
 
   // --- STAY DETAILS ---
   const stayY = 300;
   doc.roundedRect(50, stayY, 495, 60, 6).strokeColor(borderLight).stroke();
-  doc.moveTo(297, stayY).lineTo(297, stayY + 60).strokeColor(borderLight).stroke();
+  doc
+    .moveTo(297, stayY)
+    .lineTo(297, stayY + 60)
+    .strokeColor(borderLight)
+    .stroke();
 
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("CHECK-IN", 70, stayY + 15);
-  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(new Date(booking.checkIn).toDateString(), 70, stayY + 30);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("CHECK-IN", 70, stayY + 15);
+  doc
+    .fillColor(brandDark)
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(new Date(booking.checkIn).toDateString(), 70, stayY + 30);
 
-  doc.fillColor(textMuted).fontSize(10).font("Helvetica-Bold").text("CHECK-OUT", 320, stayY + 15);
-  doc.fillColor(brandDark).fontSize(12).font("Helvetica-Bold").text(new Date(booking.checkOut).toDateString(), 320, stayY + 30);
+  doc
+    .fillColor(textMuted)
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("CHECK-OUT", 320, stayY + 15);
+  doc
+    .fillColor(brandDark)
+    .fontSize(12)
+    .font("Helvetica-Bold")
+    .text(new Date(booking.checkOut).toDateString(), 320, stayY + 30);
 
   // --- TABLE HEADER ---
   const tableTop = 400;
@@ -788,28 +890,51 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
   // --- TABLE ROW ---
   const rowY = tableTop + 40;
   const rt = booking.roomTypeId || {};
-  const bedInfo = rt.beds?.map((b: any) => `${b.quantity} ${b.type}`).join(", ") || "";
+  const bedInfo =
+    rt.beds?.map((b: any) => `${b.quantity} ${b.type}`).join(", ") || "";
 
-  doc.fillColor(brandDark).fontSize(11).font("Helvetica-Bold").text(rt.name || "Standard Room", 60, rowY);
-  
+  doc
+    .fillColor(brandDark)
+    .fontSize(11)
+    .font("Helvetica-Bold")
+    .text(rt.name || "Standard Room", 60, rowY);
+
   doc
     .fillColor(textMuted)
     .fontSize(9)
     .font("Helvetica")
-    .text(`${bedInfo}${bedInfo && rt.roomSizeSqm ? ' | ' : ''}${rt.roomSizeSqm ? rt.roomSizeSqm + ' m²' : ''}`, 60, rowY + 15)
+    .text(
+      `${bedInfo}${bedInfo && rt.roomSizeSqm ? " | " : ""}${rt.roomSizeSqm ? rt.roomSizeSqm + " m²" : ""}`,
+      60,
+      rowY + 15,
+    )
     .text(rt.amenities?.slice(0, 4).join(" • ") || "", 60, rowY + 28);
 
-  doc.fillColor(brandDark).fontSize(10).font("Helvetica").text(`${booking.nights || 1}`, 250, rowY);
-  
+  doc
+    .fillColor(brandDark)
+    .fontSize(10)
+    .font("Helvetica")
+    .text(`${booking.nights || 1}`, 250, rowY);
+
   const adultCount = booking.guests?.adults || 0;
   const childCount = booking.guests?.children || 0;
   doc.text(`${adultCount}A, ${childCount}C`, 350, rowY);
-  
-  doc.fontSize(11).font("Helvetica-Bold").text(`Rs. ${(booking.totalAmount || 0).toFixed(2)}`, 450, rowY, { width: 85, align: "right" });
+
+  doc
+    .fontSize(11)
+    .font("Helvetica-Bold")
+    .text(`Rs. ${(booking.totalAmount || 0).toFixed(2)}`, 450, rowY, {
+      width: 85,
+      align: "right",
+    });
 
   // Divider below row
   const rowBottom = rowY + 50;
-  doc.moveTo(50, rowBottom).lineTo(545, rowBottom).strokeColor(borderLight).stroke();
+  doc
+    .moveTo(50, rowBottom)
+    .lineTo(545, rowBottom)
+    .strokeColor(borderLight)
+    .stroke();
 
   // --- TOTALS SECTION ---
   const calcX = 350;
@@ -820,7 +945,7 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
   const nights = booking.nights || 1;
   const basePrice = rt.basePrice || booking.pricePerNight || 0;
   const baseTotal = basePrice * nights;
-  
+
   let discountAmt = 0;
   if (booking.discountAmount !== undefined) {
     discountAmt = booking.discountAmount;
@@ -828,7 +953,12 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
     discountAmt = (rt.basePrice - rt.discountPrice) * nights;
   }
 
-  const drawRow = (label: string, value: string, isBold = false, isRed = false) => {
+  const drawRow = (
+    label: string,
+    value: string,
+    isBold = false,
+    isRed = false,
+  ) => {
     doc
       .fillColor(isRed ? brandRed : brandDark)
       .fontSize(isBold ? 12 : 10)
@@ -842,8 +972,14 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
   drawRow("Base Price", `Rs. ${baseTotal.toFixed(2)}`);
 
   if (discountAmt > 0) {
-    const discountPercent = baseTotal > 0 ? Math.round((discountAmt / baseTotal) * 100) : 0;
-    drawRow(`Discount (${discountPercent}%)`, `- Rs. ${discountAmt.toFixed(2)}`, false, true);
+    const discountPercent =
+      baseTotal > 0 ? Math.round((discountAmt / baseTotal) * 100) : 0;
+    drawRow(
+      `Discount (${discountPercent}%)`,
+      `- Rs. ${discountAmt.toFixed(2)}`,
+      false,
+      true,
+    );
   }
 
   const taxes = booking.taxAmount || booking.totalTax || 0;
@@ -854,19 +990,32 @@ export const userInvoiceDownload = async (booking: any, res: any) => {
   }
 
   currentY += 5;
-  doc.moveTo(calcX, currentY - 5).lineTo(535, currentY - 5).strokeColor(borderLight).stroke();
+  doc
+    .moveTo(calcX, currentY - 5)
+    .lineTo(535, currentY - 5)
+    .strokeColor(borderLight)
+    .stroke();
   currentY += 5;
 
   drawRow("GRAND TOTAL", `Rs. ${(booking.totalAmount || 0).toFixed(2)}`, true);
 
   // --- FOOTER ---
   const footerY = 780;
-  doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor(borderLight).stroke();
+  doc
+    .moveTo(50, footerY)
+    .lineTo(545, footerY)
+    .strokeColor(borderLight)
+    .stroke();
   doc
     .fillColor(textMuted)
     .fontSize(9)
     .font("Helvetica")
-    .text(`Thank you for choosing ${companyName}! For support, please contact us.`, 50, footerY + 15, { align: "center" });
+    .text(
+      `Thank you for choosing ${companyName}! For support, please contact us.`,
+      50,
+      footerY + 15,
+      { align: "center" },
+    );
 
   doc.end();
 };
@@ -892,14 +1041,16 @@ export const getRefundPreview = async (bookingId: any, userId: any) => {
     }
 
     const daysBeforeCheckIn = Math.ceil(
-      (new Date(booking.checkIn).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      (new Date(booking.checkIn).getTime() - now.getTime()) /
+        (1000 * 60 * 60 * 24),
     );
 
     let refundPercentage = 0;
     let policyApplied = "";
 
     const isWithin24Hours =
-      now.getTime() - new Date(booking.createdAt).getTime() <= 24 * 60 * 60 * 1000;
+      now.getTime() - new Date(booking.createdAt).getTime() <=
+      24 * 60 * 60 * 1000;
 
     if (isWithin24Hours) {
       refundPercentage = 100;
@@ -933,7 +1084,11 @@ export const getRefundPreview = async (bookingId: any, userId: any) => {
 };
 
 // Cancel Booking Request
-export const cancelBooking = async (bookingId: any, userId: any, reason: any) => {
+export const cancelBooking = async (
+  bookingId: any,
+  userId: any,
+  reason: any,
+) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -964,11 +1119,13 @@ export const cancelBooking = async (bookingId: any, userId: any, reason: any) =>
 
     //days calculation
     const daysBeforeCheckIn = Math.ceil(
-      (new Date(booking.checkIn).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      (new Date(booking.checkIn).getTime() - now.getTime()) /
+        (1000 * 60 * 60 * 24),
     );
 
     const isWithin24Hours =
-      now.getTime() - new Date(booking.createdAt).getTime() <= 24 * 60 * 60 * 1000;
+      now.getTime() - new Date(booking.createdAt).getTime() <=
+      24 * 60 * 60 * 1000;
 
     let refundPercentage = 0;
     let policyApplied = "";
@@ -1288,7 +1445,11 @@ export const getVendorInvoices = async (vendorId: any, queryParams: any) => {
 //   doc.end();
 // };
 
-export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any) => {
+export const generateInvoicePdf = async (
+  bookingId: any,
+  vendorId: any,
+  res: any,
+) => {
   if (!mongoose.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
@@ -1360,7 +1521,9 @@ export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any
     .fontSize(10)
     .font("Helvetica-Bold")
     .text("BOOKING STATUS:", statusX + 15, statusY + 12)
-    .fillColor((booking.status as string) === "confirmed" ? "#f5a623" : "orange") // Orange/Amber
+    .fillColor(
+      (booking.status as string) === "confirmed" ? "#f5a623" : "orange",
+    ) // Orange/Amber
     .text(booking.status.toUpperCase(), statusX + 115, statusY + 12);
 
   doc
@@ -1379,14 +1542,23 @@ export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any
     .fontSize(12)
     .font("Helvetica-Bold")
     .text(hotel.name, 40, gridY);
-  const invoiceHotelAddr = typeof hotel.address === 'object' && hotel.address !== null
-    ? (hotel.address.formattedAddress || hotel.address.streetAddress || hotel.address.city || '')
-    : (hotel.address || '');
+  const invoiceHotelAddr =
+    typeof hotel.address === "object" && hotel.address !== null
+      ? hotel.address.formattedAddress ||
+        hotel.address.streetAddress ||
+        hotel.address.city ||
+        ""
+      : hotel.address || "";
   doc
     .fillColor("#666")
     .fontSize(9)
     .font("Helvetica")
-    .text(`${invoiceHotelAddr ? `${invoiceHotelAddr}, ` : ''}${hotel.city || ''}`, 40, gridY + 15, { width: 220 });
+    .text(
+      `${invoiceHotelAddr ? `${invoiceHotelAddr}, ` : ""}${hotel.city || ""}`,
+      40,
+      gridY + 15,
+      { width: 220 },
+    );
 
   // Right: Guest
   doc
@@ -1475,7 +1647,9 @@ export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any
     .font("Helvetica-Bold")
     .fontSize(11)
     .text(rt.name || "Room", 50, rowY);
-  const bedInfo = (rt.beds || []).map((b: any) => `${b.quantity} ${b.type}`).join(", ");
+  const bedInfo = (rt.beds || [])
+    .map((b: any) => `${b.quantity} ${b.type}`)
+    .join(", ");
   doc
     .fillColor("#666")
     .fontSize(9)
@@ -1510,12 +1684,22 @@ export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any
 
   //Logic
   const baseTotal = (rt.basePrice || 0) * booking.nights;
-  const discountAmt = ((rt.basePrice || 0) - (rt.discountPrice || 0)) * booking.nights;
-  const discountPercent = (rt.basePrice || 0) > 0 ? Math.round(
-    (((rt.basePrice || 0) - (rt.discountPrice || 0)) / rt.basePrice) * 100,
-  ) : 0;
+  const discountAmt =
+    ((rt.basePrice || 0) - (rt.discountPrice || 0)) * booking.nights;
+  const discountPercent =
+    (rt.basePrice || 0) > 0
+      ? Math.round(
+          (((rt.basePrice || 0) - (rt.discountPrice || 0)) / rt.basePrice) *
+            100,
+        )
+      : 0;
 
-  const drawPriceRow = (label: string, value: string, isTotal = false, isDisc = false) => {
+  const drawPriceRow = (
+    label: string,
+    value: string,
+    isTotal = false,
+    isDisc = false,
+  ) => {
     const currentY = doc.y;
     doc
       .font(isTotal ? "Helvetica-Bold" : "Helvetica")
@@ -1560,9 +1744,14 @@ export const generateInvoicePdf = async (bookingId: any, vendorId: any, res: any
   doc
     .fontSize(8)
     .fillColor("gray")
-    .text(`Thank you for booking with ${trivlloData.company_name}! Have a great stay.`, 40, 760, {
-      align: "center",
-    })
+    .text(
+      `Thank you for booking with ${trivlloData.company_name}! Have a great stay.`,
+      40,
+      760,
+      {
+        align: "center",
+      },
+    )
     .text("Carry a valid Govt. ID (Aadhar/Passport) for check-in.", {
       align: "center",
     });
@@ -1856,7 +2045,6 @@ export const checkOutBooking = async (bookingId: any, vendorId: any) => {
 
   return booking;
 };
-
 
 const booking_service = {
   createBooking,
