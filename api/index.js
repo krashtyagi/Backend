@@ -1,10 +1,5 @@
-"use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __esm = (fn, res, err) => function __init() {
   if (err) throw err[0];
   try {
@@ -17,23 +12,6 @@ var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key2 of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key2) && key2 !== except)
-        __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/modules/availability/availability.model.ts
 var availability_model_exports = {};
@@ -41,15 +19,15 @@ __export(availability_model_exports, {
   Availability: () => Availability,
   default: () => availability_model_default
 });
-var import_mongoose10, availabilitySchema, Availability, availability_model_default;
+import mongoose10, { Schema as Schema9 } from "mongoose";
+var availabilitySchema, Availability, availability_model_default;
 var init_availability_model = __esm({
   "src/modules/availability/availability.model.ts"() {
     "use strict";
-    import_mongoose10 = __toESM(require("mongoose"), 1);
-    availabilitySchema = new import_mongoose10.Schema(
+    availabilitySchema = new Schema9(
       {
         roomTypeId: {
-          type: import_mongoose10.Schema.Types.ObjectId,
+          type: Schema9.Types.ObjectId,
           ref: "RoomType",
           required: true
         },
@@ -76,7 +54,7 @@ var init_availability_model = __esm({
       { timestamps: true }
     );
     availabilitySchema.index({ roomTypeId: 1, date: 1 }, { unique: true });
-    Availability = import_mongoose10.default.model("Availability", availabilitySchema);
+    Availability = mongoose10.model("Availability", availabilitySchema);
     availability_model_default = Availability;
   }
 });
@@ -87,15 +65,15 @@ __export(cabService_model_exports, {
   CabService: () => CabService,
   default: () => cabService_model_default
 });
-var import_mongoose23, cabServiceSchema, CabService, cabService_model_default;
+import mongoose23, { Schema as Schema17 } from "mongoose";
+var cabServiceSchema, CabService, cabService_model_default;
 var init_cabService_model = __esm({
   "src/modules/cab/service/cabService.model.ts"() {
     "use strict";
-    import_mongoose23 = __toESM(require("mongoose"), 1);
-    cabServiceSchema = new import_mongoose23.Schema(
+    cabServiceSchema = new Schema17(
       {
         cab: {
-          type: import_mongoose23.Schema.Types.ObjectId,
+          type: Schema17.Types.ObjectId,
           ref: "CabCompany",
           required: true
         },
@@ -178,7 +156,7 @@ var init_cabService_model = __esm({
     });
     cabServiceSchema.index({ cab: 1, isActive: 1 });
     cabServiceSchema.index({ title: "text", description: "text" });
-    CabService = import_mongoose23.default.model("CabService", cabServiceSchema);
+    CabService = mongoose23.model("CabService", cabServiceSchema);
     cabService_model_default = CabService;
   }
 });
@@ -189,15 +167,15 @@ __export(bikeService_model_exports, {
   BikeService: () => BikeService,
   default: () => bikeService_model_default
 });
-var import_mongoose24, bikeServiceSchema, BikeService, bikeService_model_default;
+import mongoose24, { Schema as Schema18 } from "mongoose";
+var bikeServiceSchema, BikeService, bikeService_model_default;
 var init_bikeService_model = __esm({
   "src/modules/bike/service/bikeService.model.ts"() {
     "use strict";
-    import_mongoose24 = __toESM(require("mongoose"), 1);
-    bikeServiceSchema = new import_mongoose24.Schema(
+    bikeServiceSchema = new Schema18(
       {
         bike: {
-          type: import_mongoose24.Schema.Types.ObjectId,
+          type: Schema18.Types.ObjectId,
           ref: "BikeCompany",
           required: true
         },
@@ -261,7 +239,7 @@ var init_bikeService_model = __esm({
     );
     bikeServiceSchema.index({ bike: 1, isActive: 1 });
     bikeServiceSchema.index({ bikeType: 1, pricePerDay: 1 });
-    BikeService = import_mongoose24.default.model("BikeService", bikeServiceSchema);
+    BikeService = mongoose24.model("BikeService", bikeServiceSchema);
     bikeService_model_default = BikeService;
   }
 });
@@ -272,12 +250,12 @@ __export(service_model_exports, {
   Service: () => Service,
   default: () => service_model_default
 });
-var import_mongoose25, itinerarySchema, serviceSchema, Service, service_model_default;
+import mongoose25, { Schema as Schema19 } from "mongoose";
+var itinerarySchema, serviceSchema, Service, service_model_default;
 var init_service_model = __esm({
   "src/modules/adventure/service/service.model.ts"() {
     "use strict";
-    import_mongoose25 = __toESM(require("mongoose"), 1);
-    itinerarySchema = new import_mongoose25.Schema(
+    itinerarySchema = new Schema19(
       {
         day: {
           type: Number,
@@ -294,10 +272,10 @@ var init_service_model = __esm({
       },
       { _id: false }
     );
-    serviceSchema = new import_mongoose25.Schema(
+    serviceSchema = new Schema19(
       {
         adventure: {
-          type: import_mongoose25.Schema.Types.ObjectId,
+          type: Schema19.Types.ObjectId,
           ref: "Adventure",
           required: true,
           index: true
@@ -363,7 +341,7 @@ var init_service_model = __esm({
     serviceSchema.index({ adventure: 1, type: 1 });
     serviceSchema.index({ adventure: 1, basePrice: 1 });
     serviceSchema.index({ adventure: 1, discountPrice: 1 });
-    Service = import_mongoose25.default.model("Service", serviceSchema);
+    Service = mongoose25.model("Service", serviceSchema);
     service_model_default = Service;
   }
 });
@@ -374,12 +352,12 @@ __export(tourService_model_exports, {
   TourService: () => TourService,
   default: () => tourService_model_default
 });
-var import_mongoose26, itinerarySchema2, tourServiceSchema, TourService, tourService_model_default;
+import mongoose26, { Schema as Schema20 } from "mongoose";
+var itinerarySchema2, tourServiceSchema, TourService, tourService_model_default;
 var init_tourService_model = __esm({
   "src/modules/tour/service/tourService.model.ts"() {
     "use strict";
-    import_mongoose26 = __toESM(require("mongoose"), 1);
-    itinerarySchema2 = new import_mongoose26.Schema(
+    itinerarySchema2 = new Schema20(
       {
         day: {
           type: Number,
@@ -402,10 +380,10 @@ var init_tourService_model = __esm({
       },
       { _id: false }
     );
-    tourServiceSchema = new import_mongoose26.Schema(
+    tourServiceSchema = new Schema20(
       {
         tour: {
-          type: import_mongoose26.Schema.Types.ObjectId,
+          type: Schema20.Types.ObjectId,
           ref: "TourCompany",
           required: true,
           index: true
@@ -497,47 +475,40 @@ var init_tourService_model = __esm({
     tourServiceSchema.index({ title: "text", description: "text" });
     tourServiceSchema.index({ basePrice: 1 });
     tourServiceSchema.index({ isActive: 1 });
-    TourService = import_mongoose26.default.model("TourService", tourServiceSchema);
+    TourService = mongoose26.model("TourService", tourServiceSchema);
     tourService_model_default = TourService;
   }
 });
 
-// src/serverless.ts
-var serverless_exports = {};
-__export(serverless_exports, {
-  default: () => handler
-});
-module.exports = __toCommonJS(serverless_exports);
-
 // src/shared/config/db.ts
-var import_mongoose = __toESM(require("mongoose"), 1);
+import mongoose from "mongoose";
 
 // src/shared/utils/logger.ts
-var import_winston = __toESM(require("winston"), 1);
+import winston from "winston";
 var transports = [
-  new import_winston.default.transports.Console({
-    format: process.env.NODE_ENV === "production" ? import_winston.default.format.json() : import_winston.default.format.simple()
+  new winston.transports.Console({
+    format: process.env.NODE_ENV === "production" ? winston.format.json() : winston.format.simple()
   })
 ];
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   try {
     transports.push(
-      new import_winston.default.transports.File({
+      new winston.transports.File({
         filename: "logs/error.log",
         level: "error"
       }),
-      new import_winston.default.transports.File({
+      new winston.transports.File({
         filename: "logs/combined.log"
       })
     );
   } catch (err) {
   }
 }
-var logger = import_winston.default.createLogger({
+var logger = winston.createLogger({
   level: "info",
-  format: import_winston.default.format.combine(
-    import_winston.default.format.timestamp(),
-    import_winston.default.format.json()
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
   ),
   transports
 });
@@ -550,7 +521,7 @@ var connectDB = async () => {
     return;
   }
   try {
-    const conn = await import_mongoose.default.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       bufferCommands: false
     });
     isConnected = conn.connections[0].readyState === 1;
@@ -564,21 +535,21 @@ var connectDB = async () => {
 var db_default = connectDB;
 
 // src/app.ts
-var import_config = require("dotenv/config");
-var import_express40 = __toESM(require("express"), 1);
-var import_cors = __toESM(require("cors"), 1);
-var import_helmet = __toESM(require("helmet"), 1);
-var import_morgan = __toESM(require("morgan"), 1);
-var import_express_rate_limit2 = __toESM(require("express-rate-limit"), 1);
-var import_passport3 = __toESM(require("passport"), 1);
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import rateLimit2 from "express-rate-limit";
+import passport2 from "passport";
 
 // src/modules/auth/auth.routes.ts
-var import_express = require("express");
+import { Router } from "express";
 
 // src/modules/auth/auth.model.ts
-var import_mongoose2 = __toESM(require("mongoose"), 1);
-var import_bcryptjs = __toESM(require("bcryptjs"), 1);
-var userSchema = new import_mongoose2.Schema(
+import mongoose2, { Schema } from "mongoose";
+import bcrypt from "bcryptjs";
+var userSchema = new Schema(
   {
     email: {
       type: String,
@@ -653,24 +624,24 @@ var userSchema = new import_mongoose2.Schema(
 userSchema.pre("save", async function() {
   if (!this.isModified("password") || !this.password) return;
   try {
-    this.password = await import_bcryptjs.default.hash(this.password, 12);
+    this.password = await bcrypt.hash(this.password, 12);
   } catch (error) {
     throw error;
   }
 });
 userSchema.methods.comparePassword = async function(candidatePassword) {
   if (!this.password) return false;
-  return await import_bcryptjs.default.compare(candidatePassword, this.password);
+  return await bcrypt.compare(candidatePassword, this.password);
 };
-var User = import_mongoose2.default.models.User || import_mongoose2.default.model("User", userSchema);
+var User = mongoose2.models.User || mongoose2.model("User", userSchema);
 var auth_model_default = User;
 
 // src/modules/vendors/vendor.model.ts
-var import_mongoose3 = __toESM(require("mongoose"), 1);
-var vendorSchema = new import_mongoose3.Schema(
+import mongoose3, { Schema as Schema2 } from "mongoose";
+var vendorSchema = new Schema2(
   {
     userId: {
-      type: import_mongoose3.Schema.Types.ObjectId,
+      type: Schema2.Types.ObjectId,
       ref: "User",
       required: [true, "Vendor must be linked to a User account"],
       index: true
@@ -683,7 +654,7 @@ var vendorSchema = new import_mongoose3.Schema(
       index: true
     },
     linkedGroupId: {
-      type: import_mongoose3.Schema.Types.ObjectId,
+      type: Schema2.Types.ObjectId,
       ref: "VendorAccountGroup",
       default: null,
       index: true
@@ -790,7 +761,7 @@ var vendorSchema = new import_mongoose3.Schema(
     blockedAt: Date,
     reviewedAt: Date,
     reviewedBy: {
-      type: import_mongoose3.Schema.Types.ObjectId,
+      type: Schema2.Types.ObjectId,
       ref: "User"
     },
     isSubmitted: {
@@ -812,11 +783,11 @@ var vendorSchema = new import_mongoose3.Schema(
       trim: true
     },
     blockedBy: {
-      type: import_mongoose3.Schema.Types.ObjectId,
+      type: Schema2.Types.ObjectId,
       ref: "User"
     },
     approvedBy: {
-      type: import_mongoose3.Schema.Types.ObjectId,
+      type: Schema2.Types.ObjectId,
       ref: "User"
     }
   },
@@ -831,20 +802,20 @@ vendorSchema.index({ serviceType: 1 });
 vendorSchema.index({ city: 1 });
 vendorSchema.index({ userId: 1 });
 vendorSchema.index({ propertyId: 1 }, { sparse: true });
-var Vendor = import_mongoose3.default.model("Vendor", vendorSchema);
+var Vendor = mongoose3.model("Vendor", vendorSchema);
 var vendor_model_default = Vendor;
 
 // src/modules/auth/auth.service.ts
-var import_crypto = __toESM(require("crypto"), 1);
-var import_jsonwebtoken = __toESM(require("jsonwebtoken"), 1);
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 // src/shared/utils/sendEmail.ts
-var import_nodemailer = __toESM(require("nodemailer"), 1);
-var import_axios = __toESM(require("axios"), 1);
+import nodemailer from "nodemailer";
+import axios from "axios";
 var trivlloData = {
   company_name: "Trivllo"
 };
-var transporter = import_nodemailer.default.createTransport({
+var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
@@ -854,7 +825,7 @@ var transporter = import_nodemailer.default.createTransport({
 var sendWhatsAppOTP = async (phone, otp) => {
   try {
     const cleanNumber = phone.replace("+91", "");
-    await import_axios.default.post(
+    await axios.post(
       "https://api.interakt.ai/v1/public/message/",
       {
         countryCode: "91",
@@ -1167,7 +1138,7 @@ var sendAccountDeletionRejectedEmail = async (email, firstName) => {
 var sendAccountDeletionApprovedWhatsApp = async (phone, firstName) => {
   try {
     const cleanNumber = phone.replace("+91", "");
-    await import_axios.default.post(
+    await axios.post(
       "https://api.interakt.ai/v1/public/message/",
       {
         countryCode: "91",
@@ -1197,7 +1168,7 @@ var sendAccountDeletionApprovedWhatsApp = async (phone, firstName) => {
 var sendAccountDeletionRejectedWhatsApp = async (phone, firstName) => {
   try {
     const cleanNumber = phone.replace("+91", "");
-    await import_axios.default.post(
+    await axios.post(
       "https://api.interakt.ai/v1/public/message/",
       {
         countryCode: "91",
@@ -1280,7 +1251,7 @@ var sendVendorBookingNotificationEmail = async (emails, details) => {
 
 // src/modules/auth/auth.service.ts
 var generateOTP = async () => {
-  const otp = import_crypto.default.randomInt(1e3, 9999).toString();
+  const otp = crypto.randomInt(1e3, 9999).toString();
   const otpExpires = new Date(Date.now() + 10 * 60 * 1e3);
   return { otp, otpExpires };
 };
@@ -1681,7 +1652,7 @@ var changePassword = async (userId, oldPassword, newPassword) => {
   }
 };
 var generateToken = (userId) => {
-  return import_jsonwebtoken.default.sign(
+  return jwt.sign(
     { id: userId },
     process.env.JWT_ACCESS_SECRET || "",
     { expiresIn: "7d" }
@@ -1852,8 +1823,8 @@ var authService = new AuthService();
 var auth_service_default = authService;
 
 // src/modules/hotels/hotel.model.ts
-var import_mongoose4 = __toESM(require("mongoose"), 1);
-var addressSchema = new import_mongoose4.Schema(
+import mongoose4, { Schema as Schema3 } from "mongoose";
+var addressSchema = new Schema3(
   {
     // 1. Street & Door Level Details
     buildingName: { type: String, trim: true, default: "" },
@@ -1892,10 +1863,10 @@ var addressSchema = new import_mongoose4.Schema(
   },
   { _id: false }
 );
-var hotelSchema = new import_mongoose4.Schema(
+var hotelSchema = new Schema3(
   {
     vendorId: {
-      type: import_mongoose4.default.Schema.ObjectId,
+      type: mongoose4.Schema.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -1936,13 +1907,13 @@ var hotelSchema = new import_mongoose4.Schema(
     },
     locationHistory: [
       {
-        address: { type: import_mongoose4.default.Schema.Types.Mixed },
+        address: { type: mongoose4.Schema.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
         coordinates: [Number],
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: import_mongoose4.default.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: mongoose4.Schema.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2019,7 +1990,7 @@ var hotelSchema = new import_mongoose4.Schema(
       index: true
     },
     createdBy: {
-      type: import_mongoose4.default.Schema.Types.ObjectId,
+      type: mongoose4.Schema.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2107,15 +2078,15 @@ hotelSchema.index(
     }
   }
 );
-var Hotel = import_mongoose4.default.model("Hotel", hotelSchema);
+var Hotel = mongoose4.model("Hotel", hotelSchema);
 var hotel_model_default = Hotel;
 
 // src/modules/cab/company/cab.model.ts
-var import_mongoose5 = __toESM(require("mongoose"), 1);
-var cabCompanySchema = new import_mongoose5.Schema(
+import mongoose5, { Schema as Schema4 } from "mongoose";
+var cabCompanySchema = new Schema4(
   {
     vendorId: {
-      type: import_mongoose5.Schema.Types.ObjectId,
+      type: Schema4.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2137,7 +2108,7 @@ var cabCompanySchema = new import_mongoose5.Schema(
       }
     },
     address: {
-      type: import_mongoose5.Schema.Types.Mixed
+      type: Schema4.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2145,7 +2116,7 @@ var cabCompanySchema = new import_mongoose5.Schema(
     },
     locationHistory: [
       {
-        address: { type: import_mongoose5.Schema.Types.Mixed },
+        address: { type: Schema4.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2154,7 +2125,7 @@ var cabCompanySchema = new import_mongoose5.Schema(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: import_mongoose5.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema4.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2201,7 +2172,7 @@ var cabCompanySchema = new import_mongoose5.Schema(
       index: true
     },
     createdBy: {
-      type: import_mongoose5.Schema.Types.ObjectId,
+      type: Schema4.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2214,15 +2185,15 @@ var cabCompanySchema = new import_mongoose5.Schema(
 cabCompanySchema.index({ name: "text", description: "text" });
 cabCompanySchema.index({ "location.city": 1, isActive: 1 });
 cabCompanySchema.index({ vendorId: 1, createdAt: -1 });
-var CabCompany = import_mongoose5.default.model("CabCompany", cabCompanySchema);
+var CabCompany = mongoose5.model("CabCompany", cabCompanySchema);
 var cab_model_default = CabCompany;
 
 // src/modules/bike/company/bike.model.ts
-var import_mongoose6 = __toESM(require("mongoose"), 1);
-var bikeCompanySchema = new import_mongoose6.Schema(
+import mongoose6, { Schema as Schema5 } from "mongoose";
+var bikeCompanySchema = new Schema5(
   {
     vendorId: {
-      type: import_mongoose6.Schema.Types.ObjectId,
+      type: Schema5.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2244,7 +2215,7 @@ var bikeCompanySchema = new import_mongoose6.Schema(
       }
     },
     address: {
-      type: import_mongoose6.Schema.Types.Mixed
+      type: Schema5.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2252,7 +2223,7 @@ var bikeCompanySchema = new import_mongoose6.Schema(
     },
     locationHistory: [
       {
-        address: { type: import_mongoose6.Schema.Types.Mixed },
+        address: { type: Schema5.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2261,7 +2232,7 @@ var bikeCompanySchema = new import_mongoose6.Schema(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: import_mongoose6.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema5.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2325,7 +2296,7 @@ var bikeCompanySchema = new import_mongoose6.Schema(
       index: true
     },
     createdBy: {
-      type: import_mongoose6.Schema.Types.ObjectId,
+      type: Schema5.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2338,12 +2309,12 @@ var bikeCompanySchema = new import_mongoose6.Schema(
 );
 bikeCompanySchema.index({ "location.city": 1, isActive: 1 });
 bikeCompanySchema.index({ vendorId: 1, createdAt: -1 });
-var BikeCompany = import_mongoose6.default.model("BikeCompany", bikeCompanySchema);
+var BikeCompany = mongoose6.model("BikeCompany", bikeCompanySchema);
 var bike_model_default = BikeCompany;
 
 // src/modules/tour/company/tour.model.ts
-var import_mongoose7 = __toESM(require("mongoose"), 1);
-var addressSchema2 = new import_mongoose7.Schema(
+import mongoose7, { Schema as Schema6 } from "mongoose";
+var addressSchema2 = new Schema6(
   {
     buildingName: { type: String, trim: true, default: "" },
     doorNumber: { type: String, trim: true, default: "" },
@@ -2376,10 +2347,10 @@ var addressSchema2 = new import_mongoose7.Schema(
   },
   { _id: false }
 );
-var tourCompanySchema = new import_mongoose7.Schema(
+var tourCompanySchema = new Schema6(
   {
     vendorId: {
-      type: import_mongoose7.Schema.Types.ObjectId,
+      type: Schema6.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2406,7 +2377,7 @@ var tourCompanySchema = new import_mongoose7.Schema(
     },
     // Embedded Powerful Address Schema (or string for legacy compatibility)
     address: {
-      type: import_mongoose7.Schema.Types.Mixed
+      type: Schema6.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2414,7 +2385,7 @@ var tourCompanySchema = new import_mongoose7.Schema(
     },
     locationHistory: [
       {
-        address: { type: import_mongoose7.Schema.Types.Mixed },
+        address: { type: Schema6.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2423,7 +2394,7 @@ var tourCompanySchema = new import_mongoose7.Schema(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: import_mongoose7.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema6.Types.ObjectId, ref: "User" }
       }
     ],
     logo: {
@@ -2497,7 +2468,7 @@ var tourCompanySchema = new import_mongoose7.Schema(
       index: true
     },
     createdBy: {
-      type: import_mongoose7.Schema.Types.ObjectId,
+      type: Schema6.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2580,15 +2551,15 @@ tourCompanySchema.index({
   "address.district": "text",
   "address.streetAddress": "text"
 });
-var TourCompany = import_mongoose7.default.model("TourCompany", tourCompanySchema);
+var TourCompany = mongoose7.model("TourCompany", tourCompanySchema);
 var tour_model_default = TourCompany;
 
 // src/modules/adventure/category/adventure.model.ts
-var import_mongoose8 = __toESM(require("mongoose"), 1);
-var adventureSchema = new import_mongoose8.Schema(
+import mongoose8, { Schema as Schema7 } from "mongoose";
+var adventureSchema = new Schema7(
   {
     vendorId: {
-      type: import_mongoose8.Schema.Types.ObjectId,
+      type: Schema7.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2614,7 +2585,7 @@ var adventureSchema = new import_mongoose8.Schema(
       country: { type: String, default: "India" }
     },
     address: {
-      type: import_mongoose8.Schema.Types.Mixed
+      type: Schema7.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2622,7 +2593,7 @@ var adventureSchema = new import_mongoose8.Schema(
     },
     locationHistory: [
       {
-        address: { type: import_mongoose8.Schema.Types.Mixed },
+        address: { type: Schema7.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2631,7 +2602,7 @@ var adventureSchema = new import_mongoose8.Schema(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: import_mongoose8.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema7.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2698,7 +2669,7 @@ var adventureSchema = new import_mongoose8.Schema(
       index: true
     },
     createdBy: {
-      type: import_mongoose8.Schema.Types.ObjectId,
+      type: Schema7.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2711,13 +2682,13 @@ var adventureSchema = new import_mongoose8.Schema(
 );
 adventureSchema.index({ category: 1, "location.city": 1 });
 adventureSchema.index({ vendorId: 1, createdAt: -1 });
-var Adventure = import_mongoose8.default.model("Adventure", adventureSchema);
+var Adventure = mongoose8.model("Adventure", adventureSchema);
 var adventure_model_default = Adventure;
 
 // src/shared/utils/jwt.ts
-var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"), 1);
+import jwt2 from "jsonwebtoken";
 var generateTokens = (userId, vendorId = null) => {
-  const accessToken = import_jsonwebtoken2.default.sign(
+  const accessToken = jwt2.sign(
     {
       id: userId,
       vendorId
@@ -2727,7 +2698,7 @@ var generateTokens = (userId, vendorId = null) => {
       expiresIn: "1d"
     }
   );
-  const refreshToken = import_jsonwebtoken2.default.sign(
+  const refreshToken = jwt2.sign(
     {
       id: userId,
       vendorId
@@ -3134,7 +3105,7 @@ var AuthController = class {
 };
 
 // src/shared/middlewares/verifyToken.ts
-var import_jsonwebtoken3 = __toESM(require("jsonwebtoken"), 1);
+import jwt3 from "jsonwebtoken";
 var protect = async (req, res, next) => {
   try {
     let token;
@@ -3147,7 +3118,7 @@ var protect = async (req, res, next) => {
         message: "Not authorized, no token provided"
       });
     }
-    const decoded = import_jsonwebtoken3.default.verify(token, process.env.JWT_ACCESS_SECRET);
+    const decoded = jwt3.verify(token, process.env.JWT_ACCESS_SECRET);
     const currentUser = await auth_model_default.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
@@ -3176,7 +3147,7 @@ var optionalProtect = async (req, res, next) => {
     if (!token) {
       return next();
     }
-    const decoded = import_jsonwebtoken3.default.verify(token, process.env.JWT_ACCESS_SECRET);
+    const decoded = jwt3.verify(token, process.env.JWT_ACCESS_SECRET);
     const currentUser = await auth_model_default.findById(decoded.id);
     if (currentUser) {
       req.user = currentUser;
@@ -3188,15 +3159,19 @@ var optionalProtect = async (req, res, next) => {
 };
 
 // src/shared/config/passport.ts
-var import_fs = __toESM(require("fs"), 1);
-var import_passport = __toESM(require("passport"), 1);
-var import_passport_google_oauth20 = require("passport-google-oauth20");
-var import_passport_facebook = require("passport-facebook");
-var import_passport_apple = __toESM(require("passport-apple"), 1);
+import fs from "fs";
+import passport from "passport";
+import {
+  Strategy as GoogleStrategy
+} from "passport-google-oauth20";
+import {
+  Strategy as FacebookStrategy
+} from "passport-facebook";
+import AppleStrategy from "passport-apple";
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   try {
-    import_passport.default.use(
-      new import_passport_google_oauth20.Strategy(
+    passport.use(
+      new GoogleStrategy(
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -3234,8 +3209,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET && process.env.FACEBOOK_APP_ID !== "your_facebook_app_id") {
   try {
-    import_passport.default.use(
-      new import_passport_facebook.Strategy(
+    passport.use(
+      new FacebookStrategy(
         {
           clientID: process.env.FACEBOOK_APP_ID,
           clientSecret: process.env.FACEBOOK_APP_SECRET,
@@ -3271,10 +3246,10 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET && process.en
     logger_default.warn("Could not initialize Facebook OAuth strategy:", err);
   }
 }
-if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_ID !== "your_apple_service_id" && process.env.APPLE_PRIVATE_KEY_PATH && import_fs.default.existsSync(process.env.APPLE_PRIVATE_KEY_PATH)) {
+if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_ID !== "your_apple_service_id" && process.env.APPLE_PRIVATE_KEY_PATH && fs.existsSync(process.env.APPLE_PRIVATE_KEY_PATH)) {
   try {
-    import_passport.default.use(
-      new import_passport_apple.default(
+    passport.use(
+      new AppleStrategy(
         {
           clientID: process.env.APPLE_CLIENT_ID,
           teamID: process.env.APPLE_TEAM_ID || "",
@@ -3311,13 +3286,13 @@ if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_ID !== "your_apple_s
     logger_default.warn("Could not initialize Apple OAuth strategy:", err);
   }
 }
-var passport_default = import_passport.default;
+var passport_default = passport;
 
 // src/modules/auth/auth.routes.ts
-var import_express_rate_limit = __toESM(require("express-rate-limit"), 1);
-var router = (0, import_express.Router)();
+import rateLimit from "express-rate-limit";
+var router = Router();
 var authController = new AuthController();
-var authLimiter = (0, import_express_rate_limit.default)({
+var authLimiter = rateLimit({
   windowMs: 15 * 60 * 1e3,
   // 15 minutes
   max: 10,
@@ -3329,7 +3304,7 @@ var authLimiter = (0, import_express_rate_limit.default)({
   standardHeaders: true,
   legacyHeaders: false
 });
-var otpLimiter = (0, import_express_rate_limit.default)({
+var otpLimiter = rateLimit({
   windowMs: 60 * 60 * 1e3,
   // 1 hour
   max: 5,
@@ -3411,16 +3386,16 @@ router.post(
 var auth_routes_default = router;
 
 // src/modules/users/user.routes.ts
-var import_express2 = require("express");
+import { Router as Router2 } from "express";
 
 // src/shared/config/cloudinary.ts
-var import_cloudinary = require("cloudinary");
-import_cloudinary.v2.config({
+import { v2 as cloudinary } from "cloudinary";
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
-var cloudinary_default = import_cloudinary.v2;
+var cloudinary_default = cloudinary;
 
 // src/modules/upload/upload.service.ts
 var uploadFiles = async (files, folder = "general") => {
@@ -3625,7 +3600,7 @@ var UserController = class {
 };
 
 // src/modules/users/user.routes.ts
-var router2 = (0, import_express2.Router)();
+var router2 = Router2();
 var userController = new UserController();
 router2.use(protect);
 router2.get("/me", userController.getMe);
@@ -3638,14 +3613,14 @@ router2.post(
 var user_routes_default = router2;
 
 // src/modules/hotels/hotel.routes.ts
-var import_express3 = require("express");
+import { Router as Router3 } from "express";
 
 // src/modules/rooms/roomType.model.ts
-var import_mongoose9 = __toESM(require("mongoose"), 1);
-var roomTypeSchema = new import_mongoose9.Schema(
+import mongoose9, { Schema as Schema8 } from "mongoose";
+var roomTypeSchema = new Schema8(
   {
     hotelId: {
-      type: import_mongoose9.Schema.Types.ObjectId,
+      type: Schema8.Types.ObjectId,
       ref: "Hotel",
       required: true,
       index: true
@@ -3738,15 +3713,15 @@ var roomTypeSchema = new import_mongoose9.Schema(
   },
   { timestamps: true }
 );
-var RoomType = import_mongoose9.default.model("RoomType", roomTypeSchema);
+var RoomType = mongoose9.model("RoomType", roomTypeSchema);
 var roomType_model_default = RoomType;
 
 // src/modules/hotels/hotel.service.ts
 init_availability_model();
 
 // src/modules/admin/tax/tax.model.ts
-var import_mongoose11 = __toESM(require("mongoose"), 1);
-var taxSchema = new import_mongoose11.Schema(
+import mongoose11, { Schema as Schema10 } from "mongoose";
+var taxSchema = new Schema10(
   {
     taxPercentage: {
       type: Number,
@@ -3759,33 +3734,33 @@ var taxSchema = new import_mongoose11.Schema(
       default: true
     },
     createdBy: {
-      type: import_mongoose11.Schema.Types.ObjectId,
+      type: Schema10.Types.ObjectId,
       ref: "User"
       // superadmin
     },
     updatedBy: {
-      type: import_mongoose11.Schema.Types.ObjectId,
+      type: Schema10.Types.ObjectId,
       ref: "User"
     }
   },
   { timestamps: true }
 );
 taxSchema.index({ isActive: 1 });
-var Tax = import_mongoose11.default.model("Tax", taxSchema);
+var Tax = mongoose11.model("Tax", taxSchema);
 var tax_model_default = Tax;
 
 // src/modules/favorites/favorite.model.ts
-var import_mongoose12 = __toESM(require("mongoose"), 1);
-var favoriteSchema = new import_mongoose12.Schema(
+import mongoose12, { Schema as Schema11 } from "mongoose";
+var favoriteSchema = new Schema11(
   {
     user: {
-      type: import_mongoose12.Schema.Types.ObjectId,
+      type: Schema11.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
     },
     itemId: {
-      type: import_mongoose12.Schema.Types.ObjectId,
+      type: Schema11.Types.ObjectId,
       required: true,
       index: true
     },
@@ -3798,7 +3773,7 @@ var favoriteSchema = new import_mongoose12.Schema(
   { timestamps: true }
 );
 favoriteSchema.index({ user: 1, itemId: 1, itemType: 1 }, { unique: true });
-var Favorite = import_mongoose12.default.model("Favorite", favoriteSchema);
+var Favorite = mongoose12.model("Favorite", favoriteSchema);
 var favorite_model_default = Favorite;
 
 // src/modules/hotels/hotel.service.ts
@@ -5064,7 +5039,7 @@ var searchHotels2 = hotelController.searchHotels.bind(hotelController);
 var getRankedHotels2 = hotelController.getRankedHotels.bind(hotelController);
 
 // src/modules/hotels/hotel.routes.ts
-var router3 = (0, import_express3.Router)();
+var router3 = Router3();
 var hotelController2 = new HotelController();
 router3.get("/", optionalProtect, hotelController2.getHotels);
 router3.get("/home", optionalProtect, hotelController2.getHomeHotels);
@@ -5077,19 +5052,19 @@ router3.get("/:id/availability", hotelController2.getHotelAvailability);
 var hotel_routes_default = router3;
 
 // src/modules/rooms/room.routes.ts
-var import_express4 = require("express");
+import { Router as Router4 } from "express";
 
 // src/modules/rooms/room.model.ts
-var import_mongoose13 = __toESM(require("mongoose"), 1);
-var roomSchema = new import_mongoose13.Schema(
+import mongoose13, { Schema as Schema12 } from "mongoose";
+var roomSchema = new Schema12(
   {
     hotelId: {
-      type: import_mongoose13.Schema.Types.ObjectId,
+      type: Schema12.Types.ObjectId,
       ref: "Hotel",
       required: true
     },
     roomTypeId: {
-      type: import_mongoose13.Schema.Types.ObjectId,
+      type: Schema12.Types.ObjectId,
       ref: "RoomType",
       required: true
     },
@@ -5111,11 +5086,11 @@ var roomSchema = new import_mongoose13.Schema(
   },
   { timestamps: true }
 );
-var Room = import_mongoose13.default.model("Room", roomSchema);
+var Room = mongoose13.model("Room", roomSchema);
 var room_model_default = Room;
 
 // src/modules/rooms/room.service.ts
-var import_mongoose14 = __toESM(require("mongoose"), 1);
+import mongoose14 from "mongoose";
 var createRoom = async (roomData) => {
   try {
     return await room_model_default.create(roomData);
@@ -5125,7 +5100,7 @@ var createRoom = async (roomData) => {
   }
 };
 var getRoomsByHotel = async (hotelId) => {
-  if (!import_mongoose14.default.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose14.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -5241,7 +5216,7 @@ var authorize = (...roles) => {
 };
 
 // src/modules/rooms/room.routes.ts
-var router4 = (0, import_express4.Router)();
+var router4 = Router4();
 var roomController = new RoomController();
 router4.use(protect);
 router4.post("/", authorize("vendor"), roomController.createRoom);
@@ -5254,29 +5229,29 @@ router4.patch("/:id", authorize("vendor"), roomController.updateRoomStatus);
 var room_routes_default = router4;
 
 // src/modules/rooms/roomType.routes.ts
-var import_express5 = require("express");
+import { Router as Router5 } from "express";
 
 // src/modules/rooms/roomType.controller.ts
-var import_mongoose17 = __toESM(require("mongoose"), 1);
+import mongoose17 from "mongoose";
 
 // src/modules/rooms/roomType.service.ts
-var import_mongoose16 = __toESM(require("mongoose"), 1);
+import mongoose16 from "mongoose";
 
 // src/modules/bookings/booking.model.ts
-var import_mongoose15 = __toESM(require("mongoose"), 1);
-var bookingSchema = new import_mongoose15.Schema(
+import mongoose15, { Schema as Schema13 } from "mongoose";
+var bookingSchema = new Schema13(
   {
     userId: {
-      type: import_mongoose15.Schema.Types.ObjectId,
+      type: Schema13.Types.ObjectId,
       ref: "User"
     },
     hotelId: {
-      type: import_mongoose15.Schema.Types.ObjectId,
+      type: Schema13.Types.ObjectId,
       ref: "Hotel",
       required: true
     },
     roomTypeId: {
-      type: import_mongoose15.Schema.Types.ObjectId,
+      type: Schema13.Types.ObjectId,
       ref: "RoomType",
       required: true
     },
@@ -5390,7 +5365,7 @@ var bookingSchema = new import_mongoose15.Schema(
       default: "pending"
     },
     paymentId: {
-      type: import_mongoose15.Schema.Types.ObjectId,
+      type: Schema13.Types.ObjectId,
       ref: "Payment"
     },
     refundPercentage: {
@@ -5441,7 +5416,7 @@ bookingSchema.index({
   checkOut: 1,
   status: 1
 });
-var Booking = import_mongoose15.default.model("Booking", bookingSchema);
+var Booking = mongoose15.model("Booking", bookingSchema);
 var booking_model_default = Booking;
 
 // src/modules/rooms/roomType.service.ts
@@ -5455,7 +5430,7 @@ var createRoomType = async (data) => {
   }
 };
 var getRoomTypesByHotel = async (hotelId) => {
-  if (!import_mongoose16.default.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose16.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -5506,7 +5481,7 @@ var updateRoomType = async (roomTypeId, hotelId, updateData) => {
   }
 };
 var getVendorBookingDetail = async (bookingId, vendorId) => {
-  if (!import_mongoose16.default.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose16.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
@@ -5574,7 +5549,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
     limit = 10,
     search
   } = queryParams;
-  if (!hotelId || !import_mongoose16.default.Types.ObjectId.isValid(hotelId)) {
+  if (!hotelId || !mongoose16.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Valid hotelId is required");
   }
   const hotel = await hotel_model_default.findOne({ _id: hotelId, vendorId }).lean();
@@ -5648,7 +5623,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
   };
 };
 var getVendorRoomTypeDetail = async (roomTypeId, vendorId) => {
-  if (!import_mongoose16.default.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose16.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   const roomType = await roomType_model_default.findById(roomTypeId).select(
@@ -5773,7 +5748,7 @@ var RoomTypeController = class {
   }
   //roomtype create also rooms create
   async createRoomTypeWithAutoRooms(req, res, next) {
-    const session = await import_mongoose17.default.startSession();
+    const session = await mongoose17.startSession();
     session.startTransaction();
     try {
       const vendor = await vendor_model_default.findOne({ userId: req.user._id });
@@ -5875,7 +5850,7 @@ var RoomTypeController = class {
 };
 
 // src/modules/rooms/roomType.routes.ts
-var router5 = (0, import_express5.Router)();
+var router5 = Router5();
 var controller = new RoomTypeController();
 router5.use(protect);
 router5.post("/", authorize("vendor"), controller.createRoomType);
@@ -5889,10 +5864,10 @@ router5.delete("/:id", authorize("vendor"), controller.deleteRoomType);
 var roomType_routes_default = router5;
 
 // src/modules/availability/availability.routes.ts
-var import_express6 = require("express");
+import { Router as Router6 } from "express";
 
 // src/modules/availability/availability.service.ts
-var import_mongoose18 = __toESM(require("mongoose"), 1);
+import mongoose18 from "mongoose";
 init_availability_model();
 var upsertAvailability = async (data) => {
   try {
@@ -5917,7 +5892,7 @@ var upsertAvailability = async (data) => {
   }
 };
 var getAvailabilityForRange = async (roomTypeId, startDate, endDate) => {
-  if (!import_mongoose18.default.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   try {
@@ -5957,7 +5932,7 @@ var decreaseAvailability = async (roomTypeId, date, qty = 1) => {
 };
 var getVendorRoomTypes2 = async (userId, hotelId) => {
   try {
-    if (!import_mongoose18.default.Types.ObjectId.isValid(hotelId)) {
+    if (!mongoose18.Types.ObjectId.isValid(hotelId)) {
       throw new Error("Invalid hotel ID");
     }
     const vendor = await vendor_model_default.findOne({ userId }).lean();
@@ -5984,7 +5959,7 @@ var getVendorRoomTypes2 = async (userId, hotelId) => {
 };
 var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
   try {
-    if (!import_mongoose18.default.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!month || !year) {
@@ -6049,7 +6024,7 @@ var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
 };
 var updateRoomTypeCalendar = async (userId, roomTypeId, date, blockedRooms, priceOverride) => {
   try {
-    if (!import_mongoose18.default.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!date) throw new Error("Date is required");
@@ -6346,7 +6321,7 @@ var AvailabilityController = class {
 };
 
 // src/modules/availability/availability.routes.ts
-var router6 = (0, import_express6.Router)();
+var router6 = Router6();
 var availabilityController = new AvailabilityController();
 router6.get("/", availabilityController.getAvailability);
 router6.use(protect);
@@ -6378,11 +6353,11 @@ router6.delete(
 var availability_routes_default = router6;
 
 // src/modules/vendors/vendor.routes.ts
-var import_express7 = require("express");
+import { Router as Router7 } from "express";
 
 // src/modules/bookings/booking.service.ts
 init_availability_model();
-var import_mongoose21 = __toESM(require("mongoose"), 1);
+import mongoose21 from "mongoose";
 
 // trivllo.json
 var trivllo_default = {
@@ -6409,17 +6384,17 @@ var trivllo_default = {
 };
 
 // src/modules/payments/payment.model.ts
-var import_mongoose19 = __toESM(require("mongoose"), 1);
-var paymentSchema = new import_mongoose19.Schema(
+import mongoose19, { Schema as Schema14 } from "mongoose";
+var paymentSchema = new Schema14(
   {
     bookingId: {
-      type: import_mongoose19.Schema.Types.ObjectId,
+      type: Schema14.Types.ObjectId,
       ref: "Booking",
       required: true,
       index: true
     },
     userId: {
-      type: import_mongoose19.Schema.Types.ObjectId,
+      type: Schema14.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
@@ -6490,26 +6465,26 @@ var paymentSchema = new import_mongoose19.Schema(
 paymentSchema.index({ razorpayPaymentId: 1 });
 paymentSchema.index({ razorpayOrderId: 1 });
 paymentSchema.index({ bookingId: 1, status: 1 });
-var Payment = import_mongoose19.default.model("Payment", paymentSchema);
+var Payment = mongoose19.model("Payment", paymentSchema);
 var payment_model_default = Payment;
 
 // src/shared/config/razorpay.ts
-var import_razorpay = __toESM(require("razorpay"), 1);
-var razorpay = new import_razorpay.default({
+import Razorpay from "razorpay";
+var razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 var razorpay_default = razorpay;
 
 // src/modules/bookings/booking.service.ts
-var import_crypto2 = __toESM(require("crypto"), 1);
-var import_path = __toESM(require("path"), 1);
-var import_fs2 = __toESM(require("fs"), 1);
-var import_pdfkit = __toESM(require("pdfkit"), 1);
+import crypto2 from "crypto";
+import path from "path";
+import fs2 from "fs";
+import PDFDocument from "pdfkit";
 
 // src/modules/multiServiceBookings/booking.model.ts
-var import_mongoose20 = __toESM(require("mongoose"), 1);
-var participantSchema = new import_mongoose20.Schema(
+import mongoose20, { Schema as Schema15 } from "mongoose";
+var participantSchema = new Schema15(
   {
     name: { type: String, trim: true },
     age: { type: Number },
@@ -6522,15 +6497,15 @@ var participantSchema = new import_mongoose20.Schema(
   },
   { _id: false }
 );
-var bookingSchema2 = new import_mongoose20.Schema(
+var bookingSchema2 = new Schema15(
   {
     userId: {
-      type: import_mongoose20.Schema.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       ref: "User",
       index: true
     },
     vendorId: {
-      type: import_mongoose20.Schema.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -6542,7 +6517,7 @@ var bookingSchema2 = new import_mongoose20.Schema(
       index: true
     },
     serviceId: {
-      type: import_mongoose20.Schema.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       required: true,
       index: true
     },
@@ -6604,7 +6579,7 @@ var bookingSchema2 = new import_mongoose20.Schema(
       title: { type: String },
       type: { type: String },
       price: { type: Number },
-      vendorId: { type: import_mongoose20.Schema.Types.ObjectId },
+      vendorId: { type: Schema15.Types.ObjectId },
       extra: {
         type: Object,
         default: {}
@@ -6632,7 +6607,7 @@ var bookingSchema2 = new import_mongoose20.Schema(
       index: true
     },
     paymentId: {
-      type: import_mongoose20.Schema.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       ref: "Payment"
     },
     refundAmount: {
@@ -6663,7 +6638,7 @@ bookingSchema2.index({ serviceId: 1, serviceType: 1 });
 bookingSchema2.index({ bookingDate: 1, status: 1 });
 bookingSchema2.index({ paymentStatus: 1, status: 1 });
 bookingSchema2.index({ bookingReference: 1 });
-var GenericBooking = import_mongoose20.default.model("GenericBooking", bookingSchema2);
+var GenericBooking = mongoose20.model("GenericBooking", bookingSchema2);
 var booking_model_default2 = GenericBooking;
 
 // src/modules/bookings/booking.service.ts
@@ -6697,7 +6672,7 @@ async function processRefund(booking, session) {
   await payment.save({ session });
 }
 var createBooking = async (data, userId) => {
-  const session = await import_mongoose21.default.startSession();
+  const session = await mongoose21.startSession();
   session.startTransaction();
   try {
     const {
@@ -6773,7 +6748,7 @@ var createBooking = async (data, userId) => {
       (totalBasePrice * taxPercentage / 100).toFixed(2)
     );
     const finalTotalAmount = Number((totalBasePrice + totalTax).toFixed(2));
-    const bookingReference = "BK-" + import_crypto2.default.randomBytes(6).toString("hex").toUpperCase();
+    const bookingReference = "BK-" + crypto2.randomBytes(6).toString("hex").toUpperCase();
     const expiresAt = new Date(Date.now() + 2 * 60 * 1e3);
     const [booking] = await booking_model_default.create(
       [
@@ -7051,7 +7026,7 @@ var userInvoiceDownload = async (booking, res) => {
     `attachment; filename=invoice-${booking.bookingReference}.pdf`
   );
   res.setHeader("Content-Type", "application/pdf");
-  const doc = new import_pdfkit.default({ margin: 50, size: "A4" });
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
   doc.pipe(res);
   const brandColor = "#2563EB";
   const brandDark = "#1E293B";
@@ -7061,16 +7036,16 @@ var userInvoiceDownload = async (booking, res) => {
   const bgLight = "#F8FAFC";
   const companyName = typeof trivllo_default !== "undefined" && trivllo_default.company_name ? trivllo_default.company_name : "Trivllo";
   const logoCandidates = [
-    import_path.default.join(__dirname, "../../assets/logo.png"),
-    import_path.default.join(__dirname, "../../../assets/logo.png"),
-    import_path.default.join(__dirname, "../../../public/logo.png"),
-    import_path.default.join(process.cwd(), "src/assets/logo.png"),
-    import_path.default.join(process.cwd(), "public/logo.png"),
-    import_path.default.join(process.cwd(), "../frontend/public/logo.png"),
-    import_path.default.join(process.cwd(), "../vendor/public/logo.png"),
-    import_path.default.join(process.cwd(), "../admin/public/logo.png")
+    path.join(__dirname, "../../assets/logo.png"),
+    path.join(__dirname, "../../../assets/logo.png"),
+    path.join(__dirname, "../../../public/logo.png"),
+    path.join(process.cwd(), "src/assets/logo.png"),
+    path.join(process.cwd(), "public/logo.png"),
+    path.join(process.cwd(), "../frontend/public/logo.png"),
+    path.join(process.cwd(), "../vendor/public/logo.png"),
+    path.join(process.cwd(), "../admin/public/logo.png")
   ];
-  const logoPath = logoCandidates.find((p) => import_fs2.default.existsSync(p));
+  const logoPath = logoCandidates.find((p) => fs2.existsSync(p));
   if (logoPath) {
     try {
       doc.image(logoPath, 50, 48, { fit: [140, 50] });
@@ -7214,7 +7189,7 @@ var getRefundPreview = async (bookingId, userId) => {
   }
 };
 var cancelBooking = async (bookingId, userId, reason) => {
-  const session = await import_mongoose21.default.startSession();
+  const session = await mongoose21.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findOne({
@@ -7282,7 +7257,7 @@ var cancelBooking = async (bookingId, userId, reason) => {
   }
 };
 var adminHandleRefund = async (bookingId, action) => {
-  const session = await import_mongoose21.default.startSession();
+  const session = await mongoose21.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findById(bookingId).session(session);
@@ -7433,7 +7408,7 @@ var getVendorInvoices = async (vendorId, queryParams) => {
   };
 };
 var generateInvoicePdf = async (bookingId, vendorId, res) => {
-  if (!import_mongoose21.default.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose21.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId).populate({
@@ -7451,7 +7426,7 @@ var generateInvoicePdf = async (bookingId, vendorId, res) => {
     `attachment; filename=invoice-${booking.bookingReference}.pdf`
   );
   res.setHeader("Content-Type", "application/pdf");
-  const doc = new import_pdfkit.default({ margin: 40, size: "A4" });
+  const doc = new PDFDocument({ margin: 40, size: "A4" });
   doc.pipe(res);
   const primaryBlue = "#1a73e8";
   const brandRed = "#ff3838";
@@ -7722,7 +7697,7 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
   };
 };
 var validateOwnership = async (bookingId, vendorId) => {
-  if (!import_mongoose21.default.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose21.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId);
@@ -7787,31 +7762,31 @@ var booking_service = {
 var booking_service_default = booking_service;
 
 // src/modules/vendorBank/bank.model.ts
-var import_mongoose22 = __toESM(require("mongoose"), 1);
+import mongoose22, { Schema as Schema16 } from "mongoose";
 
 // src/shared/utils/encryption.ts
-var import_crypto3 = __toESM(require("crypto"), 1);
+import crypto3 from "crypto";
 var algorithm = "aes-256-cbc";
-var key = import_crypto3.default.createHash("sha256").update(process.env.BANK_ENCRYPTION_KEY).digest();
+var key = crypto3.createHash("sha256").update(process.env.BANK_ENCRYPTION_KEY).digest();
 var iv = Buffer.alloc(16, 0);
 var encrypt = (text) => {
-  const cipher = import_crypto3.default.createCipheriv(algorithm, key, iv);
+  const cipher = crypto3.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
   return encrypted;
 };
 var decrypt = (text) => {
-  const decipher = import_crypto3.default.createDecipheriv(algorithm, key, iv);
+  const decipher = crypto3.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(text, "hex", "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;
 };
 
 // src/modules/vendorBank/bank.model.ts
-var vendorBankSchema = new import_mongoose22.Schema(
+var vendorBankSchema = new Schema16(
   {
     vendorId: {
-      type: import_mongoose22.Schema.Types.ObjectId,
+      type: Schema16.Types.ObjectId,
       ref: "Vendor",
       required: true,
       unique: false
@@ -7910,7 +7885,7 @@ vendorBankSchema.post("find", function(docs) {
     }
   });
 });
-var VendorBank = import_mongoose22.default.model("VendorBank", vendorBankSchema);
+var VendorBank = mongoose22.model("VendorBank", vendorBankSchema);
 var bank_model_default = VendorBank;
 
 // src/modules/vendors/vendor.service.ts
@@ -7920,11 +7895,11 @@ init_service_model();
 init_tourService_model();
 
 // src/modules/admin/promotion/promotion.model.ts
-var import_mongoose27 = __toESM(require("mongoose"), 1);
-var promotionSchema = new import_mongoose27.Schema(
+import mongoose27, { Schema as Schema21 } from "mongoose";
+var promotionSchema = new Schema21(
   {
     vendorId: {
-      type: import_mongoose27.Schema.Types.ObjectId,
+      type: Schema21.Types.ObjectId,
       ref: "Vendor",
       required: [true, "Promotion must be linked to a Vendor"],
       index: true
@@ -7936,7 +7911,7 @@ var promotionSchema = new import_mongoose27.Schema(
       index: true
     },
     serviceId: {
-      type: import_mongoose27.Schema.Types.ObjectId,
+      type: Schema21.Types.ObjectId,
       required: true,
       index: true
     },
@@ -7967,7 +7942,7 @@ var promotionSchema = new import_mongoose27.Schema(
       type: Date
     },
     approvedBy: {
-      type: import_mongoose27.Schema.Types.ObjectId,
+      type: Schema21.Types.ObjectId,
       ref: "User"
     },
     rejectedAt: {
@@ -7984,7 +7959,7 @@ var promotionSchema = new import_mongoose27.Schema(
 );
 promotionSchema.index({ vendorId: 1, status: 1 });
 promotionSchema.index({ serviceId: 1, status: 1 });
-var Promotion = import_mongoose27.default.model("Promotion", promotionSchema);
+var Promotion = mongoose27.model("Promotion", promotionSchema);
 var promotion_model_default = Promotion;
 
 // src/modules/vendors/vendor.service.ts
@@ -9347,11 +9322,11 @@ var BookingController = class {
 };
 
 // src/modules/task/task.model.ts
-var import_mongoose28 = __toESM(require("mongoose"), 1);
-var taskSchema = new import_mongoose28.Schema(
+import mongoose28, { Schema as Schema22 } from "mongoose";
+var taskSchema = new Schema22(
   {
     vendorId: {
-      type: import_mongoose28.Schema.Types.ObjectId,
+      type: Schema22.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -9383,11 +9358,11 @@ var taskSchema = new import_mongoose28.Schema(
   { timestamps: true }
 );
 taskSchema.index({ vendorId: 1, status: 1 });
-var Task = import_mongoose28.default.model("Task", taskSchema);
+var Task = mongoose28.model("Task", taskSchema);
 var task_model_default = Task;
 
 // src/modules/task/task.service.ts
-var import_mongoose29 = __toESM(require("mongoose"), 1);
+import mongoose29 from "mongoose";
 var getTasks = async (vendorId, query = {}) => {
   const { page = 1, limit = 10, status } = query;
   const filter = { vendorId };
@@ -9406,7 +9381,7 @@ var createTask = async (vendorId, data) => {
   return await task_model_default.create({ ...data, vendorId });
 };
 var updateTask = async (taskId, vendorId, data) => {
-  if (!import_mongoose29.default.Types.ObjectId.isValid(taskId)) {
+  if (!mongoose29.Types.ObjectId.isValid(taskId)) {
     throw new Error("Invalid task id");
   }
   const task = await task_model_default.findOneAndUpdate({ _id: taskId, vendorId }, data, {
@@ -9498,7 +9473,7 @@ var TaskController = class {
 };
 
 // src/modules/vendors/vendor.routes.ts
-var router7 = (0, import_express7.Router)();
+var router7 = Router7();
 var vendorController2 = new VendorController();
 var bookingController = new BookingController();
 var hotelController3 = new HotelController();
@@ -9653,14 +9628,14 @@ router7.get(
 var vendor_routes_default = router7;
 
 // src/modules/policies/policy.routes.ts
-var import_express8 = require("express");
+import { Router as Router8 } from "express";
 
 // src/modules/policies/policy.model.ts
-var import_mongoose30 = __toESM(require("mongoose"), 1);
-var policySchema = new import_mongoose30.Schema(
+import mongoose30, { Schema as Schema23 } from "mongoose";
+var policySchema = new Schema23(
   {
     hotelId: {
-      type: import_mongoose30.Schema.Types.ObjectId,
+      type: Schema23.Types.ObjectId,
       ref: "Hotel",
       required: true,
       unique: true
@@ -9678,7 +9653,7 @@ var policySchema = new import_mongoose30.Schema(
   },
   { timestamps: true }
 );
-var HotelPolicy = import_mongoose30.default.model("HotelPolicy", policySchema);
+var HotelPolicy = mongoose30.model("HotelPolicy", policySchema);
 var policy_model_default = HotelPolicy;
 
 // src/modules/policies/policy.service.ts
@@ -9753,7 +9728,7 @@ var PolicyController = class {
 };
 
 // src/modules/policies/policy.routes.ts
-var router8 = (0, import_express8.Router)();
+var router8 = Router8();
 var controller2 = new PolicyController();
 router8.get("/hotel/:hotelId", controller2.getPolicy);
 router8.use(protect);
@@ -9761,8 +9736,8 @@ router8.post("/", authorize("vendor"), controller2.setPolicy);
 var policy_routes_default = router8;
 
 // src/modules/bookings/booking.routes.ts
-var import_express9 = require("express");
-var router9 = (0, import_express9.Router)();
+import { Router as Router9 } from "express";
+var router9 = Router9();
 var bookingController2 = new BookingController();
 router9.use(protect, authorize("user"));
 router9.post("/", bookingController2.createBooking);
@@ -9774,14 +9749,14 @@ router9.get("/:id", bookingController2.getBookingById);
 var booking_routes_default = router9;
 
 // src/modules/payments/payment.routes.ts
-var import_express10 = require("express");
+import { Router as Router10 } from "express";
 
 // src/modules/payments/payment.service.ts
-var import_mongoose31 = __toESM(require("mongoose"), 1);
-var import_crypto4 = __toESM(require("crypto"), 1);
+import mongoose31 from "mongoose";
+import crypto4 from "crypto";
 init_availability_model();
 var verifyPayment = async (data) => {
-  const session = await import_mongoose31.default.startSession();
+  const session = await mongoose31.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -9807,7 +9782,7 @@ var verifyPayment = async (data) => {
       throw new Error("Payment session expired");
     }
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSignature = import_crypto4.default.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "").update(body).digest("hex");
+    const expectedSignature = crypto4.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "").update(body).digest("hex");
     if (expectedSignature !== razorpay_signature) {
       throw new Error("Invalid payment signature");
     }
@@ -9950,33 +9925,33 @@ var PaymentController = class {
 };
 
 // src/modules/payments/payment.routes.ts
-var router10 = (0, import_express10.Router)();
+var router10 = Router10();
 var paymentController = new PaymentController();
 router10.post("/verify", protect, paymentController.verifyPayment);
 var payment_routes_default = router10;
 
 // src/modules/reviews/review.routes.ts
-var import_express11 = require("express");
+import { Router as Router11 } from "express";
 
 // src/modules/reviews/review.service.ts
-var import_mongoose33 = __toESM(require("mongoose"), 1);
+import mongoose33 from "mongoose";
 
 // src/modules/reviews/review.model.ts
-var import_mongoose32 = __toESM(require("mongoose"), 1);
-var reviewSchema = new import_mongoose32.Schema(
+import mongoose32, { Schema as Schema24 } from "mongoose";
+var reviewSchema = new Schema24(
   {
     userId: {
-      type: import_mongoose32.Schema.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       ref: "User",
       required: true
     },
     bookingId: {
-      type: import_mongoose32.Schema.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       required: true,
       unique: true
     },
     companyId: {
-      type: import_mongoose32.Schema.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       required: true
     },
     companyName: {
@@ -9990,7 +9965,7 @@ var reviewSchema = new import_mongoose32.Schema(
       required: true
     },
     vendorId: {
-      type: import_mongoose32.Schema.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       ref: "Vendor",
       required: true
     },
@@ -10032,7 +10007,7 @@ reviewSchema.index({
   companyType: 1,
   companyId: 1
 });
-var Review = import_mongoose32.default.model("Review", reviewSchema);
+var Review = mongoose32.model("Review", reviewSchema);
 var review_model_default = Review;
 
 // src/modules/reviews/review.service.ts
@@ -10119,7 +10094,7 @@ var getCompanyReviews = async (companyType, companyId, query = {}) => {
     if (!allowedTypes.includes(companyType)) {
       throw new Error("Invalid company type");
     }
-    if (!import_mongoose33.default.Types.ObjectId.isValid(companyId)) {
+    if (!mongoose33.Types.ObjectId.isValid(companyId)) {
       throw new Error("Invalid company id");
     }
     const page = Number(query.page) || 1;
@@ -10138,7 +10113,7 @@ var getCompanyReviews = async (companyType, companyId, query = {}) => {
         {
           $match: {
             companyType,
-            companyId: new import_mongoose33.default.Types.ObjectId(companyId)
+            companyId: new mongoose33.Types.ObjectId(companyId)
           }
         },
         {
@@ -10586,7 +10561,7 @@ var ReviewController = class {
 };
 
 // src/modules/reviews/review.routes.ts
-var router11 = (0, import_express11.Router)();
+var router11 = Router11();
 var controller3 = new ReviewController();
 router11.get("/:companyType/:companyId", controller3.getCompanyReviews);
 router11.get("/", protect, controller3.getUserReviews);
@@ -10607,7 +10582,7 @@ router11.post(
 var review_routes_default = router11;
 
 // src/modules/upload/upload.routes.ts
-var import_express12 = require("express");
+import { Router as Router12 } from "express";
 
 // src/modules/upload/upload.controller.ts
 var UploadController = class {
@@ -10664,9 +10639,9 @@ var UploadController = class {
 };
 
 // src/shared/utils/multer.ts
-var import_multer = __toESM(require("multer"), 1);
-var storage = import_multer.default.memoryStorage();
-var upload = (0, import_multer.default)({
+import multer from "multer";
+var storage = multer.memoryStorage();
+var upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024
@@ -10676,7 +10651,7 @@ var upload = (0, import_multer.default)({
 var multer_default = upload;
 
 // src/modules/upload/upload.routes.ts
-var router12 = (0, import_express12.Router)();
+var router12 = Router12();
 var uploadController = new UploadController();
 router12.post(
   "/",
@@ -10688,7 +10663,7 @@ router12.delete("/:public_id", uploadController.deleteFile);
 var upload_routes_default = router12;
 
 // src/modules/favorites/favorite.routes.ts
-var import_express13 = require("express");
+import { Router as Router13 } from "express";
 
 // src/modules/favorites/favorite.service.ts
 var SERVICE_MODELS3 = {
@@ -10893,7 +10868,7 @@ var FavoriteController = class {
 };
 
 // src/modules/favorites/favorite.routes.ts
-var router13 = (0, import_express13.Router)();
+var router13 = Router13();
 var favoriteController = new FavoriteController();
 router13.use(protect);
 router13.post("/toggle/:serviceType/:itemId", favoriteController.toggleFavorite);
@@ -10903,7 +10878,7 @@ router13.get("/my-trip", favoriteController.getMyTripFavorites);
 var favorite_routes_default = router13;
 
 // src/modules/vendorBank/bank.routes.ts
-var import_express14 = require("express");
+import { Router as Router14 } from "express";
 
 // src/modules/vendorBank/bank.service.ts
 var createBankDetails = async (vendor, bankData) => {
@@ -10982,7 +10957,7 @@ var BankController = class {
 };
 
 // src/modules/vendorBank/bank.routes.ts
-var router14 = (0, import_express14.Router)();
+var router14 = Router14();
 var bankController = new BankController();
 router14.post(
   "/",
@@ -10993,11 +10968,11 @@ router14.post(
 var bank_routes_default = router14;
 
 // src/modules/support/support.routes.ts
-var import_express15 = require("express");
+import { Router as Router15 } from "express";
 
 // src/modules/support/support.model.ts
-var import_mongoose34 = __toESM(require("mongoose"), 1);
-var messageSchema = new import_mongoose34.Schema(
+import mongoose34, { Schema as Schema25 } from "mongoose";
+var messageSchema = new Schema25(
   {
     sender: {
       type: String,
@@ -11018,10 +10993,10 @@ var messageSchema = new import_mongoose34.Schema(
   },
   { timestamps: true }
 );
-var supportSchema = new import_mongoose34.Schema(
+var supportSchema = new Schema25(
   {
     userId: {
-      type: import_mongoose34.Schema.Types.ObjectId,
+      type: Schema25.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
@@ -11073,7 +11048,7 @@ var supportSchema = new import_mongoose34.Schema(
   { timestamps: true }
 );
 supportSchema.index({ status: 1, createdAt: -1 });
-var Support = import_mongoose34.default.model("Support", supportSchema);
+var Support = mongoose34.model("Support", supportSchema);
 var support_model_default = Support;
 
 // src/modules/support/support.service.ts
@@ -11272,7 +11247,7 @@ var SupportController = class {
 };
 
 // src/modules/support/support.routes.ts
-var router15 = (0, import_express15.Router)();
+var router15 = Router15();
 var supportController = new SupportController();
 router15.get("/", protect, supportController.getMyTickets);
 router15.post("/", protect, supportController.createTicket);
@@ -11281,10 +11256,10 @@ router15.post("/:ticketId/reply", protect, supportController.replyToTicket);
 var support_routes_default = router15;
 
 // src/modules/adventure/category/adventure.routes.ts
-var import_express16 = require("express");
+import { Router as Router16 } from "express";
 
 // src/modules/adventure/category/adventure.service.ts
-var import_mongoose35 = __toESM(require("mongoose"), 1);
+import mongoose35 from "mongoose";
 init_service_model();
 var attachFavoriteFlag2 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
@@ -11421,7 +11396,7 @@ var getAdventures = async (query = {}, userId = null) => {
 };
 var getAdventureDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose35.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose35.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11624,7 +11599,7 @@ var getVendorAdventures = async (vendorId) => {
 };
 var getVendorAdventureDetails = async (id, vendorId) => {
   try {
-    if (!import_mongoose35.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose35.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11676,7 +11651,7 @@ var getVendorAdventureDetails = async (id, vendorId) => {
 };
 var updateAdventure = async (id, data, vendorId) => {
   try {
-    if (!import_mongoose35.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose35.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11725,7 +11700,7 @@ var updateAdventure = async (id, data, vendorId) => {
 };
 var deleteAdventure = async (id, vendorId) => {
   try {
-    if (!import_mongoose35.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose35.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11908,7 +11883,7 @@ var AdventureController = class {
 };
 
 // src/modules/adventure/category/adventure.routes.ts
-var router16 = (0, import_express16.Router)();
+var router16 = Router16();
 var adventureController = new AdventureController();
 router16.get("/search", optionalProtect, adventureController.searchAdventures);
 router16.get("/", optionalProtect, adventureController.getAdventures);
@@ -11946,11 +11921,11 @@ router16.delete(
 var adventure_routes_default = router16;
 
 // src/modules/adventure/service/service.routes.ts
-var import_express17 = require("express");
+import { Router as Router17 } from "express";
 
 // src/modules/adventure/service/service.service.ts
 init_service_model();
-var import_mongoose36 = __toESM(require("mongoose"), 1);
+import mongoose36 from "mongoose";
 var checkIsFavorite2 = async (itemId, userId, itemType) => {
   if (!userId || !itemId) return false;
   const fav = await favorite_model_default.findOne({
@@ -11962,7 +11937,7 @@ var checkIsFavorite2 = async (itemId, userId, itemType) => {
 };
 var getServiceDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose36.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose36.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findOne({
@@ -12076,7 +12051,7 @@ var getVendorServices = async (vendorId) => {
 };
 var getVendorServiceById = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose36.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose36.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(serviceId).populate({
@@ -12174,7 +12149,7 @@ var createService = async (data, vendorId) => {
 };
 var updateService = async (id, data, vendorId) => {
   try {
-    if (!import_mongoose36.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose36.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -12233,7 +12208,7 @@ var updateService = async (id, data, vendorId) => {
 };
 var deleteService = async (id, vendorId) => {
   try {
-    if (!import_mongoose36.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose36.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -12386,7 +12361,7 @@ var ServiceController = class {
 };
 
 // src/modules/adventure/service/service.routes.ts
-var router17 = (0, import_express17.Router)();
+var router17 = Router17();
 var serviceController = new ServiceController();
 router17.get("/:id", optionalProtect, serviceController.getServiceDetails);
 router17.post(
@@ -12422,7 +12397,7 @@ router17.delete(
 var service_routes_default = router17;
 
 // src/modules/cab/company/cab.routes.ts
-var import_express18 = require("express");
+import { Router as Router18 } from "express";
 
 // src/modules/cab/company/cab.service.ts
 var createCabCompany = async (vendor, data) => {
@@ -12552,7 +12527,7 @@ var CabController = class {
 };
 
 // src/modules/cab/company/cab.routes.ts
-var router18 = (0, import_express18.Router)();
+var router18 = Router18();
 var cabController = new CabController();
 router18.post(
   "/vendor/cabs",
@@ -12563,11 +12538,11 @@ router18.post(
 var cab_routes_default = router18;
 
 // src/modules/cab/service/cabService.routes.ts
-var import_express19 = require("express");
+import { Router as Router19 } from "express";
 
 // src/modules/cab/service/cabService.service.ts
-var import_mongoose37 = __toESM(require("mongoose"), 1);
 init_cabService_model();
+import mongoose37 from "mongoose";
 var attachFavoriteFlag3 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -12688,7 +12663,7 @@ var getCabs = async (query, userId = null) => {
 };
 var getCabCompanyDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose37.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await cab_model_default.findOne({
@@ -12753,7 +12728,7 @@ var getCabCompanyDetails = async (id, userId = null) => {
 };
 var getCabServiceDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose37.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findOne({
@@ -12832,7 +12807,7 @@ var createCabService = async (data, vendorId) => {
       features = [],
       images = []
     } = data;
-    if (!cabId || !import_mongoose37.default.Types.ObjectId.isValid(cabId)) {
+    if (!cabId || !mongoose37.Types.ObjectId.isValid(cabId)) {
       throw new Error("Valid cabId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -12936,7 +12911,7 @@ var getVendorCabServices = async (query = {}, vendorId) => {
 };
 var getVendorCabServiceById = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose37.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate("cab", "name vendorId").lean();
@@ -12982,7 +12957,7 @@ var getVendorCabServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorCabService = async (serviceId, vendorId, data) => {
   try {
-    if (!import_mongoose37.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -13032,7 +13007,7 @@ var updateVendorCabService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorCabService = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose37.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -13226,7 +13201,7 @@ var CabServiceController = class {
 };
 
 // src/modules/cab/service/cabService.routes.ts
-var router19 = (0, import_express19.Router)();
+var router19 = Router19();
 var cabServiceController = new CabServiceController();
 router19.get("/", optionalProtect, cabServiceController.getCabs);
 router19.get("/:id", optionalProtect, cabServiceController.getCabServiceDetails);
@@ -13268,7 +13243,7 @@ router19.delete(
 var cabService_routes_default = router19;
 
 // src/modules/bike/company/bike.routes.ts
-var import_express20 = require("express");
+import { Router as Router20 } from "express";
 
 // src/modules/bike/company/bike.service.ts
 var createBikeCompany = async (data, vendor) => {
@@ -13398,7 +13373,7 @@ var BikeController = class {
 };
 
 // src/modules/bike/company/bike.routes.ts
-var router20 = (0, import_express20.Router)();
+var router20 = Router20();
 var bikeController = new BikeController();
 router20.post(
   "/vendor/bikes",
@@ -13409,11 +13384,11 @@ router20.post(
 var bike_routes_default = router20;
 
 // src/modules/bike/service/bikeService.routes.ts
-var import_express21 = require("express");
+import { Router as Router21 } from "express";
 
 // src/modules/bike/service/bikeService.service.ts
-var import_mongoose38 = __toESM(require("mongoose"), 1);
 init_bikeService_model();
+import mongoose38 from "mongoose";
 var attachFavoriteFlag4 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -13529,7 +13504,7 @@ var getBikes = async (query, userId = null) => {
 };
 var getBikeCompanyDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose38.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await bike_model_default.findOne({
@@ -13600,7 +13575,7 @@ var getBikeCompanyDetails = async (id, userId = null) => {
 };
 var getBikeServiceDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose38.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findOne({
@@ -13664,7 +13639,7 @@ var getBikeServiceDetails = async (id, userId = null) => {
 var calculateBikePrice = async (body) => {
   try {
     const { serviceId, startDate, endDate } = body;
-    if (!import_mongoose38.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     if (!startDate || !endDate) {
@@ -13727,7 +13702,7 @@ var createBikeService = async (data, vendorId) => {
       meta = {},
       images = []
     } = data;
-    if (!bikeId || !import_mongoose38.default.Types.ObjectId.isValid(bikeId)) {
+    if (!bikeId || !mongoose38.Types.ObjectId.isValid(bikeId)) {
       throw new Error("Valid bikeId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -13819,7 +13794,7 @@ var getVendorBikeServices = async (query = {}, vendorId) => {
 };
 var getVendorBikeServiceById = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose38.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate("bike", "name vendorId").lean();
@@ -13862,7 +13837,7 @@ var getVendorBikeServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorBikeService = async (serviceId, vendorId, data) => {
   try {
-    if (!import_mongoose38.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -13909,7 +13884,7 @@ var updateVendorBikeService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorBikeService = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose38.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -14112,7 +14087,7 @@ var BikeServiceController = class {
 };
 
 // src/modules/bike/service/bikeService.routes.ts
-var router21 = (0, import_express21.Router)();
+var router21 = Router21();
 var bikeServiceController = new BikeServiceController();
 router21.get("/", optionalProtect, bikeServiceController.getBikes);
 router21.get(
@@ -14158,7 +14133,7 @@ router21.delete(
 var bikeService_routes_default = router21;
 
 // src/modules/tour/company/tour.routes.ts
-var import_express22 = require("express");
+import { Router as Router22 } from "express";
 
 // src/modules/tour/company/tour.service.ts
 var createTourCompany = async (data, vendor) => {
@@ -14615,7 +14590,7 @@ var TourController = class {
 };
 
 // src/modules/tour/company/tour.routes.ts
-var router22 = (0, import_express22.Router)();
+var router22 = Router22();
 var tourController = new TourController();
 router22.get("/", tourController.getTourCompanies);
 router22.get("/companies", tourController.getTourCompanies);
@@ -14632,11 +14607,11 @@ router22.post(
 var tour_routes_default = router22;
 
 // src/modules/tour/service/tourService.routes.ts
-var import_express23 = require("express");
+import { Router as Router23 } from "express";
 
 // src/modules/tour/service/tourService.service.ts
-var import_mongoose39 = __toESM(require("mongoose"), 1);
 init_tourService_model();
+import mongoose39 from "mongoose";
 var attachFavoriteFlag5 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -14866,7 +14841,7 @@ var getTours = async (query, userId = null) => {
 };
 var getCompanyDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose39.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await tour_model_default.findOne({
@@ -14929,7 +14904,7 @@ var getCompanyDetails = async (id, userId = null) => {
 };
 var getTourServiceDetails = async (id, userId = null) => {
   try {
-    if (!import_mongoose39.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findOne({
@@ -15014,7 +14989,7 @@ var createTourService = async (data, vendorId) => {
       maxPeople = 10
     } = data;
     let targetTourId = tourId;
-    if (!targetTourId || !import_mongoose39.default.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose39.Types.ObjectId.isValid(targetTourId)) {
       const company = await tour_model_default.findOne({
         vendorId,
         isActive: true
@@ -15023,7 +14998,7 @@ var createTourService = async (data, vendorId) => {
         targetTourId = company._id;
       }
     }
-    if (!targetTourId || !import_mongoose39.default.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose39.Types.ObjectId.isValid(targetTourId)) {
       throw new Error("Valid tourId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -15129,7 +15104,7 @@ var getVendorTourServices = async (query = {}, vendorId) => {
 };
 var getVendorTourServiceById = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose39.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate("tour", "name vendorId").lean();
@@ -15171,7 +15146,7 @@ var getVendorTourServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorTourService = async (serviceId, vendorId, data) => {
   try {
-    if (!import_mongoose39.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -15231,7 +15206,7 @@ var updateVendorTourService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorTourService = async (serviceId, vendorId) => {
   try {
-    if (!import_mongoose39.default.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -15438,7 +15413,7 @@ var TourServiceController = class {
 };
 
 // src/modules/tour/service/tourService.routes.ts
-var router23 = (0, import_express23.Router)();
+var router23 = Router23();
 var tourServiceController = new TourServiceController();
 router23.get("/", optionalProtect, tourServiceController.getTours);
 router23.get(
@@ -15484,23 +15459,23 @@ router23.delete(
 var tourService_routes_default = router23;
 
 // src/modules/multiServiceBookings/booking.routes.ts
-var import_express24 = require("express");
+import { Router as Router24 } from "express";
 
 // src/modules/multiServiceBookings/booking.service.ts
-var import_mongoose41 = __toESM(require("mongoose"), 1);
-var import_crypto5 = __toESM(require("crypto"), 1);
+import mongoose41 from "mongoose";
+import crypto5 from "crypto";
 
 // src/modules/multiServiceBookings/payment.model.ts
-var import_mongoose40 = __toESM(require("mongoose"), 1);
-var paymentSchema2 = new import_mongoose40.Schema(
+import mongoose40, { Schema as Schema26 } from "mongoose";
+var paymentSchema2 = new Schema26(
   {
     bookingId: {
-      type: import_mongoose40.Schema.Types.ObjectId,
+      type: Schema26.Types.ObjectId,
       ref: "Booking",
       required: true
     },
     userId: {
-      type: import_mongoose40.Schema.Types.ObjectId,
+      type: Schema26.Types.ObjectId,
       ref: "User",
       required: true
     },
@@ -15570,7 +15545,7 @@ var paymentSchema2 = new import_mongoose40.Schema(
 );
 paymentSchema2.index({ bookingId: 1, status: 1 });
 paymentSchema2.index({ userId: 1, createdAt: -1 });
-var GenericPayment = import_mongoose40.default.model("GenericPayment", paymentSchema2);
+var GenericPayment = mongoose40.model("GenericPayment", paymentSchema2);
 var payment_model_default2 = GenericPayment;
 
 // src/modules/multiServiceBookings/booking.service.ts
@@ -15579,7 +15554,7 @@ init_cabService_model();
 init_bikeService_model();
 init_tourService_model();
 var createBooking2 = async (data, userId) => {
-  const session = await import_mongoose41.default.startSession();
+  const session = await mongoose41.startSession();
   session.startTransaction();
   try {
     const {
@@ -15692,7 +15667,7 @@ var createBooking2 = async (data, userId) => {
     }
     const taxAmount = Number((baseAmount * taxPercentage / 100).toFixed(2));
     const totalAmount = Number((baseAmount + taxAmount).toFixed(2));
-    const bookingReference = "BK-" + import_crypto5.default.randomBytes(6).toString("hex").toUpperCase();
+    const bookingReference = "BK-" + crypto5.randomBytes(6).toString("hex").toUpperCase();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
     const [booking] = await booking_model_default2.create(
       [
@@ -15773,7 +15748,7 @@ var createBooking2 = async (data, userId) => {
   }
 };
 var verifyPayment2 = async (data) => {
-  const session = await import_mongoose41.default.startSession();
+  const session = await mongoose41.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -15802,7 +15777,7 @@ var verifyPayment2 = async (data) => {
       throw new Error("Payment session expired");
     }
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSignature = import_crypto5.default.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "").update(body).digest("hex");
+    const expectedSignature = crypto5.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "").update(body).digest("hex");
     if (expectedSignature !== razorpay_signature) {
       throw new Error("Invalid payment signature");
     }
@@ -15945,7 +15920,7 @@ var MultiServiceBookingController = class {
 };
 
 // src/modules/multiServiceBookings/booking.routes.ts
-var router24 = (0, import_express24.Router)();
+var router24 = Router24();
 var bookingController3 = new MultiServiceBookingController();
 router24.use(protect);
 router24.post("/booking", authorize("user"), bookingController3.createBooking);
@@ -15957,10 +15932,10 @@ router24.post(
 var booking_routes_default2 = router24;
 
 // src/modules/multiServiceVendor/vendor.routes.ts
-var import_express28 = require("express");
+import { Router as Router28 } from "express";
 
 // src/modules/multiServiceVendor/dashboard/dashboard.routes.ts
-var import_express25 = require("express");
+import { Router as Router25 } from "express";
 
 // src/modules/multiServiceVendor/dashboard/dashboard.service.ts
 var getDashboardStats = async (query = {}, vendor) => {
@@ -16220,7 +16195,7 @@ var MSVDashboardController = class {
 };
 
 // src/modules/multiServiceVendor/dashboard/dashboard.routes.ts
-var router25 = (0, import_express25.Router)();
+var router25 = Router25();
 var dashboardController = new MSVDashboardController();
 router25.use(protect);
 router25.get(
@@ -16244,10 +16219,10 @@ router25.get(
 var dashboard_routes_default = router25;
 
 // src/modules/multiServiceVendor/booking/booking.routes.ts
-var import_express26 = require("express");
+import { Router as Router26 } from "express";
 
 // src/modules/multiServiceVendor/booking/booking.service.ts
-var import_mongoose42 = __toESM(require("mongoose"), 1);
+import mongoose42 from "mongoose";
 var getVendorBookings3 = async (query = {}, vendor) => {
   try {
     const { status, search, page = 1, limit = 10 } = query;
@@ -16310,7 +16285,7 @@ var getVendorBookings3 = async (query = {}, vendor) => {
 };
 var getVendorBookingById = async (bookingId, vendor) => {
   try {
-    if (!import_mongoose42.default.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose42.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking id");
     }
     const booking = await booking_model_default2.findOne({
@@ -16437,7 +16412,7 @@ var MSVBookingController = class {
 };
 
 // src/modules/multiServiceVendor/booking/booking.routes.ts
-var router26 = (0, import_express26.Router)();
+var router26 = Router26();
 var bookingController4 = new MSVBookingController();
 router26.use(protect);
 router26.get(
@@ -16455,10 +16430,10 @@ router26.get(
 var booking_routes_default3 = router26;
 
 // src/modules/multiServiceVendor/invoice/invoice.routes.ts
-var import_express27 = require("express");
+import { Router as Router27 } from "express";
 
 // src/modules/multiServiceVendor/invoice/invoice.service.ts
-var import_pdfkit2 = __toESM(require("pdfkit"), 1);
+import PDFDocument2 from "pdfkit";
 var getVendorInvoiceList = async (query = {}, vendor) => {
   try {
     const {
@@ -16542,7 +16517,7 @@ var generateInvoicePdf2 = async (bookingId, vendor, res) => {
     if (!booking || booking.vendorId.toString() !== vendor._id.toString()) {
       throw new Error("Unauthorized access");
     }
-    const doc = new import_pdfkit2.default({ margin: 40 });
+    const doc = new PDFDocument2({ margin: 40 });
     res.setHeader(
       "Content-Disposition",
       `attachment; filename=invoice-${booking.bookingReference}.pdf`
@@ -16675,7 +16650,7 @@ var MSVInvoiceController = class {
 };
 
 // src/modules/multiServiceVendor/invoice/invoice.routes.ts
-var router27 = (0, import_express27.Router)();
+var router27 = Router27();
 var invoiceController = new MSVInvoiceController();
 router27.get(
   "/",
@@ -16692,27 +16667,27 @@ router27.get(
 var invoice_routes_default = router27;
 
 // src/modules/multiServiceVendor/vendor.routes.ts
-var router28 = (0, import_express28.Router)();
+var router28 = Router28();
 router28.use("/dashboard", dashboard_routes_default);
 router28.use("/bookings", booking_routes_default3);
 router28.use("/invoices", invoice_routes_default);
 var vendor_routes_default2 = router28;
 
 // src/modules/vendorAccountGroup/accountGroup.routes.ts
-var import_express29 = require("express");
+import { Router as Router29 } from "express";
 
 // src/modules/vendorAccountGroup/accountGroup.service.ts
-var import_bcryptjs2 = __toESM(require("bcryptjs"), 1);
-var import_jsonwebtoken4 = __toESM(require("jsonwebtoken"), 1);
+import bcrypt2 from "bcryptjs";
+import jwt4 from "jsonwebtoken";
 
 // src/modules/vendorAccountGroup/accountGroup.model.ts
-var import_mongoose43 = __toESM(require("mongoose"), 1);
-var vendorAccountGroupSchema = new import_mongoose43.Schema(
+import mongoose43, { Schema as Schema27 } from "mongoose";
+var vendorAccountGroupSchema = new Schema27(
   {
     accounts: [
       {
         vendorId: {
-          type: import_mongoose43.Schema.Types.ObjectId,
+          type: Schema27.Types.ObjectId,
           ref: "Vendor",
           required: true
         },
@@ -16727,7 +16702,7 @@ var vendorAccountGroupSchema = new import_mongoose43.Schema(
       }
     ],
     primaryVendorId: {
-      type: import_mongoose43.Schema.Types.ObjectId,
+      type: Schema27.Types.ObjectId,
       ref: "Vendor",
       required: true
     }
@@ -16739,7 +16714,7 @@ var vendorAccountGroupSchema = new import_mongoose43.Schema(
 vendorAccountGroupSchema.index({
   "accounts.vendorId": 1
 });
-var VendorAccountGroup = import_mongoose43.default.model("VendorAccountGroup", vendorAccountGroupSchema);
+var VendorAccountGroup = mongoose43.model("VendorAccountGroup", vendorAccountGroupSchema);
 var accountGroup_model_default = VendorAccountGroup;
 
 // src/modules/vendorAccountGroup/accountGroup.service.ts
@@ -16760,7 +16735,7 @@ var connectVendorAccounts = async (currentVendorId, email, password) => {
   if (!targetUser) {
     throw new Error("Account not found");
   }
-  const isMatch = await import_bcryptjs2.default.compare(password, targetUser.password);
+  const isMatch = await bcrypt2.compare(password, targetUser.password);
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
@@ -16895,7 +16870,7 @@ var switchVendorAccount = async (currentVendorId, targetVendorId) => {
   if (!targetUser) {
     throw new Error("User not found");
   }
-  const accessToken = import_jsonwebtoken4.default.sign(
+  const accessToken = jwt4.sign(
     {
       id: targetUser._id,
       vendorId: targetVendor._id
@@ -16989,7 +16964,7 @@ var VendorAccountGroupController = class {
 };
 
 // src/modules/vendorAccountGroup/accountGroup.routes.ts
-var router29 = (0, import_express29.Router)();
+var router29 = Router29();
 var vendorAccountController = new VendorAccountGroupController();
 router29.post(
   "/connect-account",
@@ -17012,19 +16987,19 @@ router29.post(
 var accountGroup_routes_default = router29;
 
 // src/modules/admin/property/property.routes.ts
-var import_express30 = require("express");
+import { Router as Router30 } from "express";
 
 // src/modules/admin/property/property.service.ts
-var import_mongoose45 = __toESM(require("mongoose"), 1);
-var import_crypto6 = __toESM(require("crypto"), 1);
+import mongoose45 from "mongoose";
+import crypto6 from "crypto";
 init_tourService_model();
 
 // src/modules/admin/property/deletedProperty.model.ts
-var import_mongoose44 = __toESM(require("mongoose"), 1);
-var deletedPropertySchema = new import_mongoose44.Schema(
+import mongoose44, { Schema as Schema28 } from "mongoose";
+var deletedPropertySchema = new Schema28(
   {
     originalVendorId: {
-      type: import_mongoose44.Schema.Types.ObjectId,
+      type: Schema28.Types.ObjectId,
       index: true
     },
     propertyId: {
@@ -17074,7 +17049,7 @@ var deletedPropertySchema = new import_mongoose44.Schema(
       trim: true
     },
     deletedBy: {
-      type: import_mongoose44.Schema.Types.ObjectId,
+      type: Schema28.Types.ObjectId,
       ref: "User"
     },
     deletedAt: {
@@ -17088,7 +17063,7 @@ var deletedPropertySchema = new import_mongoose44.Schema(
   }
 );
 deletedPropertySchema.index({ deletedAt: -1 });
-var DeletedProperty = import_mongoose44.default.model("DeletedProperty", deletedPropertySchema);
+var DeletedProperty = mongoose44.model("DeletedProperty", deletedPropertySchema);
 var deletedProperty_model_default = DeletedProperty;
 
 // src/modules/admin/property/property.service.ts
@@ -17334,7 +17309,7 @@ var getAllProperties = async (query) => {
 };
 var getPropertyDetail = async (vendorId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17453,7 +17428,7 @@ var getPropertyDetail = async (vendorId) => {
 };
 var approveVendor = async (vendorId, adminId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17520,7 +17495,7 @@ var approveVendor = async (vendorId, adminId) => {
       let uniqueId;
       let isUnique = false;
       while (!isUnique) {
-        uniqueId = String(Math.floor(1e5 + import_crypto6.default.randomInt(9e5)));
+        uniqueId = String(Math.floor(1e5 + crypto6.randomInt(9e5)));
         const existing = await vendor_model_default.findOne({ propertyId: uniqueId });
         if (!existing) isUnique = true;
       }
@@ -17546,7 +17521,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
     if (!validRanks.includes(rank)) {
       throw new Error("Invalid rank value");
     }
-    if (!import_mongoose45.default.Types.ObjectId.isValid(businessId)) {
+    if (!mongoose45.Types.ObjectId.isValid(businessId)) {
       throw new Error("Invalid business ID");
     }
     const BusinessModel = serviceModelMap[serviceType];
@@ -17572,7 +17547,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
 };
 var markIssue = async (vendorId, step, reason, adminId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -17609,7 +17584,7 @@ var markIssue = async (vendorId, step, reason, adminId) => {
 };
 var verifySection = async (vendorId, step, adminId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -17674,7 +17649,7 @@ var verifySection = async (vendorId, step, adminId) => {
 };
 var rejectVendor = async (vendorId, body, adminId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17715,7 +17690,7 @@ var rejectVendor = async (vendorId, body, adminId) => {
 };
 var getPropertyListings = async (vendorId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17805,7 +17780,7 @@ var getPropertyListings = async (vendorId) => {
 };
 var blockVendor = async (vendorId, adminId, reason = "") => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17889,7 +17864,7 @@ var blockVendor = async (vendorId, adminId, reason = "") => {
 };
 var unblockVendor = async (vendorId, adminId) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17969,7 +17944,7 @@ var unblockVendor = async (vendorId, adminId) => {
 };
 var deleteProperty = async (vendorId, adminId = null, reason = "") => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -18107,7 +18082,7 @@ var cleanAllDeletedProperties = async () => {
 };
 var deleteDeletedPropertyRecord = async (id) => {
   try {
-    if (!import_mongoose45.default.Types.ObjectId.isValid(id)) {
+    if (!mongoose45.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid record ID");
     }
     await deletedProperty_model_default.findByIdAndDelete(id);
@@ -18422,7 +18397,7 @@ var PropertyController = class {
 };
 
 // src/modules/admin/property/property.routes.ts
-var router30 = (0, import_express30.Router)();
+var router30 = Router30();
 var propertyController = new PropertyController();
 router30.get(
   "/",
@@ -18511,10 +18486,10 @@ router30.delete(
 var property_routes_default = router30;
 
 // src/modules/admin/user/user.routes.ts
-var import_express31 = require("express");
+import { Router as Router31 } from "express";
 
 // src/modules/admin/user/user.service.ts
-var import_mongoose46 = __toESM(require("mongoose"), 1);
+import mongoose46 from "mongoose";
 var getAllUsers = async (query) => {
   try {
     const {
@@ -18671,7 +18646,7 @@ var getUserBookings2 = async (userId, query) => {
     const hotelPipeline = [
       {
         $match: {
-          userId: new import_mongoose46.default.Types.ObjectId(userId)
+          userId: new mongoose46.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -18718,7 +18693,7 @@ var getUserBookings2 = async (userId, query) => {
     const genericPipeline = [
       {
         $match: {
-          userId: new import_mongoose46.default.Types.ObjectId(userId)
+          userId: new mongoose46.Types.ObjectId(userId)
         }
       },
       {
@@ -18776,8 +18751,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new import_mongoose46.default.Types.ObjectId(bookingId),
-          userId: new import_mongoose46.default.Types.ObjectId(userId)
+          _id: new mongoose46.Types.ObjectId(bookingId),
+          userId: new mongoose46.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -18921,8 +18896,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new import_mongoose46.default.Types.ObjectId(bookingId),
-          userId: new import_mongoose46.default.Types.ObjectId(userId)
+          _id: new mongoose46.Types.ObjectId(bookingId),
+          userId: new mongoose46.Types.ObjectId(userId)
         }
       },
       // VENDOR
@@ -19055,7 +19030,7 @@ var updateUserStatus = async (userId, body) => {
     if (typeof isActive !== "boolean") {
       throw new Error("isActive must be true or false");
     }
-    if (!import_mongoose46.default.Types.ObjectId.isValid(userId)) {
+    if (!mongoose46.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const existingUser = await auth_model_default.findOne({
@@ -19187,7 +19162,7 @@ var UserController2 = class {
 };
 
 // src/modules/admin/user/user.routes.ts
-var router31 = (0, import_express31.Router)();
+var router31 = Router31();
 var userController2 = new UserController2();
 router31.get("/", protect, authorize("admin"), userController2.getAllUsers);
 router31.get(
@@ -19211,10 +19186,10 @@ router31.patch(
 var user_routes_default2 = router31;
 
 // src/modules/admin/booking/booking.routes.ts
-var import_express32 = require("express");
+import { Router as Router32 } from "express";
 
 // src/modules/admin/booking/booking.service.ts
-var import_mongoose47 = __toESM(require("mongoose"), 1);
+import mongoose47 from "mongoose";
 var getBookingStats = async () => {
   try {
     const todayStart = /* @__PURE__ */ new Date();
@@ -19529,10 +19504,10 @@ var getAllBookings = async (query) => {
 };
 var getBookingDetail3 = async (bookingId) => {
   try {
-    if (!import_mongoose47.default.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose47.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking ID");
     }
-    const objectId = new import_mongoose47.default.Types.ObjectId(bookingId);
+    const objectId = new mongoose47.Types.ObjectId(bookingId);
     const hotelBooking = await booking_model_default.aggregate([
       { $match: { _id: objectId } },
       {
@@ -19853,7 +19828,7 @@ var BookingController2 = class {
 };
 
 // src/modules/admin/booking/booking.routes.ts
-var router32 = (0, import_express32.Router)();
+var router32 = Router32();
 var bookingController5 = new BookingController2();
 router32.get(
   "/stats",
@@ -19871,7 +19846,7 @@ router32.get(
 var booking_routes_default4 = router32;
 
 // src/modules/admin/review/review.routes.ts
-var import_express33 = require("express");
+import { Router as Router33 } from "express";
 
 // src/modules/admin/review/review.service.ts
 var getReviewStats = async () => {
@@ -20190,7 +20165,7 @@ var ReviewController2 = class {
 };
 
 // src/modules/admin/review/review.routes.ts
-var router33 = (0, import_express33.Router)();
+var router33 = Router33();
 var reviewController = new ReviewController2();
 router33.get(
   "/stats",
@@ -20220,10 +20195,10 @@ router33.patch(
 var review_routes_default2 = router33;
 
 // src/modules/admin/payment/payment.routes.ts
-var import_express34 = require("express");
+import { Router as Router34 } from "express";
 
 // src/modules/admin/payment/payment.service.ts
-var import_mongoose48 = __toESM(require("mongoose"), 1);
+import mongoose48 from "mongoose";
 init_availability_model();
 var getAllPayments = async (query) => {
   try {
@@ -20546,7 +20521,7 @@ var getPaymentDetail = async (paymentId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new import_mongoose48.default.Types.ObjectId(paymentId)
+          _id: new mongoose48.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -20683,7 +20658,7 @@ var getPaymentDetail = async (paymentId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new import_mongoose48.default.Types.ObjectId(paymentId)
+          _id: new mongoose48.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -21542,7 +21517,7 @@ var getRefundRequests = async (query) => {
   }
 };
 var handleRefund = async (paymentId, action) => {
-  const session = await import_mongoose48.default.startSession();
+  const session = await mongoose48.startSession();
   session.startTransaction();
   try {
     if (!["approve", "reject"].includes(action)) {
@@ -21815,7 +21790,7 @@ var PaymentController2 = class {
 };
 
 // src/modules/admin/payment/payment.routes.ts
-var router34 = (0, import_express34.Router)();
+var router34 = Router34();
 var paymentController2 = new PaymentController2();
 router34.get(
   "/stats",
@@ -21851,7 +21826,7 @@ router34.get(
 var payment_routes_default2 = router34;
 
 // src/modules/admin/support/support.routes.ts
-var import_express35 = require("express");
+import { Router as Router35 } from "express";
 
 // src/modules/admin/support/support.service.ts
 var getAllTickets = async (query) => {
@@ -22136,7 +22111,7 @@ var SupportController2 = class {
 };
 
 // src/modules/admin/support/support.routes.ts
-var router35 = (0, import_express35.Router)();
+var router35 = Router35();
 var supportController2 = new SupportController2();
 router35.get(
   "/stats",
@@ -22166,7 +22141,7 @@ router35.patch(
 var support_routes_default2 = router35;
 
 // src/modules/admin/dashboard/dashboard.routes.ts
-var import_express36 = require("express");
+import { Router as Router36 } from "express";
 
 // src/modules/admin/dashboard/dashboard.service.ts
 var getDashboard = async ({
@@ -22612,7 +22587,7 @@ var DashboardController = class {
 };
 
 // src/modules/admin/dashboard/dashboard.routes.ts
-var router36 = (0, import_express36.Router)();
+var router36 = Router36();
 var dashboardController2 = new DashboardController();
 router36.get("/", protect, authorize("admin"), dashboardController2.getDashboard);
 router36.get(
@@ -22624,7 +22599,7 @@ router36.get(
 var dashboard_routes_default2 = router36;
 
 // src/modules/admin/tax/tax.routes.ts
-var import_express37 = require("express");
+import { Router as Router37 } from "express";
 
 // src/modules/admin/tax/tax.service.ts
 var setTax = async (userId, taxPercentage) => {
@@ -22687,17 +22662,17 @@ var TaxController = class {
 };
 
 // src/modules/admin/tax/tax.routes.ts
-var router37 = (0, import_express37.Router)();
+var router37 = Router37();
 var taxController = new TaxController();
 router37.post("/set-tax", protect, authorize("admin"), taxController.setTax);
 router37.get("/active", taxController.getActiveTax);
 var tax_routes_default = router37;
 
 // src/modules/admin/account-deactivate/account.routes.ts
-var import_express38 = require("express");
+import { Router as Router38 } from "express";
 
 // src/modules/admin/account-deactivate/account.service.ts
-var import_mongoose49 = __toESM(require("mongoose"), 1);
+import mongoose49 from "mongoose";
 var getDeleteRequests = async (query) => {
   try {
     const { page = 1, limit = 10, search } = query;
@@ -22807,10 +22782,10 @@ var getDeleteRequests = async (query) => {
   }
 };
 var approveDeleteRequest = async (userId) => {
-  const session = await import_mongoose49.default.startSession();
+  const session = await mongoose49.startSession();
   try {
     session.startTransaction();
-    if (!import_mongoose49.default.Types.ObjectId.isValid(userId)) {
+    if (!mongoose49.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -22882,7 +22857,7 @@ var approveDeleteRequest = async (userId) => {
 };
 var rejectDeleteRequest = async (userId) => {
   try {
-    if (!import_mongoose49.default.Types.ObjectId.isValid(userId)) {
+    if (!mongoose49.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -22975,7 +22950,7 @@ var AccountController = class {
 };
 
 // src/modules/admin/account-deactivate/account.routes.ts
-var router38 = (0, import_express38.Router)();
+var router38 = Router38();
 var accountController = new AccountController();
 router38.get(
   "/delete-requests",
@@ -22998,7 +22973,7 @@ router38.patch(
 var account_routes_default = router38;
 
 // src/modules/admin/promotion/promotion.routes.ts
-var import_express39 = require("express");
+import { Router as Router39 } from "express";
 
 // src/modules/admin/promotion/promotion.service.ts
 var SERVICE_MODELS4 = {
@@ -23339,7 +23314,7 @@ var PromotionController = class {
 };
 
 // src/modules/admin/promotion/promotion.routes.ts
-var router39 = (0, import_express39.Router)();
+var router39 = Router39();
 var promotionController = new PromotionController();
 router39.get(
   "/",
@@ -23406,7 +23381,7 @@ var errorHandler = (err, req, res, next) => {
 };
 
 // src/app.ts
-var app = (0, import_express40.default)();
+var app = express();
 var allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -23416,7 +23391,7 @@ var allowedOrigins = [
   process.env.ADMIN_URL
 ].filter(Boolean);
 app.use(
-  (0, import_cors.default)({
+  cors({
     origin: function(origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("trivllo.com") || origin.includes("localhost") || origin.includes("127.0.0.1")) {
@@ -23444,13 +23419,13 @@ app.use(
   })
 );
 app.use(
-  (0, import_helmet.default)({
+  helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
     crossOriginOpenerPolicy: { policy: "unsafe-none" },
     crossOriginEmbedderPolicy: false
   })
 );
-var limiter = (0, import_express_rate_limit2.default)({
+var limiter = rateLimit2({
   windowMs: 15 * 60 * 1e3,
   max: 2e3,
   // Reasonable limit for busy single-page apps
@@ -23459,10 +23434,10 @@ var limiter = (0, import_express_rate_limit2.default)({
   legacyHeaders: false
 });
 app.use("/api", limiter);
-app.use(import_express40.default.json({ limit: "10kb" }));
-app.use(import_passport3.default.initialize());
+app.use(express.json({ limit: "10kb" }));
+app.use(passport2.initialize());
 if (process.env.NODE_ENV === "development") {
-  app.use((0, import_morgan.default)("dev"));
+  app.use(morgan("dev"));
 }
 app.get(
   "/",
@@ -23516,3 +23491,6 @@ async function handler(req, res) {
   }
   return app_default(req, res);
 }
+export {
+  handler as default
+};
