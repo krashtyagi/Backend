@@ -53,8 +53,7 @@ import "./shared/config/passport";
 
 const app: Application = express();
 
-app.use(helmet());
-
+// ── Allowed origins for CORS ──
 const allowedOrigins: string[] = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -64,21 +63,27 @@ const allowedOrigins: string[] = [
   process.env.ADMIN_URL,
 ].filter(Boolean) as string[];
 
+// ── CORS must be registered BEFORE helmet so preflight (OPTIONS) requests
+//    are handled before helmet can set restrictive headers ──
 app.use(
   cors({
     origin: function (
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
       if (
-        !origin ||
         allowedOrigins.includes(origin) ||
         origin.endsWith(".vercel.app") ||
         origin.includes("trivllo.com") ||
         origin.includes("localhost") ||
-        origin.includes("127.0.0.1") ||
-        process.env.NODE_ENV !== "production"
+        origin.includes("127.0.0.1")
       ) {
+        callback(null, true);
+      } else if (process.env.NODE_ENV !== "production") {
+        // Allow all origins in non-production environments
         callback(null, true);
       } else {
         callback(null, false);
@@ -86,7 +91,26 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+      "Cache-Control",
+      "X-CSRF-Token",
+    ],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
+    maxAge: 86400, // Cache preflight response for 24 hours
+  }),
+);
+
+// ── Helmet AFTER cors – configure to not conflict with cross-origin requests ──
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "unsafe-none" },
+    crossOriginEmbedderPolicy: false,
   }),
 );
 
