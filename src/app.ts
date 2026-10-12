@@ -129,11 +129,16 @@ const rpcHandler = new RPCHandler(appRouter);
 
 app.use(async (req, res, next) => {
   if (req.url.startsWith("/rpc")) {
-    const { matched } = await rpcHandler.handle(req, res, {
-      prefix: "/rpc",
-      context: {},
-    });
-    if (matched) return;
+    try {
+      const { matched } = await rpcHandler.handle(req, res, {
+        prefix: "/rpc",
+        context: {},
+      });
+      if (matched) return;
+    } catch (err) {
+      console.error("oRPC handler error:", err);
+      // Fall through to next middleware instead of crashing
+    }
   }
   next();
 });
