@@ -12,7 +12,7 @@ export class TourServiceController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const userId = (req as any).user._id || null;
+      const userId = (req as any).user?._id || null;
       const data = await tourService.getTours(req.query, userId);
 
       res.status(200).json({
@@ -32,7 +32,7 @@ export class TourServiceController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = (req as any).user._id || null;
+      const userId = (req as any).user?._id || null;
 
       const data = await tourService.getCompanyDetails(id, userId);
 
@@ -53,7 +53,7 @@ export class TourServiceController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = (req as any).user._id || null;
+      const userId = (req as any).user?._id || null;
 
       const data = await tourService.getTourServiceDetails(id, userId);
 
