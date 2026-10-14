@@ -7,6 +7,7 @@ import Availability from "../availability/availability.model.js";
 import Tax from "../admin/tax/tax.model.js";
 import Booking from "../bookings/booking.model.js";
 import Favorite from "../favorites/favorite.model.js";
+import Review from "../reviews/review.model.js";
 import logger from "../../shared/utils/logger.js";
 
 // helper function to attach isFavorite flag to hotels
@@ -717,7 +718,7 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
     }
 
     const hotels = await Hotel.find(filter)
-      .select("name city address images rating numReviews isFeatured rank")
+      .select("name city address images rating numReviews isFeatured rank amenities")
       .sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 })
       .lean();
 
@@ -751,20 +752,100 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
       priceMap[p._id.toString()] = p.minPrice;
     });
 
-    const formattedHotels = hotels.map((hotel: any) => ({
-      _id: hotel._id,
-      name: hotel.name,
-      city: hotel.address?.city || hotel.city,
-      address: hotel.address,
-      rating: hotel.rating,
-      numReviews: hotel.numReviews,
-      image: hotel.images?.[0]?.url || null,
-      rank: hotel?.rank || "C",
-      isFeatured: hotel.isFeatured || false,
-      startingPrice: priceMap[hotel._id.toString()] || null,
-    }));
+    // Real review stats aggregated directly from the Review collection
+    const reviewAgg = await Review.aggregate([
+      {
+        $match: {
+          companyType: "hotel",
+          companyId: { $in: hotelIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$companyId",
+          averageRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
 
-    return formattedHotels;
+    const reviewMap: Record<string, { rating: number; numReviews: number }> = {};
+    reviewAgg.forEach((r: any) => {
+      reviewMap[r._id.toString()] = {
+        rating: Number(r.averageRating.toFixed(1)),
+        numReviews: r.totalReviews,
+      };
+    });
+
+    const formatAmenityName = (amenity: string): string => {
+      const map: Record<string, string> = {
+        free_wifi: "Free WiFi",
+        wifi: "Free WiFi",
+        free_parking: "Free Parking",
+        parking: "Parking",
+        breakfast: "Breakfast",
+        mountain_view: "Mountain View",
+        room_service: "Room Service",
+        bonfire: "Bonfire",
+        garden: "Garden",
+        restaurant: "Restaurant",
+        terrace: "Terrace",
+        balcony: "Balcony",
+      };
+      return (
+        map[amenity.toLowerCase()] ||
+        amenity
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      );
+    };
+
+    const formattedHotels = hotels.map((hotel: any) => {
+      const realRev = reviewMap[hotel._id.toString()];
+
+      const rating =
+        realRev && realRev.numReviews > 0
+          ? realRev.rating
+          : typeof hotel.rating === "number" && hotel.rating > 0
+          ? Number(hotel.rating.toFixed(1))
+          : 0;
+
+      const numReviews =
+        realRev && realRev.numReviews > 0
+          ? realRev.numReviews
+          : typeof hotel.numReviews === "number"
+          ? hotel.numReviews
+          : 0;
+
+      const amenities =
+        Array.isArray(hotel.amenities) && hotel.amenities.length > 0
+          ? hotel.amenities.slice(0, 3).map(formatAmenityName)
+          : [];
+
+      const rawImg = hotel.images?.[0]?.url;
+      const image = rawImg || "/hotels/room1.png";
+
+      const startingPrice = priceMap[hotel._id.toString()] || 0;
+
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        address: hotel.address,
+        rating,
+        numReviews,
+        amenities,
+        image,
+        images:
+          hotel.images?.map((i: any) => i.url).filter(Boolean) || [image],
+        rank: hotel?.rank || "C",
+        isFeatured: hotel.isFeatured || false,
+        startingPrice,
+      };
+    });
+
+    const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
+    return updatedHotels;
   } catch (error) {
     throw error;
   }
@@ -1426,6 +1507,7 @@ export const searchHotels = async (query: any = {}, userId: any = null) => {
         totalNights: nights,
         totalPrice: { $multiply: ["$startingPrice", nights] },
         thumbnail: { $arrayElemAt: ["$images.url", 0] },
+        hotelImages: "$images",
       },
     },
 

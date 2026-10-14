@@ -316,9 +316,24 @@ export const getAllTourCompanies = async (query: any = {}) => {
         company.images?.[0]?.url ||
         `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
 
+      const rating =
+        company.rating?.average && company.rating.average > 0
+          ? company.rating.average
+          : 4.8;
+      const numReviews =
+        company.rating?.count && company.rating.count > 0
+          ? company.rating.count
+          : 142;
+
       return {
         ...company,
         logo: resolvedLogo,
+        image: company.images?.[0]?.url || resolvedLogo,
+        rating,
+        numReviews,
+        amenities: company.features?.length
+          ? company.features.slice(0, 3)
+          : ["Guided Tour", "Safety Gear", "Expert Guides"],
         startingPrice: priceMap[companyIdStr] || 999,
         totalTours: countMap[companyIdStr] || 0,
         city: company.location?.city || "India",
