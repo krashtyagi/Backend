@@ -150,7 +150,8 @@ export class HotelController {
   }
 
   /**
-   * Search nearby hotels based on coordinates (Geospatial API)
+   * Search nearby hotels based on coordinates (Geospatial API using MongoDB 2dsphere index)
+   * GET /api/v1/hotels/nearby?lat=...&lng=...&radius=2000&limit=20
    */
   async getNearbyHotels(
     req: Request,
@@ -158,23 +159,51 @@ export class HotelController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { lng, lat, distance } = req.query;
+      const { lng, lat, radius, distance, limit } = req.query;
 
       if (!lng || !lat) {
-        throw new Error("Please provide longitude and latitude");
+        res.status(400).json({
+          success: false,
+          message: "Please provide both latitude and longitude query parameters.",
+        });
+        return;
       }
 
-      const userId: string = (req as any).user?._id;
+      const numLat = Number(lat);
+      const numLng = Number(lng);
+
+      if (
+        isNaN(numLat) ||
+        isNaN(numLng) ||
+        numLat < -90 ||
+        numLat > 90 ||
+        numLng < -180 ||
+        numLng > 180
+      ) {
+        res.status(400).json({
+          success: false,
+          message: "Valid latitude (-90 to 90) and longitude (-180 to 180) are required.",
+        });
+        return;
+      }
+
+      const radiusMeters = Number(radius || distance) || 2000;
+      const limitCount = Math.min(Math.max(Number(limit) || 20, 1), 100);
+      const userId: string = (req as any).user?._id || null;
 
       const hotels = await hotelService.findNearbyHotels(
-        Number(lng),
-        Number(lat),
-        Number(distance) || 5000, // Default 5km
+        numLng,
+        numLat,
+        radiusMeters,
+        limitCount,
+        userId,
       );
 
       res.status(200).json({
         success: true,
         count: hotels.length,
+        radius: radiusMeters,
+        coordinates: [numLng, numLat],
         data: hotels,
       });
     } catch (error) {

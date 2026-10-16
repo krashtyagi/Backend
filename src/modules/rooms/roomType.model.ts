@@ -66,7 +66,13 @@ const roomTypeSchema = new Schema<IRoomType>(
       min: 0,
       validate: {
         validator: function (this: any, value: number): boolean {
-          return value <= this.basePrice;
+          if (!value || Number(value) === 0) return true;
+          const base =
+            this?.basePrice ??
+            this?.getUpdate?.()?.basePrice ??
+            this?.getUpdate?.()?.$set?.basePrice;
+          if (base === undefined || base === null) return true;
+          return Number(value) <= Number(base);
         },
         message: "Discount price cannot be greater than base price",
       },

@@ -373,6 +373,8 @@ export const getAllHotels = async (query: any = {}, userId: any = null) => {
             name: { $first: "$name" },
             city: { $first: { $ifNull: ["$address.city", "$city"] } },
             address: { $first: "$address" },
+            location: { $first: "$location" },
+            coordinates: { $first: "$coordinates" },
             rating: { $first: "$rating" },
             numReviews: { $first: "$numReviews" },
             isFeatured: { $first: "$isFeatured" },
@@ -518,6 +520,8 @@ export const getAllHotels = async (query: any = {}, userId: any = null) => {
           name: { $first: "$name" },
           city: { $first: { $ifNull: ["$address.city", "$city"] } },
           address: { $first: "$address" },
+          location: { $first: "$location" },
+          coordinates: { $first: "$coordinates" },
           rating: { $first: "$rating" },
           numReviews: { $first: "$numReviews" },
           isFeatured: { $first: "$isFeatured" },
@@ -525,6 +529,15 @@ export const getAllHotels = async (query: any = {}, userId: any = null) => {
           amenities: { $first: "$amenities" },
           images: { $first: "$images" },
           rank: { $first: "$rank" },
+          startingPrice: {
+            $min: {
+              $cond: [
+                { $gt: ["$roomTypes.discountPrice", 0] },
+                "$roomTypes.discountPrice",
+                "$roomTypes.basePrice",
+              ],
+            },
+          },
         },
       },
       {
@@ -532,7 +545,6 @@ export const getAllHotels = async (query: any = {}, userId: any = null) => {
           rank: { $ifNull: ["$rank", "C"] },
           thumbnail: { $arrayElemAt: ["$images.url", 0] },
           hotelImages: "$images",
-          startingPrice: null,
           availableRooms: null,
           totalNights: 1,
           totalPrice: null,
@@ -1186,20 +1198,175 @@ export const updateHotel = async (hotelId: any, vendorId: any, updateData: any) 
   }
 };
 
-// Find hotels near a specific location (Geospatial Search)
-export const findNearbyHotels = async (lng: any, lat: any, maxDistance: any = 5000) => {
+// Find hotels near a specific location (Geospatial Search using MongoDB 2dsphere S2/R-Tree index)
+export const findNearbyHotels = async (
+  lng: number,
+  lat: number,
+  radiusMeters: number = 2000,
+  limit: number = 20,
+  userId: any = null,
+) => {
   try {
-    return await Hotel.find({
-      isActive: true,
-      location: {
-        $near: {
-          $geometry: { type: "Point", coordinates: [lng, lat] },
-          $maxDistance: maxDistance,
+    const validRadius = Math.min(Math.max(Number(radiusMeters) || 2000, 50), 50000);
+    const validLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+
+    // MongoDB Geospatial Aggregation using 2dsphere index and $geoNear
+    let hotels: any[] = [];
+    try {
+      hotels = await Hotel.aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [lng, lat],
+            },
+            key: "location",
+            distanceField: "distance",
+            maxDistance: validRadius,
+            spherical: true,
+            query: { isActive: true },
+          },
+        },
+        { $limit: validLimit },
+      ]);
+    } catch (geoNearErr) {
+      // Fallback to native $near find query if $geoNear aggregation encounters pipeline restriction
+      hotels = await Hotel.find({
+        isActive: true,
+        location: {
+          $near: {
+            $geometry: { type: "Point", coordinates: [lng, lat] },
+            $maxDistance: validRadius,
+          },
+        },
+      })
+        .limit(validLimit)
+        .lean();
+    }
+
+    if (!hotels || hotels.length === 0) {
+      return [];
+    }
+
+    const hotelIds = hotels.map((h: any) => h._id);
+
+    // 1. Fetch Room Prices
+    const priceAgg = await RoomType.aggregate([
+      {
+        $match: {
+          hotelId: { $in: hotelIds },
+          isActive: true,
         },
       },
-    })
-      .limit(50)
-      .lean();
+      {
+        $group: {
+          _id: "$hotelId",
+          minPrice: {
+            $min: {
+              $cond: [
+                { $gt: ["$discountPrice", 0] },
+                "$discountPrice",
+                "$basePrice",
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    const priceMap: Record<string, number> = {};
+    priceAgg.forEach((p: any) => {
+      priceMap[p._id.toString()] = p.minPrice;
+    });
+
+    // 2. Fetch Review Stats
+    const reviewAgg = await Review.aggregate([
+      {
+        $match: {
+          companyType: "hotel",
+          companyId: { $in: hotelIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$companyId",
+          averageRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const reviewMap: Record<string, { rating: number; numReviews: number }> = {};
+    reviewAgg.forEach((r: any) => {
+      reviewMap[r._id.toString()] = {
+        rating: Number(r.averageRating.toFixed(1)),
+        numReviews: r.totalReviews,
+      };
+    });
+
+    // 3. Format and enrich hotels with distances
+    const formattedHotels = hotels.map((hotel: any) => {
+      const realRev = reviewMap[hotel._id.toString()];
+      const rating =
+        realRev && realRev.numReviews > 0
+          ? realRev.rating
+          : typeof hotel.rating === "number" && hotel.rating > 0
+          ? Number(hotel.rating.toFixed(1))
+          : 0;
+
+      const numReviews =
+        realRev && realRev.numReviews > 0
+          ? realRev.numReviews
+          : typeof hotel.numReviews === "number"
+          ? hotel.numReviews
+          : 0;
+
+      const rawImg = hotel.images?.[0]?.url;
+      const image = rawImg || "/hotels/room1.png";
+      const startingPrice = priceMap[hotel._id.toString()] || 0;
+
+      // Distance calculation in meters (from $geoNear or fallback haversine)
+      let distanceMeters: number | null = null;
+      if (typeof hotel.distance === "number") {
+        distanceMeters = Math.round(hotel.distance);
+      } else if (hotel.location?.coordinates?.length >= 2) {
+        // Haversine fallback if $near was used instead of $geoNear
+        const hLng = hotel.location.coordinates[0];
+        const hLat = hotel.location.coordinates[1];
+        const R = 6371e3; // metres
+        const φ1 = (lat * Math.PI) / 180;
+        const φ2 = (hLat * Math.PI) / 180;
+        const Δφ = ((hLat - lat) * Math.PI) / 180;
+        const Δλ = ((hLng - lng) * Math.PI) / 180;
+        const a =
+          Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        distanceMeters = Math.round(R * c);
+      }
+
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        address: hotel.address || hotel.formattedAddress || "",
+        location: hotel.location,
+        coordinates: hotel.location?.coordinates || null,
+        rating,
+        numReviews,
+        amenities: hotel.amenities || [],
+        image,
+        images: hotel.images?.map((i: any) => i.url).filter(Boolean) || [image],
+        rank: hotel?.rank || "C",
+        isFeatured: hotel.isFeatured || false,
+        startingPrice,
+        price: startingPrice,
+        distance: distanceMeters,
+      };
+    });
+
+    const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
+    return updatedHotels;
   } catch (error) {
     logger.error("Service Error: findNearbyHotels", error);
     throw error;
@@ -1239,7 +1406,7 @@ export const getSuggestions = async (query: any) => {
     .limit(30)
     .lean();
 
-  // Build unique location suggestions with counts
+  // Build unique location suggestions without counting hotels
   const locationMap = new Map();
 
   for (const hotel of results) {
@@ -1258,10 +1425,8 @@ export const getSuggestions = async (query: any) => {
           value: city,
           label: [city, state].filter(Boolean).join(", "),
           state,
-          count: 0,
         });
       }
-      locationMap.get(key).count++;
     }
 
     // Add area/town suggestion (only if it matched the query)
@@ -1274,10 +1439,8 @@ export const getSuggestions = async (query: any) => {
           label: [area, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
           city,
           state,
-          count: 0,
         });
       }
-      locationMap.get(key).count++;
     }
 
     // Add district suggestion (only if it matched the query)
@@ -1289,10 +1452,8 @@ export const getSuggestions = async (query: any) => {
           value: district,
           label: [district, state].filter(Boolean).join(", "),
           state,
-          count: 0,
         });
       }
-      locationMap.get(key).count++;
     }
 
     // Add landmark suggestion (only if it matched the query)
@@ -1305,20 +1466,18 @@ export const getSuggestions = async (query: any) => {
           label: [landmark, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
           city,
           state,
-          count: 0,
         });
       }
-      locationMap.get(key).count++;
     }
   }
 
-  // Sort: exact prefix matches first, then by count
+  // Sort: exact prefix matches first, then alphabetically
   const locationSuggestions = [...locationMap.values()]
     .sort((a, b) => {
       const aStarts = a.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
       const bStarts = b.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
       if (aStarts !== bStarts) return aStarts - bStarts;
-      return b.count - a.count;
+      return a.value.localeCompare(b.value);
     })
     .slice(0, 6);
 
@@ -1605,8 +1764,14 @@ export class HotelService {
     return updateHotel(hotelId, vendorId, updateData);
   }
 
-  async findNearbyHotels(lng: any, lat: any, maxDistance: any = 5000) {
-    return findNearbyHotels(lng, lat, maxDistance);
+  async findNearbyHotels(
+    lng: any,
+    lat: any,
+    maxDistance: any = 2000,
+    limit: any = 20,
+    userId: any = null,
+  ) {
+    return findNearbyHotels(lng, lat, maxDistance, limit, userId);
   }
 
   async getSuggestions(query: any) {
