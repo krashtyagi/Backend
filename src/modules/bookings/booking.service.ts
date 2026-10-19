@@ -1224,7 +1224,11 @@ export const adminHandleRefund = async (bookingId: any, action: any) => {
 //----------VENDOR Service----------
 
 //get vendor bookings for the dashboard
-export const getVendorBookings = async (vendorId: any, queryParams: any) => {
+export const getVendorBookings = async (
+  vendorId: any,
+  queryParams: any,
+  activeHotelId?: any,
+) => {
   const {
     page = 1,
     limit = 10,
@@ -1233,12 +1237,24 @@ export const getVendorBookings = async (vendorId: any, queryParams: any) => {
     startDate,
     endDate,
     sort = "-createdAt",
+    hotelId,
   } = queryParams;
 
   const skip = (page - 1) * limit;
 
-  const hotels = await Hotel.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h: any) => h._id);
+  let hotelIds: any[] = [];
+  const targetHotelId = hotelId || activeHotelId;
+  if (targetHotelId && mongoose.Types.ObjectId.isValid(targetHotelId)) {
+    const activeHotel = await Hotel.findOne({ _id: targetHotelId, vendorId }, "_id").lean();
+    if (activeHotel) {
+      hotelIds = [activeHotel._id];
+    }
+  }
+
+  if (hotelIds.length === 0) {
+    const hotels = await Hotel.find({ vendorId }, "_id").lean();
+    hotelIds = hotels.length > 0 ? [hotels[0]._id] : [];
+  }
 
   const filter: any = {
     hotelId: { $in: hotelIds },
@@ -1763,9 +1779,20 @@ export const getVendorDashboard = async (
   vendorId: any,
   reservationDays: any = 7,
   revenueMonths: any = 6,
+  activeHotelId?: any,
 ) => {
-  const hotels = await Hotel.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h) => h._id);
+  let hotelIds: any[] = [];
+  if (activeHotelId && mongoose.Types.ObjectId.isValid(activeHotelId)) {
+    const activeHotel = await Hotel.findOne({ _id: activeHotelId, vendorId }, "_id").lean();
+    if (activeHotel) {
+      hotelIds = [activeHotel._id];
+    }
+  }
+
+  if (hotelIds.length === 0) {
+    const hotels = await Hotel.find({ vendorId }, "_id").lean();
+    hotelIds = hotels.length > 0 ? [hotels[0]._id] : [];
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);

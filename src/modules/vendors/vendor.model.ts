@@ -16,6 +16,7 @@ export interface IVendor extends Document {
   userId: Types.ObjectId;
   propertyId?: string;
   linkedGroupId?: Types.ObjectId | null;
+  activePropertyId?: Types.ObjectId | null;
   serviceType?: "hotel" | "adventure" | "cab" | "bike" | "tour";
   businessName?: string;
   logo?: IVendorLogo;
@@ -79,6 +80,13 @@ const vendorSchema = new Schema<IVendor>(
       index: true,
     },
 
+    // Currently active property (hotel/tour/etc.) the vendor is managing
+    activePropertyId: {
+      type: Schema.Types.ObjectId,
+      default: null,
+      index: true,
+    },
+
     serviceType: {
       type: String,
       enum: ["hotel", "adventure", "cab", "bike", "tour"],
@@ -103,7 +111,6 @@ const vendorSchema = new Schema<IVendor>(
       lowercase: true,
       trim: true,
       index: true,
-      unique: true,
     },
 
     businessPhone: {

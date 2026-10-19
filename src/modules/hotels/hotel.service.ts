@@ -143,6 +143,9 @@ export const createHotel = async (vendor: any, hotelData: any) => {
     vendor.currentStep = 4;
     vendor.registrationStep = Math.max(vendor.registrationStep, 4);
 
+    // Set activePropertyId to this hotel
+    vendor.activePropertyId = hotel._id;
+
     //reset rejection
     if (vendor.status === "rejected") {
       vendor.status = "draft";
@@ -711,7 +714,17 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
   try {
     const { city } = query;
 
+    // STEP 1: Find all hotel IDs that have at least one active room (similar to tours)
+    const hotelsWithActiveRooms = await RoomType.distinct("hotelId", {
+      isActive: true,
+    });
+
+    if (!hotelsWithActiveRooms || hotelsWithActiveRooms.length === 0) {
+      return [];
+    }
+
     const filter: any = {
+      _id: { $in: hotelsWithActiveRooms },
       isActive: true,
       verificationStatus: "verified",
     };

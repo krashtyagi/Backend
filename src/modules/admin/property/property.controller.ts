@@ -65,8 +65,12 @@ export class PropertyController {
   ): Promise<void> {
     try {
       const { vendorId } = req.params;
+      const { propertyId } = req.query;
 
-      const data = await propertyService.getPropertyDetail(vendorId);
+      const data = await propertyService.getPropertyDetail(
+        vendorId,
+        propertyId as string,
+      );
 
       res.status(200).json({
         success: true,
@@ -206,8 +210,12 @@ export class PropertyController {
   ): Promise<void> {
     try {
       const { vendorId } = req.params;
+      const { propertyId } = req.query;
 
-      const data = await propertyService.getPropertyListings(vendorId);
+      const data = await propertyService.getPropertyListings(
+        vendorId,
+        propertyId as string,
+      );
 
       res.status(200).json({
         success: true,

@@ -300,7 +300,7 @@ export const getAllProperties = async (query: any) => {
   }
 };
 
-export const getPropertyDetail = async (vendorId: any) => {
+export const getPropertyDetail = async (vendorId: any, propertyId?: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
@@ -318,42 +318,37 @@ export const getPropertyDetail = async (vendorId: any) => {
       vendorId,
     }).select("+accountNumber +ifscCode +upiId");
 
-    // DYNAMIC BUSINESS FETCH
-    let business = null;
+    // DYNAMIC BUSINESS FETCH - fetch all properties for this vendor
+    let business: any = null;
+    let allProperties: any[] = [];
 
-    switch (vendor.serviceType) {
-      case "hotel":
-        business = await Hotel.findOne({
-          vendorId,
-        });
-        break;
+    const ServiceModel = vendor.serviceType
+      ? serviceModelMap[vendor.serviceType as keyof typeof serviceModelMap]
+      : null;
 
-      case "cab":
-        business = await CabCompany.findOne({
-          vendorId,
-        });
-        break;
+    if (ServiceModel) {
+      allProperties = await ServiceModel.find({ vendorId })
+        .sort({ createdAt: -1 })
+        .lean();
 
-      case "bike":
-        business = await BikeCompany.findOne({
-          vendorId,
-        });
-        break;
+      if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+        business =
+          allProperties.find(
+            (p: any) => p._id.toString() === propertyId.toString(),
+          ) || null;
+      }
 
-      case "tour":
-        business = await TourCompany.findOne({
-          vendorId,
-        });
-        break;
+      if (!business && vendor.activePropertyId) {
+        business =
+          allProperties.find(
+            (p: any) =>
+              p._id.toString() === vendor.activePropertyId?.toString(),
+          ) || null;
+      }
 
-      case "adventure":
-        business = await AdventureCompany.findOne({
-          vendorId,
-        });
-        break;
-
-      default:
-        business = null;
+      if (!business && allProperties.length > 0) {
+        business = allProperties[0];
+      }
     }
 
     let promotion = null;
@@ -379,6 +374,30 @@ export const getPropertyDetail = async (vendorId: any) => {
 
     return {
       businessId: business?._id || null,
+
+      properties: allProperties.map((p: any) => ({
+        _id: p._id,
+        name: p.name,
+        description: p.description || "",
+        address: p.address,
+        city:
+          p.city ||
+          p.address?.city ||
+          p.location?.city ||
+          "",
+        image:
+          p.images?.[0]?.url ||
+          (typeof p.images?.[0] === "string" ? p.images[0] : null) ||
+          null,
+        images: p.images || [],
+        verificationStatus: p.verificationStatus || "verified",
+        isActive: p.isActive ?? false,
+        rating:
+          typeof p.rating === "number"
+            ? p.rating
+            : p.rating?.average || 0,
+        createdAt: p.createdAt,
+      })),
 
       vendor: {
         _id: vendor._id,
@@ -469,6 +488,12 @@ export const getPropertyDetail = async (vendorId: any) => {
             accessibility: (business as any).accessibility || {},
 
             verificationStatus: business.verificationStatus,
+
+            isActive: business.isActive ?? false,
+
+            location: (business as any).location,
+
+            createdAt: business.createdAt,
 
             rank: business.rank,
 
@@ -568,6 +593,11 @@ export const approveVendor = async (vendorId: any, adminId: any) => {
       }
 
       await business.save();
+
+      // Set activePropertyId if not already set
+      if (!vendor.activePropertyId) {
+        vendor.activePropertyId = business._id;
+      }
     }
 
     //GENERATE UNIQUE 6-DIGIT PROPERTY ID (only if not already set)
@@ -867,7 +897,7 @@ export const rejectVendor = async (
   }
 };
 
-export const getPropertyListings = async (vendorId: any) => {
+export const getPropertyListings = async (vendorId: any, propertyId?: any) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
@@ -892,7 +922,16 @@ export const getPropertyListings = async (vendorId: any) => {
       };
     }
 
-    const business: any = await BusinessModel.findOne({ vendorId }).lean();
+    let business: any = null;
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      business = await BusinessModel.findOne({ _id: propertyId, vendorId }).lean();
+    }
+    if (!business && vendor.activePropertyId) {
+      business = await BusinessModel.findOne({ _id: vendor.activePropertyId, vendorId }).lean();
+    }
+    if (!business) {
+      business = await BusinessModel.findOne({ vendorId }).lean();
+    }
     if (!business) {
       return {
         serviceType,

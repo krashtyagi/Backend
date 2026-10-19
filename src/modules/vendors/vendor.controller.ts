@@ -104,6 +104,7 @@ export class VendorController {
       const result = await bookingService.getVendorBookings(
         vendor._id,
         req.query,
+        vendor.activePropertyId,
       );
 
       res.status(200).json({
@@ -157,9 +158,14 @@ export class VendorController {
         return;
       }
 
+      const query = {
+        ...req.query,
+        hotelId: req.query.hotelId || vendor.activePropertyId?.toString(),
+      };
+
       const result = await roomTypeService.getVendorRoomTypes(
         vendor._id,
-        req.query,
+        query,
       );
 
       res.status(200).json({
@@ -256,7 +262,7 @@ export class VendorController {
   async getVendorDashboard(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendor: any = await Vendor.findOne({ userId: (req as any).user._id })
-        .select("_id status")
+        .select("_id status activePropertyId")
         .lean();
       if (!vendor || vendor.status !== "approved") {
         res.status(403).json({
@@ -268,11 +274,13 @@ export class VendorController {
 
       const reservationDays = parseInt(req.query.reservationDays as string) || 7;
       const revenueMonths = parseInt(req.query.revenueMonths as string) || 6;
+      const activeHotelId = (req.query.hotelId as string) || (req.query.propertyId as string) || vendor.activePropertyId;
 
       const data = await bookingService.getVendorDashboard(
         vendor._id,
         reservationDays,
         revenueMonths,
+        activeHotelId,
       );
       res.status(200).json({
         success: true,

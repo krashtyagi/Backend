@@ -179,6 +179,9 @@ export const createTourCompany = async (data: any, vendor: any) => {
 
     vendor.registrationStep = Math.max(vendor.registrationStep, 4);
 
+    // Set activePropertyId to this tour company
+    vendor.activePropertyId = tourCompany._id;
+
     // RESET REJECTION
     if (vendor.status === "rejected") {
       vendor.status = "draft";

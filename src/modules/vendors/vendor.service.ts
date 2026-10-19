@@ -54,19 +54,26 @@ export const getVendorMe = async (userId: any) => {
     }).select("+accountNumber +ifscCode +upiId");
 
     // SERVICE MODEL
-    // if (!vendor.serviceType) {
-    //   throw new Error("Vendor not found");
-    // }
     const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
 
     let serviceData = null;
 
-    // FETCH SERVICE DATA
+    // FETCH SERVICE DATA using activePropertyId (with auto-migration)
     if (ServiceModel) {
-      serviceData = await ServiceModel.findOne({
-        vendorId: vendor._id,
-        isActive: true,
-      });
+      if (vendor.activePropertyId) {
+        serviceData = await ServiceModel.findById(vendor.activePropertyId);
+      }
+      // Auto-migrate: if no activePropertyId or property not found, find first active property
+      if (!serviceData) {
+        serviceData = await ServiceModel.findOne({
+          vendorId: vendor._id,
+          isActive: true,
+        });
+        if (serviceData && !vendor.activePropertyId) {
+          vendor.activePropertyId = serviceData._id;
+          await vendor.save();
+        }
+      }
     }
 
     // DYNAMIC SERVICE DETAILS
@@ -277,6 +284,11 @@ export const getVendorMe = async (userId: any) => {
 
     // APPROVED DATA
     if (vendor.status === "approved") {
+      // Count total properties for this vendor
+      const propertyCount = ServiceModel
+        ? await ServiceModel.countDocuments({ vendorId: vendor._id, isActive: true })
+        : 0;
+
       response.approvedData = {
         vendorName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
 
@@ -299,6 +311,8 @@ export const getVendorMe = async (userId: any) => {
         tourId: serviceData?._id || null,
         adventureId: serviceData?._id || null,
         serviceName: serviceData?.name || null,
+        activePropertyId: vendor.activePropertyId || null,
+        propertyCount,
       };
     }
 
@@ -444,14 +458,23 @@ export const getVendorMyListing = async (userId: any) => {
       isActive: true,
     }).select("+accountNumber +ifscCode +upiId");
 
-    // 4. Get main service data
+    // 4. Get main service data (using activePropertyId)
     const ServiceModel = vendor.serviceType ? (SERVICE_MODELS as any)[vendor.serviceType] : null;
     let serviceData: any = null;
     if (ServiceModel) {
-      serviceData = await ServiceModel.findOne({
-        vendorId: vendor._id,
-        isActive: true,
-      });
+      if (vendor.activePropertyId) {
+        serviceData = await ServiceModel.findById(vendor.activePropertyId);
+      }
+      if (!serviceData) {
+        serviceData = await ServiceModel.findOne({
+          vendorId: vendor._id,
+          isActive: true,
+        });
+        if (serviceData && !vendor.activePropertyId) {
+          vendor.activePropertyId = serviceData._id;
+          await vendor.save();
+        }
+      }
     }
 
     // 5. Get subservices based on serviceType
@@ -683,10 +706,20 @@ export const getPropertySettings = async (userId: any) => {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
 
-    const serviceData: any = await ServiceModel.findOne({
-      vendorId: vendor._id,
-      isActive: true,
-    });
+    let serviceData: any = null;
+    if (vendor.activePropertyId) {
+      serviceData = await ServiceModel.findById(vendor.activePropertyId);
+    }
+    if (!serviceData) {
+      serviceData = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true,
+      });
+      if (serviceData && !vendor.activePropertyId) {
+        vendor.activePropertyId = serviceData._id;
+        await vendor.save();
+      }
+    }
 
     if (!serviceData) {
       throw new Error("Property listing not found for this vendor");
@@ -744,10 +777,20 @@ export const updatePropertySettings = async (userId: any, payload: any) => {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
 
-    const serviceData: any = await ServiceModel.findOne({
-      vendorId: vendor._id,
-      isActive: true,
-    });
+    let serviceData: any = null;
+    if (vendor.activePropertyId) {
+      serviceData = await ServiceModel.findById(vendor.activePropertyId);
+    }
+    if (!serviceData) {
+      serviceData = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true,
+      });
+      if (serviceData && !vendor.activePropertyId) {
+        vendor.activePropertyId = serviceData._id;
+        await vendor.save();
+      }
+    }
 
     if (!serviceData) {
       throw new Error("Property listing not found for this vendor");

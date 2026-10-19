@@ -36,6 +36,7 @@ import multiServiceBookingRoutes from "./modules/multiServiceBookings/booking.ro
 import multiServiceVendorRoutes from "./modules/multiServiceVendor/vendor.routes.js";
 
 import vendorAccountRoutes from "./modules/vendorAccountGroup/accountGroup.routes.js";
+import vendorPropertyRoutes from "./modules/vendorProperty/property.routes.js";
 
 import adminRoutes from "./modules/admin/property/property.routes.js";
 import adminUserRoutes from "./modules/admin/user/user.routes.js";
@@ -47,6 +48,7 @@ import adminDashboardRoutes from "./modules/admin/dashboard/dashboard.routes.js"
 import adminTaxRoutes from "./modules/admin/tax/tax.routes.js";
 import adminAccountDeactivateRoutes from "./modules/admin/account-deactivate/account.routes.js";
 import adminPromotionRoutes from "./modules/admin/promotion/promotion.routes.js";
+import adminVendorPropertyRoutes from "./modules/admin/vendorProperty/vendorProperty.routes.js";
 import { errorHandler } from "./shared/middlewares/errorHandler.js";
 import "./shared/config/passport.js";
 
@@ -176,6 +178,9 @@ app.use("/api/v1/multi-service-vendor", multiServiceVendorRoutes);
 //multi-service vendor accounts linked
 app.use("/api/v1/vendor-accounts", vendorAccountRoutes);
 
+//vendor property management (multi-property)
+app.use("/api/v1/vendor-properties", vendorPropertyRoutes);
+
 //admin
 app.use("/api/v1/admin/dashboard", adminDashboardRoutes);
 app.use("/api/v1/admin/property", adminRoutes);
@@ -187,6 +192,7 @@ app.use("/api/v1/admin/supports", adminSupportRoutes);
 app.use("/api/v1/admin/tax", adminTaxRoutes);
 app.use("/api/v1/admin/account-deactivate", adminAccountDeactivateRoutes);
 app.use("/api/v1/admin/promotions", adminPromotionRoutes);
+app.use("/api/v1/admin/vendor-properties", adminVendorPropertyRoutes);
 
 app.use(errorHandler);
 
