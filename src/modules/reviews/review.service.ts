@@ -38,28 +38,31 @@ export const getCompanyReviews = async (companyType: string, companyId: any, que
 
     const skip = (page - 1) * limit;
 
+    const companyObjectId = mongoose.Types.ObjectId.isValid(companyId)
+      ? new mongoose.Types.ObjectId(companyId)
+      : companyId;
+
+    const matchCompany = {
+      companyType,
+      $or: [
+        { companyId: companyObjectId },
+        { companyId: String(companyId) },
+      ],
+    };
+
     const [reviews, total, stats] = await Promise.all([
-      Review.find({
-        companyType,
-        companyId,
-      })
+      Review.find(matchCompany)
         .populate("userId", "firstName lastName avatar")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
 
-      Review.countDocuments({
-        companyType,
-        companyId,
-      }),
+      Review.countDocuments(matchCompany),
 
       Review.aggregate([
         {
-          $match: {
-            companyType,
-            companyId: new mongoose.Types.ObjectId(companyId),
-          },
+          $match: matchCompany,
         },
         {
           $group: {
@@ -70,25 +73,44 @@ export const getCompanyReviews = async (companyType: string, companyId: any, que
             totalReviews: {
               $sum: 1,
             },
+            avgFacilities: { $avg: "$breakdown.facilities" },
+            avgCleanliness: { $avg: "$breakdown.cleanliness" },
+            avgServices: { $avg: "$breakdown.services" },
+            avgComfort: { $avg: "$breakdown.comfort" },
+            avgLocation: { $avg: "$breakdown.location" },
           },
         },
       ]),
     ]);
 
+    const totalReviews = stats[0]?.totalReviews ?? total ?? 0;
+    const avgRating = stats[0]?.averageRating ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0) / reviews.length) : 0);
+    const avgFacilities = stats[0]?.avgFacilities ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.facilities || 0), 0) / reviews.length) : 0);
+    const avgCleanliness = stats[0]?.avgCleanliness ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.cleanliness || 0), 0) / reviews.length) : 0);
+    const avgServices = stats[0]?.avgServices ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.services || 0), 0) / reviews.length) : 0);
+    const avgComfort = stats[0]?.avgComfort ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.comfort || 0), 0) / reviews.length) : 0);
+    const avgLocation = stats[0]?.avgLocation ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.location || 0), 0) / reviews.length) : 0);
+
     return {
       reviews,
 
       summary: {
-        averageRating: stats[0]?.averageRating?.toFixed(1) || 0,
-
-        totalReviews: stats[0]?.totalReviews || 0,
+        averageRating: Number(avgRating.toFixed(1)),
+        totalReviews,
+        breakdown: {
+          facilities: Number(avgFacilities.toFixed(1)),
+          cleanliness: Number(avgCleanliness.toFixed(1)),
+          services: Number(avgServices.toFixed(1)),
+          comfort: Number(avgComfort.toFixed(1)),
+          location: Number(avgLocation.toFixed(1)),
+        },
       },
 
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit),
+        total: totalReviews,
+        pages: Math.ceil(totalReviews / limit),
       },
     };
   } catch (error) {
@@ -109,33 +131,29 @@ export const getUserReviews = async (userId: any) => {
       review.bookingId.toString(),
     );
 
-    // Hotel bookings
+    // Hotel bookings eligible for review
     const hotelBookings: any[] = await Booking.find({
       userId,
-      status: "completed",
+      status: { $in: ["completed", "checked_out"] },
     })
       .populate("hotelId", "name images rating")
       .lean();
 
-    // Generic bookings
+    // Generic bookings eligible for review
     const genericBookings: any[] = await GenericBooking.find({
       userId,
-      status: "completed",
+      status: { $in: ["completed", "checked_out"] },
     }).lean();
 
     const pendingHotelReviews = hotelBookings
       .filter((booking: any) => !reviewedBookingIds.includes(booking._id.toString()))
       .map((booking: any) => ({
         bookingId: booking._id,
-
         companyId: booking.hotelId?._id,
-
         companyType: "hotel",
-
-        companyName: booking.hotelId?.name || "",
-
+        companyName: booking.hotelId?.name || "Hotel",
+        companyImage: booking.hotelId?.images?.[0]?.url || "",
         bookingReference: booking.bookingReference,
-
         bookingDate: booking.createdAt,
       }));
 
@@ -167,7 +185,7 @@ export const getUserReviews = async (userId: any) => {
 
 export const createReview = async (userId: any, body: any) => {
   try {
-    const { bookingId, rating, comment } = body;
+    const { bookingId, rating, comment, breakdown } = body;
 
     if (!bookingId) {
       throw new Error("Booking ID is required");
@@ -193,7 +211,7 @@ export const createReview = async (userId: any, body: any) => {
     const hotelBooking = await Booking.findOne({
       _id: bookingId,
       userId,
-      status: "completed",
+      status: { $in: ["completed", "checked_out"] },
     });
 
     if (hotelBooking) {
@@ -205,18 +223,14 @@ export const createReview = async (userId: any, body: any) => {
 
       const review = await Review.create({
         userId,
-
         bookingId,
-
         companyId: hotel._id,
         companyName: hotel.name,
         companyType: "hotel",
-
         vendorId: hotel.vendorId,
-
         rating,
-
         comment,
+        ...(breakdown && { breakdown }),
       });
 
       await updateCompanyRating("hotel", hotel._id);
@@ -231,11 +245,11 @@ export const createReview = async (userId: any, body: any) => {
     const booking: any = await GenericBooking.findOne({
       _id: bookingId,
       userId,
-      status: "completed",
+      status: { $in: ["completed", "checked_out"] },
     });
 
     if (!booking) {
-      throw new Error("Completed booking not found");
+      throw new Error("Completed or checked-out booking not found");
     }
 
     let companyId: any;
@@ -329,20 +343,14 @@ export const createReview = async (userId: any, body: any) => {
 
     const review = await Review.create({
       userId,
-
       bookingId,
-
       companyId,
-
       companyName,
-
       companyType: booking.serviceType,
-
       vendorId,
-
       rating,
-
       comment,
+      ...(breakdown && { breakdown }),
     });
 
     await updateCompanyRating(booking.serviceType, companyId);
@@ -360,7 +368,7 @@ export const createReview = async (userId: any, body: any) => {
 
 export const updateReview = async (userId: any, reviewId: any, body: any) => {
   try {
-    const { rating, comment } = body;
+    const { rating, comment, breakdown } = body;
 
     const review = await Review.findOne({
       _id: reviewId,
@@ -391,6 +399,10 @@ export const updateReview = async (userId: any, reviewId: any, body: any) => {
       review.comment = comment;
     }
 
+    if (breakdown) {
+      review.breakdown = { ...(review.breakdown || {}), ...breakdown };
+    }
+
     await review.save();
 
     await updateCompanyRating(review.companyType, review.companyId);
@@ -413,25 +425,30 @@ export const getVendorReviews = async (vendorId: any, query: any = {}) => {
 
     const skip = (page - 1) * limit;
 
+    const vendorObjectId = mongoose.Types.ObjectId.isValid(vendorId)
+      ? new mongoose.Types.ObjectId(vendorId)
+      : vendorId;
+
+    const matchVendor = {
+      $or: [
+        { vendorId: vendorObjectId },
+        { vendorId: String(vendorId) },
+      ],
+    };
+
     const [reviews, total, stats] = await Promise.all([
-      Review.find({
-        vendorId,
-      })
+      Review.find(matchVendor)
         .populate("userId", "firstName lastName avatar")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
 
-      Review.countDocuments({
-        vendorId,
-      }),
+      Review.countDocuments(matchVendor),
 
       Review.aggregate([
         {
-          $match: {
-            vendorId,
-          },
+          $match: matchVendor,
         },
         {
           $group: {
@@ -442,16 +459,35 @@ export const getVendorReviews = async (vendorId: any, query: any = {}) => {
             totalReviews: {
               $sum: 1,
             },
+            avgFacilities: { $avg: "$breakdown.facilities" },
+            avgCleanliness: { $avg: "$breakdown.cleanliness" },
+            avgServices: { $avg: "$breakdown.services" },
+            avgComfort: { $avg: "$breakdown.comfort" },
+            avgLocation: { $avg: "$breakdown.location" },
           },
         },
       ]),
     ]);
 
+    const totalReviews = stats[0]?.totalReviews ?? total ?? 0;
+    const avgRating = stats[0]?.averageRating ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0) / reviews.length) : 0);
+    const avgFacilities = stats[0]?.avgFacilities ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.facilities || 0), 0) / reviews.length) : 0);
+    const avgCleanliness = stats[0]?.avgCleanliness ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.cleanliness || 0), 0) / reviews.length) : 0);
+    const avgServices = stats[0]?.avgServices ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.services || 0), 0) / reviews.length) : 0);
+    const avgComfort = stats[0]?.avgComfort ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.comfort || 0), 0) / reviews.length) : 0);
+    const avgLocation = stats[0]?.avgLocation ?? (reviews.length > 0 ? (reviews.reduce((acc: number, r: any) => acc + (r.breakdown?.location || 0), 0) / reviews.length) : 0);
+
     return {
       summary: {
-        totalReviews: stats[0]?.totalReviews || 0,
-
-        averageRating: Number((stats[0]?.averageRating || 0).toFixed(1)),
+        totalReviews,
+        averageRating: Number(avgRating.toFixed(1)),
+        breakdown: {
+          facilities: Number(avgFacilities.toFixed(1)),
+          cleanliness: Number(avgCleanliness.toFixed(1)),
+          services: Number(avgServices.toFixed(1)),
+          comfort: Number(avgComfort.toFixed(1)),
+          location: Number(avgLocation.toFixed(1)),
+        },
       },
 
       reviews,
@@ -459,8 +495,8 @@ export const getVendorReviews = async (vendorId: any, query: any = {}) => {
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit),
+        total: totalReviews,
+        pages: Math.ceil(totalReviews / limit),
       },
     };
   } catch (error) {

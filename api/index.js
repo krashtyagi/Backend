@@ -19,15 +19,15 @@ __export(availability_model_exports, {
   Availability: () => Availability,
   default: () => availability_model_default
 });
-import mongoose10, { Schema as Schema9 } from "mongoose";
+import mongoose14, { Schema as Schema13 } from "mongoose";
 var availabilitySchema, Availability, availability_model_default;
 var init_availability_model = __esm({
   "src/modules/availability/availability.model.ts"() {
     "use strict";
-    availabilitySchema = new Schema9(
+    availabilitySchema = new Schema13(
       {
         roomTypeId: {
-          type: Schema9.Types.ObjectId,
+          type: Schema13.Types.ObjectId,
           ref: "RoomType",
           required: true
         },
@@ -54,7 +54,7 @@ var init_availability_model = __esm({
       { timestamps: true }
     );
     availabilitySchema.index({ roomTypeId: 1, date: 1 }, { unique: true });
-    Availability = mongoose10.model("Availability", availabilitySchema);
+    Availability = mongoose14.model("Availability", availabilitySchema);
     availability_model_default = Availability;
   }
 });
@@ -65,15 +65,15 @@ __export(cabService_model_exports, {
   CabService: () => CabService,
   default: () => cabService_model_default
 });
-import mongoose23, { Schema as Schema17 } from "mongoose";
+import mongoose25, { Schema as Schema19 } from "mongoose";
 var cabServiceSchema, CabService, cabService_model_default;
 var init_cabService_model = __esm({
   "src/modules/cab/service/cabService.model.ts"() {
     "use strict";
-    cabServiceSchema = new Schema17(
+    cabServiceSchema = new Schema19(
       {
         cab: {
-          type: Schema17.Types.ObjectId,
+          type: Schema19.Types.ObjectId,
           ref: "CabCompany",
           required: true
         },
@@ -156,7 +156,7 @@ var init_cabService_model = __esm({
     });
     cabServiceSchema.index({ cab: 1, isActive: 1 });
     cabServiceSchema.index({ title: "text", description: "text" });
-    CabService = mongoose23.model("CabService", cabServiceSchema);
+    CabService = mongoose25.model("CabService", cabServiceSchema);
     cabService_model_default = CabService;
   }
 });
@@ -167,15 +167,15 @@ __export(bikeService_model_exports, {
   BikeService: () => BikeService,
   default: () => bikeService_model_default
 });
-import mongoose24, { Schema as Schema18 } from "mongoose";
+import mongoose26, { Schema as Schema20 } from "mongoose";
 var bikeServiceSchema, BikeService, bikeService_model_default;
 var init_bikeService_model = __esm({
   "src/modules/bike/service/bikeService.model.ts"() {
     "use strict";
-    bikeServiceSchema = new Schema18(
+    bikeServiceSchema = new Schema20(
       {
         bike: {
-          type: Schema18.Types.ObjectId,
+          type: Schema20.Types.ObjectId,
           ref: "BikeCompany",
           required: true
         },
@@ -239,7 +239,7 @@ var init_bikeService_model = __esm({
     );
     bikeServiceSchema.index({ bike: 1, isActive: 1 });
     bikeServiceSchema.index({ bikeType: 1, pricePerDay: 1 });
-    BikeService = mongoose24.model("BikeService", bikeServiceSchema);
+    BikeService = mongoose26.model("BikeService", bikeServiceSchema);
     bikeService_model_default = BikeService;
   }
 });
@@ -250,12 +250,12 @@ __export(service_model_exports, {
   Service: () => Service,
   default: () => service_model_default
 });
-import mongoose25, { Schema as Schema19 } from "mongoose";
+import mongoose27, { Schema as Schema21 } from "mongoose";
 var itinerarySchema, serviceSchema, Service, service_model_default;
 var init_service_model = __esm({
   "src/modules/adventure/service/service.model.ts"() {
     "use strict";
-    itinerarySchema = new Schema19(
+    itinerarySchema = new Schema21(
       {
         day: {
           type: Number,
@@ -272,10 +272,10 @@ var init_service_model = __esm({
       },
       { _id: false }
     );
-    serviceSchema = new Schema19(
+    serviceSchema = new Schema21(
       {
         adventure: {
-          type: Schema19.Types.ObjectId,
+          type: Schema21.Types.ObjectId,
           ref: "Adventure",
           required: true,
           index: true
@@ -341,7 +341,7 @@ var init_service_model = __esm({
     serviceSchema.index({ adventure: 1, type: 1 });
     serviceSchema.index({ adventure: 1, basePrice: 1 });
     serviceSchema.index({ adventure: 1, discountPrice: 1 });
-    Service = mongoose25.model("Service", serviceSchema);
+    Service = mongoose27.model("Service", serviceSchema);
     service_model_default = Service;
   }
 });
@@ -352,12 +352,12 @@ __export(tourService_model_exports, {
   TourService: () => TourService,
   default: () => tourService_model_default
 });
-import mongoose26, { Schema as Schema20 } from "mongoose";
+import mongoose28, { Schema as Schema22 } from "mongoose";
 var itinerarySchema2, tourServiceSchema, TourService, tourService_model_default;
 var init_tourService_model = __esm({
   "src/modules/tour/service/tourService.model.ts"() {
     "use strict";
-    itinerarySchema2 = new Schema20(
+    itinerarySchema2 = new Schema22(
       {
         day: {
           type: Number,
@@ -380,10 +380,10 @@ var init_tourService_model = __esm({
       },
       { _id: false }
     );
-    tourServiceSchema = new Schema20(
+    tourServiceSchema = new Schema22(
       {
         tour: {
-          type: Schema20.Types.ObjectId,
+          type: Schema22.Types.ObjectId,
           ref: "TourCompany",
           required: true,
           index: true
@@ -475,7 +475,7 @@ var init_tourService_model = __esm({
     tourServiceSchema.index({ title: "text", description: "text" });
     tourServiceSchema.index({ basePrice: 1 });
     tourServiceSchema.index({ isActive: 1 });
-    TourService = mongoose26.model("TourService", tourServiceSchema);
+    TourService = mongoose28.model("TourService", tourServiceSchema);
     tourService_model_default = TourService;
   }
 });
@@ -659,6 +659,12 @@ var vendorSchema = new Schema2(
       default: null,
       index: true
     },
+    // Currently active property (hotel/tour/etc.) the vendor is managing
+    activePropertyId: {
+      type: Schema2.Types.ObjectId,
+      default: null,
+      index: true
+    },
     serviceType: {
       type: String,
       enum: ["hotel", "adventure", "cab", "bike", "tour"],
@@ -679,8 +685,7 @@ var vendorSchema = new Schema2(
       type: String,
       lowercase: true,
       trim: true,
-      index: true,
-      unique: true
+      index: true
     },
     businessPhone: {
       type: String,
@@ -1249,6 +1254,573 @@ var sendVendorBookingNotificationEmail = async (emails, details) => {
   }
 };
 
+// src/modules/bookings/booking.model.ts
+import mongoose4, { Schema as Schema3 } from "mongoose";
+var bookingSchema = new Schema3(
+  {
+    userId: {
+      type: Schema3.Types.ObjectId,
+      ref: "User"
+    },
+    hotelId: {
+      type: Schema3.Types.ObjectId,
+      ref: "Hotel",
+      required: true
+    },
+    roomTypeId: {
+      type: Schema3.Types.ObjectId,
+      ref: "RoomType",
+      required: true
+    },
+    bookingReference: {
+      type: String,
+      unique: true,
+      required: true
+    },
+    checkIn: {
+      type: Date,
+      required: true
+    },
+    checkOut: {
+      type: Date,
+      required: true
+    },
+    nights: {
+      type: Number,
+      required: true
+    },
+    primaryGuest: {
+      firstName: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      lastName: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      email: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true
+      },
+      phoneNumber: {
+        type: String,
+        required: true,
+        trim: true
+      }
+    },
+    additionalGuests: {
+      type: [
+        {
+          firstName: {
+            type: String,
+            required: true,
+            trim: true
+          },
+          lastName: {
+            type: String,
+            required: true,
+            trim: true
+          }
+        }
+      ],
+      default: []
+    },
+    guests: {
+      adults: { type: Number, required: true },
+      children: { type: Number, default: 0 }
+    },
+    roomsBooked: {
+      type: Number,
+      default: 1
+    },
+    pricePerNight: {
+      type: Number,
+      required: true
+    },
+    taxAmount: {
+      type: Number,
+      default: 0
+    },
+    cleaningFee: {
+      type: Number,
+      default: 0
+    },
+    discountAmount: {
+      type: Number,
+      default: 0
+    },
+    totalAmount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: [
+        "pending",
+        "confirmed",
+        "checked_in",
+        "staying",
+        "checked_out",
+        "completed",
+        "cancellation_requested",
+        "cancelled"
+      ],
+      default: "pending",
+      index: true
+    },
+    roomNumber: {
+      type: String,
+      default: ""
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "refunded"],
+      default: "pending"
+    },
+    paymentId: {
+      type: Schema3.Types.ObjectId,
+      ref: "Payment"
+    },
+    refundPercentage: {
+      type: Number,
+      default: 0
+    },
+    refundAmount: {
+      type: Number,
+      default: 0
+    },
+    refundStatus: {
+      type: String,
+      enum: [
+        "none",
+        "pending",
+        //waiting for admin approval
+        "approved",
+        "rejected",
+        "processed"
+      ],
+      default: "none"
+    },
+    refundRequestedAt: Date,
+    refundProcessedAt: Date,
+    cancelledAt: Date,
+    cancellationReason: {
+      type: String,
+      trim: true
+    },
+    actualCheckInAt: Date,
+    actualCheckOutAt: Date,
+    specialRequest: {
+      type: String,
+      trim: true
+    },
+    expiresAt: {
+      type: Date,
+      index: { expires: "0s" }
+    }
+  },
+  { timestamps: true }
+);
+bookingSchema.index({ userId: 1, createdAt: -1 });
+bookingSchema.index({ hotelId: 1, checkIn: 1 });
+bookingSchema.index({
+  roomTypeId: 1,
+  checkIn: 1,
+  checkOut: 1,
+  status: 1
+});
+var Booking = mongoose4.model("Booking", bookingSchema);
+var booking_model_default = Booking;
+
+// src/modules/multiServiceBookings/booking.model.ts
+import mongoose5, { Schema as Schema4 } from "mongoose";
+var participantSchema = new Schema4(
+  {
+    name: { type: String, trim: true },
+    age: { type: Number },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"]
+    },
+    weight: { type: Number }
+    // optional (adventure use)
+  },
+  { _id: false }
+);
+var bookingSchema2 = new Schema4(
+  {
+    userId: {
+      type: Schema4.Types.ObjectId,
+      ref: "User",
+      index: true
+    },
+    vendorId: {
+      type: Schema4.Types.ObjectId,
+      ref: "Vendor",
+      required: true,
+      index: true
+    },
+    serviceType: {
+      type: String,
+      enum: ["adventure", "cab", "tour", "bike"],
+      required: true,
+      index: true
+    },
+    serviceId: {
+      type: Schema4.Types.ObjectId,
+      required: true,
+      index: true
+    },
+    bookingReference: {
+      type: String,
+      unique: true,
+      required: true,
+      index: true
+    },
+    bookingDate: {
+      type: Date,
+      required: true,
+      index: true
+    },
+    timeSlot: {
+      type: String
+      //adventure specific
+    },
+    // bike & tour specific
+    duration: {
+      startDate: Date,
+      endDate: Date,
+      totalDays: Number
+    },
+    primaryCustomer: {
+      firstName: { type: String, required: true, trim: true },
+      lastName: { type: String, trim: true },
+      email: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true
+      },
+      phoneNumber: { type: String, required: true, trim: true }
+    },
+    //Participants (Dynamic)
+    participants: {
+      type: [participantSchema],
+      default: []
+    },
+    //Dynamic Data
+    meta: {
+      type: Object,
+      default: {}
+    },
+    extraInfo: {
+      type: Object,
+      default: {}
+    },
+    //Pricing Snapshot
+    pricing: {
+      baseAmount: { type: Number, required: true },
+      taxAmount: { type: Number, default: 0 },
+      taxPercentage: { type: Number, default: 0 },
+      discountAmount: { type: Number, default: 0 },
+      totalAmount: { type: Number, required: true }
+    },
+    serviceSnapshot: {
+      title: { type: String },
+      type: { type: String },
+      price: { type: Number },
+      vendorId: { type: Schema4.Types.ObjectId },
+      extra: {
+        type: Object,
+        default: {}
+      }
+    },
+    // quantity meaning:
+    // adventure → participants
+    // bike → days
+    // tour → people
+    // cab → 1
+    quantity: {
+      type: Number,
+      default: 1
+    },
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "completed", "cancelled"],
+      default: "pending",
+      index: true
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "refunded"],
+      default: "pending",
+      index: true
+    },
+    paymentId: {
+      type: Schema4.Types.ObjectId,
+      ref: "Payment"
+    },
+    refundAmount: {
+      type: Number,
+      default: 0
+    },
+    refundStatus: {
+      type: String,
+      enum: ["none", "pending", "processed", "failed"],
+      default: "none"
+    },
+    specialRequest: {
+      type: String,
+      trim: true
+    },
+    cancelledAt: Date,
+    cancellationReason: { type: String, trim: true },
+    expiresAt: {
+      type: Date,
+      index: { expires: "0s" }
+    }
+  },
+  { timestamps: true }
+);
+bookingSchema2.index({ userId: 1, createdAt: -1 });
+bookingSchema2.index({ vendorId: 1, createdAt: -1 });
+bookingSchema2.index({ serviceId: 1, serviceType: 1 });
+bookingSchema2.index({ bookingDate: 1, status: 1 });
+bookingSchema2.index({ paymentStatus: 1, status: 1 });
+bookingSchema2.index({ bookingReference: 1 });
+var GenericBooking = mongoose5.model("GenericBooking", bookingSchema2);
+var booking_model_default2 = GenericBooking;
+
+// src/modules/payments/payment.model.ts
+import mongoose6, { Schema as Schema5 } from "mongoose";
+var paymentSchema = new Schema5(
+  {
+    bookingId: {
+      type: Schema5.Types.ObjectId,
+      ref: "Booking",
+      required: true,
+      index: true
+    },
+    userId: {
+      type: Schema5.Types.ObjectId,
+      ref: "User",
+      index: true
+    },
+    razorpayOrderId: {
+      type: String,
+      required: true
+    },
+    razorpayPaymentId: {
+      type: String
+    },
+    razorpaySignature: {
+      type: String
+    },
+    amountPaid: {
+      type: Number,
+      required: true
+    },
+    currency: {
+      type: String,
+      default: "INR"
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["card", "upi", "netbanking", "wallet", "unknown"],
+      default: "unknown"
+    },
+    status: {
+      type: String,
+      enum: [
+        "created",
+        "authorized",
+        "captured",
+        "failed",
+        "refunded",
+        "partially_refunded"
+      ],
+      default: "created",
+      index: true
+    },
+    refundAmount: {
+      type: Number,
+      default: 0
+    },
+    razorpayRefundId: {
+      type: String
+    },
+    refundStatus: {
+      type: String,
+      enum: ["none", "initiated", "pending", "processed", "failed"],
+      default: "none"
+    },
+    refundedAt: Date,
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    metadata: {
+      type: Object
+    },
+    expiresAt: {
+      type: Date,
+      index: { expires: "0s" }
+    }
+  },
+  { timestamps: true }
+);
+paymentSchema.index({ razorpayPaymentId: 1 });
+paymentSchema.index({ razorpayOrderId: 1 });
+paymentSchema.index({ bookingId: 1, status: 1 });
+var Payment = mongoose6.model("Payment", paymentSchema);
+var payment_model_default = Payment;
+
+// src/modules/multiServiceBookings/payment.model.ts
+import mongoose7, { Schema as Schema6 } from "mongoose";
+var paymentSchema2 = new Schema6(
+  {
+    bookingId: {
+      type: Schema6.Types.ObjectId,
+      ref: "Booking",
+      required: true
+    },
+    userId: {
+      type: Schema6.Types.ObjectId,
+      ref: "User"
+    },
+    gateway: {
+      type: String,
+      enum: ["razorpay"],
+      default: "razorpay"
+    },
+    gatewayOrderId: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    gatewayPaymentId: {
+      type: String,
+      index: true
+    },
+    gatewaySignature: {
+      type: String
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    currency: {
+      type: String,
+      default: "INR"
+    },
+    status: {
+      type: String,
+      enum: ["created", "authorized", "captured", "failed", "refunded"],
+      default: "created"
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["card", "upi", "netbanking", "wallet", "unknown"],
+      default: "unknown"
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    refundAmount: {
+      type: Number,
+      default: 0
+    },
+    refundStatus: {
+      type: String,
+      enum: ["none", "pending", "processed", "failed"],
+      default: "none"
+    },
+    refundedAt: Date,
+    metadata: {
+      serviceType: String,
+      bookingReference: String,
+      extra: {
+        type: Object,
+        default: {}
+      }
+    },
+    expiresAt: {
+      type: Date,
+      index: { expires: "0s" }
+    }
+  },
+  { timestamps: true }
+);
+paymentSchema2.index({ bookingId: 1, status: 1 });
+paymentSchema2.index({ userId: 1, createdAt: -1 });
+var GenericPayment = mongoose7.model("GenericPayment", paymentSchema2);
+var payment_model_default2 = GenericPayment;
+
+// src/shared/utils/reconcileGuestBookings.ts
+var reconcileGuestBookings = async (userId, email) => {
+  try {
+    if (!email || !userId) return;
+    const normalizedEmail = email.toLowerCase().trim();
+    const emailRegex = new RegExp(`^${normalizedEmail.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, "i");
+    const hotelResult = await booking_model_default.updateMany(
+      {
+        userId: null,
+        "primaryGuest.email": emailRegex,
+        paymentStatus: "paid"
+        // Only reconcile paid bookings
+      },
+      { $set: { userId } }
+    );
+    const genericResult = await booking_model_default2.updateMany(
+      {
+        userId: null,
+        "primaryCustomer.email": emailRegex,
+        paymentStatus: "paid"
+      },
+      { $set: { userId } }
+    );
+    if (hotelResult.modifiedCount > 0) {
+      const reconciledBookingIds = await booking_model_default.find(
+        { userId, "primaryGuest.email": normalizedEmail },
+        "_id"
+      ).lean();
+      await payment_model_default.updateMany(
+        {
+          bookingId: { $in: reconciledBookingIds.map((b) => b._id) },
+          userId: null
+        },
+        { $set: { userId } }
+      );
+    }
+    if (genericResult.modifiedCount > 0) {
+      const reconciledGenericIds = await booking_model_default2.find(
+        { userId, "primaryCustomer.email": normalizedEmail },
+        "_id"
+      ).lean();
+      await payment_model_default2.updateMany(
+        {
+          bookingId: { $in: reconciledGenericIds.map((b) => b._id) },
+          userId: null
+        },
+        { $set: { userId } }
+      );
+    }
+    const total = hotelResult.modifiedCount + genericResult.modifiedCount;
+    if (total > 0) {
+      logger_default.info(
+        `Reconciled ${total} guest booking(s) for user ${userId} (${normalizedEmail})`
+      );
+    }
+  } catch (error) {
+    logger_default.error("Guest booking reconciliation error:", error);
+  }
+};
+
 // src/modules/auth/auth.service.ts
 var generateOTP = async () => {
   const otp = crypto.randomInt(1e3, 9999).toString();
@@ -1346,6 +1918,7 @@ var whatsappLogin = async (phone, password) => {
     if (!user.providers.local.isVerified) {
       throw new Error("Account not verified. Please verify OTP first.");
     }
+    await reconcileGuestBookings(user._id.toString(), user.email);
     return {
       user,
       message: "Login successful"
@@ -1486,6 +2059,7 @@ var login = async (email, password) => {
     if (!user.providers.local.isVerified) {
       throw new Error("Account not verified. Please verify your OTP.");
     }
+    await reconcileGuestBookings(user._id.toString(), user.email);
     return { user, message: "Login successful" };
   } catch (error) {
     throw error;
@@ -1539,6 +2113,7 @@ var verifyOTP = async (email, inputOTP) => {
     user.otpAttempts = 0;
     user.signupExpires = void 0;
     await user.save();
+    await reconcileGuestBookings(user._id.toString(), user.email);
     let vendor = null;
     if (user.role === "vendor") {
       vendor = await vendor_model_default.findOne({ userId: user._id });
@@ -1711,6 +2286,7 @@ var emailVerifySignupOTP = async ({ email, otp }) => {
   user.otp = void 0;
   user.otpExpires = void 0;
   await user.save();
+  await reconcileGuestBookings(user._id.toString(), user.email);
   const accessToken = generateToken(user._id);
   return {
     message: "Otp verification successful",
@@ -1754,6 +2330,7 @@ var emailLogin = async ({ email, password }) => {
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
+  await reconcileGuestBookings(user._id.toString(), user.email);
   const accessToken = generateToken(user._id);
   return {
     message: "Login successful",
@@ -1823,8 +2400,8 @@ var authService = new AuthService();
 var auth_service_default = authService;
 
 // src/modules/hotels/hotel.model.ts
-import mongoose4, { Schema as Schema3 } from "mongoose";
-var addressSchema = new Schema3(
+import mongoose8, { Schema as Schema7 } from "mongoose";
+var addressSchema = new Schema7(
   {
     // 1. Street & Door Level Details
     buildingName: { type: String, trim: true, default: "" },
@@ -1863,10 +2440,10 @@ var addressSchema = new Schema3(
   },
   { _id: false }
 );
-var hotelSchema = new Schema3(
+var hotelSchema = new Schema7(
   {
     vendorId: {
-      type: mongoose4.Schema.ObjectId,
+      type: mongoose8.Schema.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -1907,13 +2484,13 @@ var hotelSchema = new Schema3(
     },
     locationHistory: [
       {
-        address: { type: mongoose4.Schema.Types.Mixed },
+        address: { type: mongoose8.Schema.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
         coordinates: [Number],
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: mongoose4.Schema.Types.ObjectId, ref: "User" }
+        changedBy: { type: mongoose8.Schema.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -1990,7 +2567,7 @@ var hotelSchema = new Schema3(
       index: true
     },
     createdBy: {
-      type: mongoose4.Schema.Types.ObjectId,
+      type: mongoose8.Schema.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2078,15 +2655,15 @@ hotelSchema.index(
     }
   }
 );
-var Hotel = mongoose4.model("Hotel", hotelSchema);
+var Hotel = mongoose8.model("Hotel", hotelSchema);
 var hotel_model_default = Hotel;
 
 // src/modules/cab/company/cab.model.ts
-import mongoose5, { Schema as Schema4 } from "mongoose";
-var cabCompanySchema = new Schema4(
+import mongoose9, { Schema as Schema8 } from "mongoose";
+var cabCompanySchema = new Schema8(
   {
     vendorId: {
-      type: Schema4.Types.ObjectId,
+      type: Schema8.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2108,7 +2685,7 @@ var cabCompanySchema = new Schema4(
       }
     },
     address: {
-      type: Schema4.Types.Mixed
+      type: Schema8.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2116,7 +2693,7 @@ var cabCompanySchema = new Schema4(
     },
     locationHistory: [
       {
-        address: { type: Schema4.Types.Mixed },
+        address: { type: Schema8.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2125,7 +2702,7 @@ var cabCompanySchema = new Schema4(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: Schema4.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema8.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2172,7 +2749,7 @@ var cabCompanySchema = new Schema4(
       index: true
     },
     createdBy: {
-      type: Schema4.Types.ObjectId,
+      type: Schema8.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2185,15 +2762,15 @@ var cabCompanySchema = new Schema4(
 cabCompanySchema.index({ name: "text", description: "text" });
 cabCompanySchema.index({ "location.city": 1, isActive: 1 });
 cabCompanySchema.index({ vendorId: 1, createdAt: -1 });
-var CabCompany = mongoose5.model("CabCompany", cabCompanySchema);
+var CabCompany = mongoose9.model("CabCompany", cabCompanySchema);
 var cab_model_default = CabCompany;
 
 // src/modules/bike/company/bike.model.ts
-import mongoose6, { Schema as Schema5 } from "mongoose";
-var bikeCompanySchema = new Schema5(
+import mongoose10, { Schema as Schema9 } from "mongoose";
+var bikeCompanySchema = new Schema9(
   {
     vendorId: {
-      type: Schema5.Types.ObjectId,
+      type: Schema9.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2215,7 +2792,7 @@ var bikeCompanySchema = new Schema5(
       }
     },
     address: {
-      type: Schema5.Types.Mixed
+      type: Schema9.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2223,7 +2800,7 @@ var bikeCompanySchema = new Schema5(
     },
     locationHistory: [
       {
-        address: { type: Schema5.Types.Mixed },
+        address: { type: Schema9.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2232,7 +2809,7 @@ var bikeCompanySchema = new Schema5(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: Schema5.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema9.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2296,7 +2873,7 @@ var bikeCompanySchema = new Schema5(
       index: true
     },
     createdBy: {
-      type: Schema5.Types.ObjectId,
+      type: Schema9.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2309,12 +2886,12 @@ var bikeCompanySchema = new Schema5(
 );
 bikeCompanySchema.index({ "location.city": 1, isActive: 1 });
 bikeCompanySchema.index({ vendorId: 1, createdAt: -1 });
-var BikeCompany = mongoose6.model("BikeCompany", bikeCompanySchema);
+var BikeCompany = mongoose10.model("BikeCompany", bikeCompanySchema);
 var bike_model_default = BikeCompany;
 
 // src/modules/tour/company/tour.model.ts
-import mongoose7, { Schema as Schema6 } from "mongoose";
-var addressSchema2 = new Schema6(
+import mongoose11, { Schema as Schema10 } from "mongoose";
+var addressSchema2 = new Schema10(
   {
     buildingName: { type: String, trim: true, default: "" },
     doorNumber: { type: String, trim: true, default: "" },
@@ -2347,10 +2924,10 @@ var addressSchema2 = new Schema6(
   },
   { _id: false }
 );
-var tourCompanySchema = new Schema6(
+var tourCompanySchema = new Schema10(
   {
     vendorId: {
-      type: Schema6.Types.ObjectId,
+      type: Schema10.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2377,7 +2954,7 @@ var tourCompanySchema = new Schema6(
     },
     // Embedded Powerful Address Schema (or string for legacy compatibility)
     address: {
-      type: Schema6.Types.Mixed
+      type: Schema10.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2385,7 +2962,7 @@ var tourCompanySchema = new Schema6(
     },
     locationHistory: [
       {
-        address: { type: Schema6.Types.Mixed },
+        address: { type: Schema10.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2394,7 +2971,7 @@ var tourCompanySchema = new Schema6(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: Schema6.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema10.Types.ObjectId, ref: "User" }
       }
     ],
     logo: {
@@ -2468,7 +3045,7 @@ var tourCompanySchema = new Schema6(
       index: true
     },
     createdBy: {
-      type: Schema6.Types.ObjectId,
+      type: Schema10.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2551,15 +3128,15 @@ tourCompanySchema.index({
   "address.district": "text",
   "address.streetAddress": "text"
 });
-var TourCompany = mongoose7.model("TourCompany", tourCompanySchema);
+var TourCompany = mongoose11.model("TourCompany", tourCompanySchema);
 var tour_model_default = TourCompany;
 
 // src/modules/adventure/category/adventure.model.ts
-import mongoose8, { Schema as Schema7 } from "mongoose";
-var adventureSchema = new Schema7(
+import mongoose12, { Schema as Schema11 } from "mongoose";
+var adventureSchema = new Schema11(
   {
     vendorId: {
-      type: Schema7.Types.ObjectId,
+      type: Schema11.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -2585,7 +3162,7 @@ var adventureSchema = new Schema7(
       country: { type: String, default: "India" }
     },
     address: {
-      type: Schema7.Types.Mixed
+      type: Schema11.Types.Mixed
     },
     coordinates: {
       lat: Number,
@@ -2593,7 +3170,7 @@ var adventureSchema = new Schema7(
     },
     locationHistory: [
       {
-        address: { type: Schema7.Types.Mixed },
+        address: { type: Schema11.Types.Mixed },
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         country: { type: String, trim: true },
@@ -2602,7 +3179,7 @@ var adventureSchema = new Schema7(
           lng: Number
         },
         changedAt: { type: Date, default: Date.now },
-        changedBy: { type: Schema7.Types.ObjectId, ref: "User" }
+        changedBy: { type: Schema11.Types.ObjectId, ref: "User" }
       }
     ],
     images: [
@@ -2669,7 +3246,7 @@ var adventureSchema = new Schema7(
       index: true
     },
     createdBy: {
-      type: Schema7.Types.ObjectId,
+      type: Schema11.Types.ObjectId,
       ref: "User"
     },
     isActive: {
@@ -2682,7 +3259,7 @@ var adventureSchema = new Schema7(
 );
 adventureSchema.index({ category: 1, "location.city": 1 });
 adventureSchema.index({ vendorId: 1, createdAt: -1 });
-var Adventure = mongoose8.model("Adventure", adventureSchema);
+var Adventure = mongoose12.model("Adventure", adventureSchema);
 var adventure_model_default = Adventure;
 
 // src/shared/utils/jwt.ts
@@ -2744,6 +3321,10 @@ var AuthController = class {
   socialAuthSuccess = async (req, res) => {
     try {
       const userId = (req.user?._id || req.user?.id)?.toString();
+      const userEmail = req.user?.email;
+      if (userId && userEmail) {
+        await reconcileGuestBookings(userId, userEmail);
+      }
       const { accessToken, refreshToken } = generateTokens(userId);
       this.setTokenCookie(res, refreshToken);
       res.redirect(
@@ -3128,6 +3709,12 @@ var protect = async (req, res, next) => {
     }
     req.user = currentUser;
     req.vendorId = decoded.vendorId || null;
+    if (!req.vendorId && (currentUser.role === "vendor" || currentUser.isVendor)) {
+      const vendor = await vendor_model_default.findOne({ userId: currentUser._id }).select("_id");
+      if (vendor) {
+        req.vendorId = vendor._id;
+      }
+    }
     next();
   } catch (error) {
     logger_default.error("Auth Middleware Error:", error.message);
@@ -3616,11 +4203,11 @@ var user_routes_default = router2;
 import { Router as Router3 } from "express";
 
 // src/modules/rooms/roomType.model.ts
-import mongoose9, { Schema as Schema8 } from "mongoose";
-var roomTypeSchema = new Schema8(
+import mongoose13, { Schema as Schema12 } from "mongoose";
+var roomTypeSchema = new Schema12(
   {
     hotelId: {
-      type: Schema8.Types.ObjectId,
+      type: Schema12.Types.ObjectId,
       ref: "Hotel",
       required: true,
       index: true
@@ -3645,7 +4232,10 @@ var roomTypeSchema = new Schema8(
       min: 0,
       validate: {
         validator: function(value) {
-          return value <= this.basePrice;
+          if (!value || Number(value) === 0) return true;
+          const base = this?.basePrice ?? this?.getUpdate?.()?.basePrice ?? this?.getUpdate?.()?.$set?.basePrice;
+          if (base === void 0 || base === null) return true;
+          return Number(value) <= Number(base);
         },
         message: "Discount price cannot be greater than base price"
       }
@@ -3713,15 +4303,15 @@ var roomTypeSchema = new Schema8(
   },
   { timestamps: true }
 );
-var RoomType = mongoose9.model("RoomType", roomTypeSchema);
+var RoomType = mongoose13.model("RoomType", roomTypeSchema);
 var roomType_model_default = RoomType;
 
 // src/modules/hotels/hotel.service.ts
 init_availability_model();
 
 // src/modules/admin/tax/tax.model.ts
-import mongoose11, { Schema as Schema10 } from "mongoose";
-var taxSchema = new Schema10(
+import mongoose15, { Schema as Schema14 } from "mongoose";
+var taxSchema = new Schema14(
   {
     taxPercentage: {
       type: Number,
@@ -3734,33 +4324,33 @@ var taxSchema = new Schema10(
       default: true
     },
     createdBy: {
-      type: Schema10.Types.ObjectId,
+      type: Schema14.Types.ObjectId,
       ref: "User"
       // superadmin
     },
     updatedBy: {
-      type: Schema10.Types.ObjectId,
+      type: Schema14.Types.ObjectId,
       ref: "User"
     }
   },
   { timestamps: true }
 );
 taxSchema.index({ isActive: 1 });
-var Tax = mongoose11.model("Tax", taxSchema);
+var Tax = mongoose15.model("Tax", taxSchema);
 var tax_model_default = Tax;
 
 // src/modules/favorites/favorite.model.ts
-import mongoose12, { Schema as Schema11 } from "mongoose";
-var favoriteSchema = new Schema11(
+import mongoose16, { Schema as Schema15 } from "mongoose";
+var favoriteSchema = new Schema15(
   {
     user: {
-      type: Schema11.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
     },
     itemId: {
-      type: Schema11.Types.ObjectId,
+      type: Schema15.Types.ObjectId,
       required: true,
       index: true
     },
@@ -3773,10 +4363,99 @@ var favoriteSchema = new Schema11(
   { timestamps: true }
 );
 favoriteSchema.index({ user: 1, itemId: 1, itemType: 1 }, { unique: true });
-var Favorite = mongoose12.model("Favorite", favoriteSchema);
+var Favorite = mongoose16.model("Favorite", favoriteSchema);
 var favorite_model_default = Favorite;
 
+// src/modules/reviews/review.model.ts
+import mongoose17, { Schema as Schema16 } from "mongoose";
+var reviewSchema = new Schema16(
+  {
+    userId: {
+      type: Schema16.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    bookingId: {
+      type: Schema16.Types.ObjectId,
+      required: true,
+      unique: true
+    },
+    companyId: {
+      type: Schema16.Types.ObjectId,
+      required: true
+    },
+    companyName: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    companyType: {
+      type: String,
+      enum: ["hotel", "adventure", "tour", "cab", "bike"],
+      required: true
+    },
+    vendorId: {
+      type: Schema16.Types.ObjectId,
+      ref: "Vendor",
+      required: true
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    comment: {
+      type: String,
+      trim: true,
+      maxlength: 1e3
+    },
+    breakdown: {
+      facilities: { type: Number, min: 1, max: 5 },
+      cleanliness: { type: Number, min: 1, max: 5 },
+      services: { type: Number, min: 1, max: 5 },
+      comfort: { type: Number, min: 1, max: 5 },
+      location: { type: Number, min: 1, max: 5 }
+    },
+    vendorReply: {
+      message: {
+        type: String,
+        trim: true,
+        maxlength: 1e3
+      },
+      repliedAt: Date
+    },
+    isFlagged: {
+      type: Boolean,
+      default: false
+    },
+    flagReason: {
+      type: String,
+      default: "",
+      trim: true
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+reviewSchema.index({ bookingId: 1 }, { unique: true });
+reviewSchema.index({
+  companyType: 1,
+  companyId: 1
+});
+var Review = mongoose17.model("Review", reviewSchema);
+var review_model_default = Review;
+
 // src/modules/hotels/hotel.service.ts
+var optimizeCloudinary = (url, transform = "f_auto,q_auto") => {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
+    return url;
+  }
+  const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
+  if (url.includes(`${marker}${transform}/`)) return url;
+  return url.replace(marker, `${marker}${transform}/`);
+};
 var attachFavoriteFlag = async (hotels, userId) => {
   if (!userId || hotels.length === 0) {
     hotels.forEach((hotel) => hotel.isFavorite = false);
@@ -3885,6 +4564,7 @@ var createHotel = async (vendor, hotelData) => {
     }
     vendor.currentStep = 4;
     vendor.registrationStep = Math.max(vendor.registrationStep, 4);
+    vendor.activePropertyId = hotel._id;
     if (vendor.status === "rejected") {
       vendor.status = "draft";
       vendor.rejectedStep = null;
@@ -4078,6 +4758,8 @@ var getAllHotels = async (query = {}, userId = null) => {
             name: { $first: "$name" },
             city: { $first: { $ifNull: ["$address.city", "$city"] } },
             address: { $first: "$address" },
+            location: { $first: "$location" },
+            coordinates: { $first: "$coordinates" },
             rating: { $first: "$rating" },
             numReviews: { $first: "$numReviews" },
             isFeatured: { $first: "$isFeatured" },
@@ -4205,13 +4887,24 @@ var getAllHotels = async (query = {}, userId = null) => {
           name: { $first: "$name" },
           city: { $first: { $ifNull: ["$address.city", "$city"] } },
           address: { $first: "$address" },
+          location: { $first: "$location" },
+          coordinates: { $first: "$coordinates" },
           rating: { $first: "$rating" },
           numReviews: { $first: "$numReviews" },
           isFeatured: { $first: "$isFeatured" },
           description: { $first: "$description" },
           amenities: { $first: "$amenities" },
           images: { $first: "$images" },
-          rank: { $first: "$rank" }
+          rank: { $first: "$rank" },
+          startingPrice: {
+            $min: {
+              $cond: [
+                { $gt: ["$roomTypes.discountPrice", 0] },
+                "$roomTypes.discountPrice",
+                "$roomTypes.basePrice"
+              ]
+            }
+          }
         }
       },
       {
@@ -4219,7 +4912,6 @@ var getAllHotels = async (query = {}, userId = null) => {
           rank: { $ifNull: ["$rank", "C"] },
           thumbnail: { $arrayElemAt: ["$images.url", 0] },
           hotelImages: "$images",
-          startingPrice: null,
           availableRooms: null,
           totalNights: 1,
           totalPrice: null
@@ -4251,7 +4943,14 @@ var getAllHotels = async (query = {}, userId = null) => {
 var getHomeHotels = async (query = {}, userId = null) => {
   try {
     const { city } = query;
+    const hotelsWithActiveRooms = await roomType_model_default.distinct("hotelId", {
+      isActive: true
+    });
+    if (!hotelsWithActiveRooms || hotelsWithActiveRooms.length === 0) {
+      return [];
+    }
     const filter = {
+      _id: { $in: hotelsWithActiveRooms },
       isActive: true,
       verificationStatus: "verified"
     };
@@ -4267,7 +4966,7 @@ var getHomeHotels = async (query = {}, userId = null) => {
         { city: cityRegex }
       ];
     }
-    const hotels = await hotel_model_default.find(filter).select("name city address images rating numReviews isFeatured rank").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
+    const hotels = await hotel_model_default.find(filter).select("name city address images rating numReviews isFeatured rank amenities").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
     const hotelIds = hotels.map((h) => h._id);
     const priceAgg = await roomType_model_default.aggregate([
       {
@@ -4295,19 +4994,72 @@ var getHomeHotels = async (query = {}, userId = null) => {
     priceAgg.forEach((p) => {
       priceMap[p._id.toString()] = p.minPrice;
     });
-    const formattedHotels = hotels.map((hotel) => ({
-      _id: hotel._id,
-      name: hotel.name,
-      city: hotel.address?.city || hotel.city,
-      address: hotel.address,
-      rating: hotel.rating,
-      numReviews: hotel.numReviews,
-      image: hotel.images?.[0]?.url || null,
-      rank: hotel?.rank || "C",
-      isFeatured: hotel.isFeatured || false,
-      startingPrice: priceMap[hotel._id.toString()] || null
-    }));
-    return formattedHotels;
+    const reviewAgg = await review_model_default.aggregate([
+      {
+        $match: {
+          companyType: "hotel",
+          companyId: { $in: hotelIds }
+        }
+      },
+      {
+        $group: {
+          _id: "$companyId",
+          averageRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+    const reviewMap = {};
+    reviewAgg.forEach((r) => {
+      reviewMap[r._id.toString()] = {
+        rating: Number(r.averageRating.toFixed(1)),
+        numReviews: r.totalReviews
+      };
+    });
+    const formatAmenityName = (amenity) => {
+      const map = {
+        free_wifi: "Free WiFi",
+        wifi: "Free WiFi",
+        free_parking: "Free Parking",
+        parking: "Parking",
+        breakfast: "Breakfast",
+        mountain_view: "Mountain View",
+        room_service: "Room Service",
+        bonfire: "Bonfire",
+        garden: "Garden",
+        restaurant: "Restaurant",
+        terrace: "Terrace",
+        balcony: "Balcony"
+      };
+      return map[amenity.toLowerCase()] || amenity.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    };
+    const formattedHotels = hotels.map((hotel) => {
+      const realRev = reviewMap[hotel._id.toString()];
+      const rating = realRev && realRev.numReviews > 0 ? realRev.rating : typeof hotel.rating === "number" && hotel.rating > 0 ? Number(hotel.rating.toFixed(1)) : 0;
+      const numReviews = realRev && realRev.numReviews > 0 ? realRev.numReviews : typeof hotel.numReviews === "number" ? hotel.numReviews : 0;
+      const amenities = Array.isArray(hotel.amenities) && hotel.amenities.length > 0 ? hotel.amenities.slice(0, 3).map(formatAmenityName) : [];
+      const rawImg = hotel.images?.[0]?.url;
+      const image = rawImg ? optimizeCloudinary(rawImg, "f_auto,q_auto,w_600,c_limit") : "/hotels/room1.png";
+      const rawImagesList = (hotel.images?.map((i) => i.url).filter(Boolean) || [image]).slice(0, 10);
+      const images = rawImagesList.map((u) => optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit"));
+      const startingPrice = priceMap[hotel._id.toString()] || 0;
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        address: hotel.address,
+        rating,
+        numReviews,
+        amenities,
+        image,
+        images,
+        rank: hotel?.rank || "C",
+        isFeatured: hotel.isFeatured || false,
+        startingPrice
+      };
+    });
+    const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
+    return updatedHotels;
   } catch (error) {
     throw error;
   }
@@ -4332,26 +5084,98 @@ var getHotelDetails = async (hotelId, userId = null) => {
     }).select("_id");
     isFavorite = !!favorite;
   }
+  const now = /* @__PURE__ */ new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
+  const roomTypeIds = roomTypes.map((r) => r._id);
+  const [todayAvailability, activeBookingsToday] = await Promise.all([
+    availability_model_default.find({
+      roomTypeId: { $in: roomTypeIds },
+      date: {
+        $gte: new Date(todayStart.getTime() - 24 * 3600 * 1e3),
+        $lte: new Date(todayEnd.getTime() + 24 * 3600 * 1e3)
+      }
+    }).lean(),
+    booking_model_default.find({
+      hotelId,
+      roomTypeId: { $in: roomTypeIds },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: todayEnd },
+      checkOut: { $gt: todayStart }
+    }).select("roomTypeId roomsBooked").lean()
+  ]);
+  const availabilityMap = {};
+  for (const doc of todayAvailability) {
+    availabilityMap[doc.roomTypeId.toString()] = doc;
+  }
+  const activeBookingsCountMap = {};
+  for (const b of activeBookingsToday) {
+    const rId = b.roomTypeId.toString();
+    activeBookingsCountMap[rId] = (activeBookingsCountMap[rId] || 0) + (b.roomsBooked || 1);
+  }
+  const optimizedHotelImages = (hotel.images || []).map((img) => ({
+    ...img,
+    url: optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit")
+  }));
   return {
     ...hotel,
+    images: optimizedHotelImages,
     isFavorite,
-    roomTypes: roomTypes.map((room) => ({
-      ...room,
-      displayPrice: room.discountPrice && room.discountPrice > 0 ? room.discountPrice : room.basePrice
-    }))
+    roomTypes: roomTypes.map((room) => {
+      const avail = availabilityMap[room._id.toString()];
+      const activeCount = activeBookingsCountMap[room._id.toString()] || 0;
+      const booked = activeCount;
+      const blocked = avail?.blockedRooms || 0;
+      const availableRooms = Math.max(room.totalRooms - booked - blocked, 0);
+      const optimizedRoomImages = (room.images || []).map((rImg) => {
+        const u = typeof rImg === "string" ? rImg : rImg?.url;
+        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+        return typeof rImg === "string" ? opt : { ...rImg, url: opt };
+      });
+      return {
+        ...room,
+        images: optimizedRoomImages,
+        displayPrice: room.discountPrice && room.discountPrice > 0 ? room.discountPrice : room.basePrice,
+        availableRooms
+      };
+    })
   };
 };
 var getHotelAvailability = async (hotelId, checkIn, checkOut, adults, children) => {
   if (!checkIn || !checkOut) throw new Error("Check-in and check-out required");
-  const startDate = new Date(checkIn);
-  const endDate = new Date(checkOut);
-  startDate.setUTCHours(0, 0, 0, 0);
-  endDate.setUTCHours(0, 0, 0, 0);
+  let startYear, startMonth, startDay;
+  let endYear, endMonth, endDay;
+  if (typeof checkIn === "string" && /^\d{4}-\d{2}-\d{2}/.test(checkIn)) {
+    const parts = checkIn.slice(0, 10).split("-").map(Number);
+    startYear = parts[0];
+    startMonth = parts[1] - 1;
+    startDay = parts[2];
+  } else {
+    const d = new Date(checkIn);
+    startYear = d.getFullYear();
+    startMonth = d.getMonth();
+    startDay = d.getDate();
+  }
+  if (typeof checkOut === "string" && /^\d{4}-\d{2}-\d{2}/.test(checkOut)) {
+    const parts = checkOut.slice(0, 10).split("-").map(Number);
+    endYear = parts[0];
+    endMonth = parts[1] - 1;
+    endDay = parts[2];
+  } else {
+    const d = new Date(checkOut);
+    endYear = d.getFullYear();
+    endMonth = d.getMonth();
+    endDay = d.getDate();
+  }
+  const startDate = new Date(Date.UTC(startYear, startMonth, startDay));
+  const endDate = new Date(Date.UTC(endYear, endMonth, endDay));
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     throw new Error("Invalid date format");
   }
   if (startDate >= endDate) throw new Error("Invalid date range");
-  const nights = (endDate.getTime() - startDate.getTime()) / (1e3 * 60 * 60 * 24);
+  const nights = Math.round((endDate.getTime() - startDate.getTime()) / (1e3 * 60 * 60 * 24));
   const hotel = await hotel_model_default.findOne({
     _id: hotelId,
     isActive: true
@@ -4367,17 +5191,28 @@ var getHotelAvailability = async (hotelId, checkIn, checkOut, adults, children) 
   const taxDoc = await tax_model_default.findOne({ isActive: true }).lean();
   const taxPercentage = taxDoc?.taxPercentage || 0;
   const roomTypeIds = roomTypes.map((r) => r._id);
-  const availabilityDocs = await availability_model_default.find({
-    roomTypeId: { $in: roomTypeIds },
-    date: { $gte: startDate, $lt: endDate }
-  }).lean();
+  const queryStartDate = new Date(startDate.getTime() - 24 * 3600 * 1e3);
+  const queryEndDate = new Date(endDate.getTime() + 24 * 3600 * 1e3);
+  const [availabilityDocs, activeBookings] = await Promise.all([
+    availability_model_default.find({
+      roomTypeId: { $in: roomTypeIds },
+      date: { $gte: queryStartDate, $lte: queryEndDate }
+    }).lean(),
+    booking_model_default.find({
+      hotelId,
+      roomTypeId: { $in: roomTypeIds },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: queryEndDate },
+      checkOut: { $gt: queryStartDate }
+    }).select("roomTypeId checkIn checkOut roomsBooked status").lean()
+  ]);
   const availabilityMap = /* @__PURE__ */ new Map();
   for (const doc of availabilityDocs) {
-    const utcDate = new Date(doc.date);
-    utcDate.setUTCHours(0, 0, 0, 0);
-    const dateStr = utcDate.toISOString().slice(0, 10);
-    const mapKey = `${doc.roomTypeId.toString()}_${dateStr}`;
-    availabilityMap.set(mapKey, doc);
+    const d = new Date(doc.date);
+    const utcStr = d.toISOString().slice(0, 10);
+    const localStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    availabilityMap.set(`${doc.roomTypeId.toString()}_${utcStr}`, doc);
+    availabilityMap.set(`${doc.roomTypeId.toString()}_${localStr}`, doc);
   }
   const results = [];
   for (const room of roomTypes) {
@@ -4388,24 +5223,35 @@ var getHotelAvailability = async (hotelId, checkIn, checkOut, adults, children) 
     }
     let minAvailable = room.totalRooms;
     let totalPrice = 0;
-    let isAvailable = true;
     for (let i = 0; i < nights; i++) {
-      const currentDate = new Date(startDate.getTime() + i * 864e5);
-      const dateStr = currentDate.toISOString().slice(0, 10);
-      const key2 = `${room._id.toString()}_${dateStr}`;
-      const dayDoc = availabilityMap.get(key2);
-      const booked = dayDoc?.bookedRooms || 0;
-      const blocked = dayDoc?.blockedRooms || 0;
-      const available = room.totalRooms - booked - blocked;
-      if (available < 1) {
-        isAvailable = false;
-        break;
+      const currentNightDate = new Date(startDate.getTime() + i * 864e5);
+      const nightDateStr = currentNightDate.toISOString().slice(0, 10);
+      const nextNightDate = new Date(currentNightDate.getTime() + 864e5);
+      let activeBookedCount = 0;
+      for (const b of activeBookings) {
+        if (b.roomTypeId.toString() !== room._id.toString()) continue;
+        const bIn = new Date(b.checkIn);
+        const bOut = new Date(b.checkOut);
+        const inUtcStr = bIn.toISOString().slice(0, 10);
+        const outUtcStr = bOut.toISOString().slice(0, 10);
+        const inLocalStr = `${bIn.getFullYear()}-${String(bIn.getMonth() + 1).padStart(2, "0")}-${String(bIn.getDate()).padStart(2, "0")}`;
+        const outLocalStr = `${bOut.getFullYear()}-${String(bOut.getMonth() + 1).padStart(2, "0")}-${String(bOut.getDate()).padStart(2, "0")}`;
+        const overlapsUtc = inUtcStr <= nightDateStr && outUtcStr > nightDateStr;
+        const overlapsLocal = inLocalStr <= nightDateStr && outLocalStr > nightDateStr;
+        const overlapsTime = bIn.getTime() < nextNightDate.getTime() && bOut.getTime() > currentNightDate.getTime();
+        if (overlapsUtc || overlapsLocal || overlapsTime) {
+          activeBookedCount += b.roomsBooked || 1;
+        }
       }
+      const key2 = `${room._id.toString()}_${nightDateStr}`;
+      const dayDoc = availabilityMap.get(key2);
+      const booked = activeBookedCount;
+      const blocked = dayDoc?.blockedRooms || 0;
+      const available = Math.max(room.totalRooms - booked - blocked, 0);
       minAvailable = Math.min(minAvailable, available);
       const price = dayDoc?.priceOverride ?? (room.discountPrice && room.discountPrice > 0 ? room.discountPrice : room.basePrice);
       totalPrice += price;
     }
-    if (!isAvailable) continue;
     const totalTax = Number((totalPrice * taxPercentage / 100).toFixed(2));
     const totalPriceWithTax = Number((totalPrice + totalTax).toFixed(2));
     results.push({
@@ -4458,17 +5304,134 @@ var updateHotel = async (hotelId, vendorId, updateData) => {
     throw error;
   }
 };
-var findNearbyHotels = async (lng, lat, maxDistance = 5e3) => {
+var findNearbyHotels = async (lng, lat, radiusMeters = 2e3, limit = 20, userId = null) => {
   try {
-    return await hotel_model_default.find({
-      isActive: true,
-      location: {
-        $near: {
-          $geometry: { type: "Point", coordinates: [lng, lat] },
-          $maxDistance: maxDistance
+    const validRadius = Math.min(Math.max(Number(radiusMeters) || 2e3, 50), 5e4);
+    const validLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+    let hotels = [];
+    try {
+      hotels = await hotel_model_default.aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [lng, lat]
+            },
+            key: "location",
+            distanceField: "distance",
+            maxDistance: validRadius,
+            spherical: true,
+            query: { isActive: true }
+          }
+        },
+        { $limit: validLimit }
+      ]);
+    } catch (geoNearErr) {
+      hotels = await hotel_model_default.find({
+        isActive: true,
+        location: {
+          $near: {
+            $geometry: { type: "Point", coordinates: [lng, lat] },
+            $maxDistance: validRadius
+          }
+        }
+      }).limit(validLimit).lean();
+    }
+    if (!hotels || hotels.length === 0) {
+      return [];
+    }
+    const hotelIds = hotels.map((h) => h._id);
+    const priceAgg = await roomType_model_default.aggregate([
+      {
+        $match: {
+          hotelId: { $in: hotelIds },
+          isActive: true
+        }
+      },
+      {
+        $group: {
+          _id: "$hotelId",
+          minPrice: {
+            $min: {
+              $cond: [
+                { $gt: ["$discountPrice", 0] },
+                "$discountPrice",
+                "$basePrice"
+              ]
+            }
+          }
         }
       }
-    }).limit(50).lean();
+    ]);
+    const priceMap = {};
+    priceAgg.forEach((p) => {
+      priceMap[p._id.toString()] = p.minPrice;
+    });
+    const reviewAgg = await review_model_default.aggregate([
+      {
+        $match: {
+          companyType: "hotel",
+          companyId: { $in: hotelIds }
+        }
+      },
+      {
+        $group: {
+          _id: "$companyId",
+          averageRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+    const reviewMap = {};
+    reviewAgg.forEach((r) => {
+      reviewMap[r._id.toString()] = {
+        rating: Number(r.averageRating.toFixed(1)),
+        numReviews: r.totalReviews
+      };
+    });
+    const formattedHotels = hotels.map((hotel) => {
+      const realRev = reviewMap[hotel._id.toString()];
+      const rating = realRev && realRev.numReviews > 0 ? realRev.rating : typeof hotel.rating === "number" && hotel.rating > 0 ? Number(hotel.rating.toFixed(1)) : 0;
+      const numReviews = realRev && realRev.numReviews > 0 ? realRev.numReviews : typeof hotel.numReviews === "number" ? hotel.numReviews : 0;
+      const rawImg = hotel.images?.[0]?.url;
+      const image = rawImg || "/hotels/room1.png";
+      const startingPrice = priceMap[hotel._id.toString()] || 0;
+      let distanceMeters = null;
+      if (typeof hotel.distance === "number") {
+        distanceMeters = Math.round(hotel.distance);
+      } else if (hotel.location?.coordinates?.length >= 2) {
+        const hLng = hotel.location.coordinates[0];
+        const hLat = hotel.location.coordinates[1];
+        const R = 6371e3;
+        const \u03C61 = lat * Math.PI / 180;
+        const \u03C62 = hLat * Math.PI / 180;
+        const \u0394\u03C6 = (hLat - lat) * Math.PI / 180;
+        const \u0394\u03BB = (hLng - lng) * Math.PI / 180;
+        const a = Math.sin(\u0394\u03C6 / 2) * Math.sin(\u0394\u03C6 / 2) + Math.cos(\u03C61) * Math.cos(\u03C62) * Math.sin(\u0394\u03BB / 2) * Math.sin(\u0394\u03BB / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        distanceMeters = Math.round(R * c);
+      }
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        address: hotel.address || hotel.formattedAddress || "",
+        location: hotel.location,
+        coordinates: hotel.location?.coordinates || null,
+        rating,
+        numReviews,
+        amenities: hotel.amenities || [],
+        image,
+        images: hotel.images?.map((i) => i.url).filter(Boolean) || [image],
+        rank: hotel?.rank || "C",
+        isFeatured: hotel.isFeatured || false,
+        startingPrice,
+        price: startingPrice,
+        distance: distanceMeters
+      };
+    });
+    const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
+    return updatedHotels;
   } catch (error) {
     logger_default.error("Service Error: findNearbyHotels", error);
     throw error;
@@ -4516,11 +5479,9 @@ var getSuggestions = async (query) => {
           type: "city",
           value: city,
           label: [city, state].filter(Boolean).join(", "),
-          state,
-          count: 0
+          state
         });
       }
-      locationMap.get(key2).count++;
     }
     if (area && reg.$regex && new RegExp(cleanQuery, "i").test(area)) {
       const key2 = `town:${area.toLowerCase()}`;
@@ -4530,11 +5491,9 @@ var getSuggestions = async (query) => {
           value: area,
           label: [area, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
           city,
-          state,
-          count: 0
+          state
         });
       }
-      locationMap.get(key2).count++;
     }
     if (district && new RegExp(cleanQuery, "i").test(district)) {
       const key2 = `district:${district.toLowerCase()}`;
@@ -4543,11 +5502,9 @@ var getSuggestions = async (query) => {
           type: "district",
           value: district,
           label: [district, state].filter(Boolean).join(", "),
-          state,
-          count: 0
+          state
         });
       }
-      locationMap.get(key2).count++;
     }
     if (landmark && new RegExp(cleanQuery, "i").test(landmark)) {
       const key2 = `landmark:${landmark.toLowerCase()}`;
@@ -4557,18 +5514,16 @@ var getSuggestions = async (query) => {
           value: landmark,
           label: [landmark, city, state].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
           city,
-          state,
-          count: 0
+          state
         });
       }
-      locationMap.get(key2).count++;
     }
   }
   const locationSuggestions = [...locationMap.values()].sort((a, b) => {
     const aStarts = a.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
     const bStarts = b.value.toLowerCase().startsWith(cleanQuery.toLowerCase()) ? 0 : 1;
     if (aStarts !== bStarts) return aStarts - bStarts;
-    return b.count - a.count;
+    return a.value.localeCompare(b.value);
   }).slice(0, 6);
   const hotelSuggestions = results.filter((h) => new RegExp(cleanQuery, "i").test(h.name)).slice(0, 3).map((hotel) => ({
     type: "hotel",
@@ -4730,7 +5685,8 @@ var searchHotels = async (query = {}, userId = null) => {
       $addFields: {
         totalNights: nights,
         totalPrice: { $multiply: ["$startingPrice", nights] },
-        thumbnail: { $arrayElemAt: ["$images.url", 0] }
+        thumbnail: { $arrayElemAt: ["$images.url", 0] },
+        hotelImages: "$images"
       }
     },
     {
@@ -4763,15 +5719,19 @@ var getRankedHotels = async (rank, page = 1, limit = 10) => {
     if (total === 0) {
       return { items: [], total: 0, page: pageNum, limit: limitNum, hasMore: false };
     }
-    const hotels = await hotel_model_default.find(filter).select("name city address images advertisementImage rating numReviews isFeatured").sort({ isFeatured: -1, rating: -1, createdAt: -1 }).skip(skip).limit(limitNum).lean();
-    const items = hotels.map((hotel) => ({
-      _id: hotel._id,
-      name: hotel.name,
-      city: hotel.address?.city || hotel.city,
-      rating: hotel.rating,
-      numReviews: hotel.numReviews,
-      image: hotel.advertisementImage?.url || hotel.images?.[0]?.url || null
-    }));
+    const hotels = await hotel_model_default.find(filter).select("name city address images advertisementImage rating numReviews isFeatured description").sort({ isFeatured: -1, rating: -1, createdAt: -1 }).skip(skip).limit(limitNum).lean();
+    const items = hotels.map((hotel) => {
+      const rawUrl = hotel.advertisementImage?.url || hotel.images?.[0]?.url || null;
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        rating: hotel.rating,
+        numReviews: hotel.numReviews,
+        description: hotel.description,
+        image: rawUrl ? optimizeCloudinary(rawUrl, "f_auto,q_auto,w_1400,c_limit") : null
+      };
+    });
     return {
       items,
       total,
@@ -4803,8 +5763,8 @@ var HotelService = class {
   async updateHotel(hotelId, vendorId, updateData) {
     return updateHotel(hotelId, vendorId, updateData);
   }
-  async findNearbyHotels(lng, lat, maxDistance = 5e3) {
-    return findNearbyHotels(lng, lat, maxDistance);
+  async findNearbyHotels(lng, lat, maxDistance = 2e3, limit = 20, userId = null) {
+    return findNearbyHotels(lng, lat, maxDistance, limit, userId);
   }
   async getSuggestions(query) {
     return getSuggestions(query);
@@ -4930,24 +5890,43 @@ var HotelController = class {
     }
   }
   /**
-   * Search nearby hotels based on coordinates (Geospatial API)
+   * Search nearby hotels based on coordinates (Geospatial API using MongoDB 2dsphere index)
+   * GET /api/v1/hotels/nearby?lat=...&lng=...&radius=2000&limit=20
    */
   async getNearbyHotels(req, res, next) {
     try {
-      const { lng, lat, distance } = req.query;
+      const { lng, lat, radius, distance, limit } = req.query;
       if (!lng || !lat) {
-        throw new Error("Please provide longitude and latitude");
+        res.status(400).json({
+          success: false,
+          message: "Please provide both latitude and longitude query parameters."
+        });
+        return;
       }
-      const userId = req.user?._id;
+      const numLat = Number(lat);
+      const numLng = Number(lng);
+      if (isNaN(numLat) || isNaN(numLng) || numLat < -90 || numLat > 90 || numLng < -180 || numLng > 180) {
+        res.status(400).json({
+          success: false,
+          message: "Valid latitude (-90 to 90) and longitude (-180 to 180) are required."
+        });
+        return;
+      }
+      const radiusMeters = Number(radius || distance) || 2e3;
+      const limitCount = Math.min(Math.max(Number(limit) || 20, 1), 100);
+      const userId = req.user?._id || null;
       const hotels = await hotel_service_default.findNearbyHotels(
-        Number(lng),
-        Number(lat),
-        Number(distance) || 5e3
-        // Default 5km
+        numLng,
+        numLat,
+        radiusMeters,
+        limitCount,
+        userId
       );
       res.status(200).json({
         success: true,
         count: hotels.length,
+        radius: radiusMeters,
+        coordinates: [numLng, numLat],
         data: hotels
       });
     } catch (error) {
@@ -5055,16 +6034,16 @@ var hotel_routes_default = router3;
 import { Router as Router4 } from "express";
 
 // src/modules/rooms/room.model.ts
-import mongoose13, { Schema as Schema12 } from "mongoose";
-var roomSchema = new Schema12(
+import mongoose18, { Schema as Schema17 } from "mongoose";
+var roomSchema = new Schema17(
   {
     hotelId: {
-      type: Schema12.Types.ObjectId,
+      type: Schema17.Types.ObjectId,
       ref: "Hotel",
       required: true
     },
     roomTypeId: {
-      type: Schema12.Types.ObjectId,
+      type: Schema17.Types.ObjectId,
       ref: "RoomType",
       required: true
     },
@@ -5086,11 +6065,11 @@ var roomSchema = new Schema12(
   },
   { timestamps: true }
 );
-var Room = mongoose13.model("Room", roomSchema);
+var Room = mongoose18.model("Room", roomSchema);
 var room_model_default = Room;
 
 // src/modules/rooms/room.service.ts
-import mongoose14 from "mongoose";
+import mongoose19 from "mongoose";
 var createRoom = async (roomData) => {
   try {
     return await room_model_default.create(roomData);
@@ -5100,7 +6079,7 @@ var createRoom = async (roomData) => {
   }
 };
 var getRoomsByHotel = async (hotelId) => {
-  if (!mongoose14.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose19.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -5133,6 +6112,57 @@ var updateRoomStatus = async (roomId, updateData) => {
     throw error;
   }
 };
+var syncRoomsForRoomType = async (hotelId, roomTypeId, targetTotal) => {
+  if (!targetTotal || targetTotal < 1) return;
+  const existingRooms = await room_model_default.find({ hotelId, roomTypeId }).sort({ roomNumber: 1 }).lean();
+  const currentCount = existingRooms.length;
+  if (targetTotal > currentCount) {
+    const toAdd = targetTotal - currentCount;
+    let highestNumber = 100;
+    for (const r of existingRooms) {
+      const num = parseInt(r.roomNumber, 10);
+      if (!isNaN(num) && num > highestNumber) {
+        highestNumber = num;
+      }
+    }
+    const newRooms = [];
+    for (let i = 1; i <= toAdd; i++) {
+      const roomNum = highestNumber + i;
+      newRooms.push({
+        hotelId,
+        roomTypeId,
+        roomNumber: roomNum.toString(),
+        floor: Math.ceil(roomNum / 100) || 1,
+        status: "available",
+        isActive: true
+      });
+    }
+    await room_model_default.insertMany(newRooms);
+  } else if (targetTotal < currentCount) {
+    const toRemove = currentCount - targetTotal;
+    const candidateRooms = await room_model_default.find({
+      hotelId,
+      roomTypeId,
+      status: "available"
+    }).sort({ roomNumber: -1 }).limit(toRemove).lean();
+    const idsToDelete = candidateRooms.map((r) => r._id);
+    if (idsToDelete.length > 0) {
+      await room_model_default.deleteMany({ _id: { $in: idsToDelete } });
+    }
+  }
+};
+var syncAllRoomsForHotel = async (hotelId) => {
+  try {
+    const roomTypes = await roomType_model_default.find({ hotelId, isActive: true }).lean();
+    for (const rt of roomTypes) {
+      if (rt.totalRooms && rt.totalRooms > 0) {
+        await syncRoomsForRoomType(hotelId, rt._id, rt.totalRooms);
+      }
+    }
+  } catch (err) {
+    logger_default.error("Error in syncAllRoomsForHotel:", err);
+  }
+};
 var RoomService = class {
   async createRoom(roomData) {
     return createRoom(roomData);
@@ -5145,6 +6175,12 @@ var RoomService = class {
   }
   async updateRoomStatus(roomId, updateData) {
     return updateRoomStatus(roomId, updateData);
+  }
+  async syncRoomsForRoomType(hotelId, roomTypeId, targetTotal) {
+    return syncRoomsForRoomType(hotelId, roomTypeId, targetTotal);
+  }
+  async syncAllRoomsForHotel(hotelId) {
+    return syncAllRoomsForHotel(hotelId);
   }
 };
 var roomService = new RoomService();
@@ -5232,194 +6268,10 @@ var room_routes_default = router4;
 import { Router as Router5 } from "express";
 
 // src/modules/rooms/roomType.controller.ts
-import mongoose17 from "mongoose";
+import mongoose21 from "mongoose";
 
 // src/modules/rooms/roomType.service.ts
-import mongoose16 from "mongoose";
-
-// src/modules/bookings/booking.model.ts
-import mongoose15, { Schema as Schema13 } from "mongoose";
-var bookingSchema = new Schema13(
-  {
-    userId: {
-      type: Schema13.Types.ObjectId,
-      ref: "User"
-    },
-    hotelId: {
-      type: Schema13.Types.ObjectId,
-      ref: "Hotel",
-      required: true
-    },
-    roomTypeId: {
-      type: Schema13.Types.ObjectId,
-      ref: "RoomType",
-      required: true
-    },
-    bookingReference: {
-      type: String,
-      unique: true,
-      required: true
-    },
-    checkIn: {
-      type: Date,
-      required: true
-    },
-    checkOut: {
-      type: Date,
-      required: true
-    },
-    nights: {
-      type: Number,
-      required: true
-    },
-    primaryGuest: {
-      firstName: {
-        type: String,
-        required: true,
-        trim: true
-      },
-      lastName: {
-        type: String,
-        required: true,
-        trim: true
-      },
-      email: {
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true
-      },
-      phoneNumber: {
-        type: String,
-        required: true,
-        trim: true
-      }
-    },
-    additionalGuests: {
-      type: [
-        {
-          firstName: {
-            type: String,
-            required: true,
-            trim: true
-          },
-          lastName: {
-            type: String,
-            required: true,
-            trim: true
-          }
-        }
-      ],
-      default: []
-    },
-    guests: {
-      adults: { type: Number, required: true },
-      children: { type: Number, default: 0 }
-    },
-    roomsBooked: {
-      type: Number,
-      default: 1
-    },
-    pricePerNight: {
-      type: Number,
-      required: true
-    },
-    taxAmount: {
-      type: Number,
-      default: 0
-    },
-    cleaningFee: {
-      type: Number,
-      default: 0
-    },
-    discountAmount: {
-      type: Number,
-      default: 0
-    },
-    totalAmount: {
-      type: Number,
-      required: true
-    },
-    status: {
-      type: String,
-      enum: [
-        "pending",
-        "confirmed",
-        "checked_in",
-        "staying",
-        "checked_out",
-        "completed",
-        "cancellation_requested",
-        "cancelled"
-      ],
-      default: "pending",
-      index: true
-    },
-    roomNumber: {
-      type: String,
-      default: ""
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending"
-    },
-    paymentId: {
-      type: Schema13.Types.ObjectId,
-      ref: "Payment"
-    },
-    refundPercentage: {
-      type: Number,
-      default: 0
-    },
-    refundAmount: {
-      type: Number,
-      default: 0
-    },
-    refundStatus: {
-      type: String,
-      enum: [
-        "none",
-        "pending",
-        //waiting for admin approval
-        "approved",
-        "rejected",
-        "processed"
-      ],
-      default: "none"
-    },
-    refundRequestedAt: Date,
-    refundProcessedAt: Date,
-    cancelledAt: Date,
-    cancellationReason: {
-      type: String,
-      trim: true
-    },
-    actualCheckInAt: Date,
-    actualCheckOutAt: Date,
-    specialRequest: {
-      type: String,
-      trim: true
-    },
-    expiresAt: {
-      type: Date,
-      index: { expires: "0s" }
-    }
-  },
-  { timestamps: true }
-);
-bookingSchema.index({ userId: 1, createdAt: -1 });
-bookingSchema.index({ hotelId: 1, checkIn: 1 });
-bookingSchema.index({
-  roomTypeId: 1,
-  checkIn: 1,
-  checkOut: 1,
-  status: 1
-});
-var Booking = mongoose15.model("Booking", bookingSchema);
-var booking_model_default = Booking;
-
-// src/modules/rooms/roomType.service.ts
+import mongoose20 from "mongoose";
 init_availability_model();
 var createRoomType = async (data) => {
   try {
@@ -5430,7 +6282,7 @@ var createRoomType = async (data) => {
   }
 };
 var getRoomTypesByHotel = async (hotelId) => {
-  if (!mongoose16.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose20.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -5474,6 +6326,13 @@ var updateRoomType = async (roomTypeId, hotelId, updateData) => {
       updateData,
       { new: true, runValidators: true }
     );
+    if (updateData.totalRooms && Number(updateData.totalRooms) > 0) {
+      try {
+        await syncRoomsForRoomType(hotelId, roomTypeId, Number(updateData.totalRooms));
+      } catch (err) {
+        logger_default.error("Error syncing rooms after updateRoomType:", err);
+      }
+    }
     return updatedRoomType;
   } catch (error) {
     logger_default.error("Service Error: updateRoomType", error);
@@ -5481,7 +6340,7 @@ var updateRoomType = async (roomTypeId, hotelId, updateData) => {
   }
 };
 var getVendorBookingDetail = async (bookingId, vendorId) => {
-  if (!mongoose16.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose20.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
@@ -5549,7 +6408,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
     limit = 10,
     search
   } = queryParams;
-  if (!hotelId || !mongoose16.Types.ObjectId.isValid(hotelId)) {
+  if (!hotelId || !mongoose20.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Valid hotelId is required");
   }
   const hotel = await hotel_model_default.findOne({ _id: hotelId, vendorId }).lean();
@@ -5623,7 +6482,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
   };
 };
 var getVendorRoomTypeDetail = async (roomTypeId, vendorId) => {
-  if (!mongoose16.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose20.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   const roomType = await roomType_model_default.findById(roomTypeId).select(
@@ -5748,7 +6607,7 @@ var RoomTypeController = class {
   }
   //roomtype create also rooms create
   async createRoomTypeWithAutoRooms(req, res, next) {
-    const session = await mongoose17.startSession();
+    const session = await mongoose21.startSession();
     session.startTransaction();
     try {
       const vendor = await vendor_model_default.findOne({ userId: req.user._id });
@@ -5867,7 +6726,7 @@ var roomType_routes_default = router5;
 import { Router as Router6 } from "express";
 
 // src/modules/availability/availability.service.ts
-import mongoose18 from "mongoose";
+import mongoose22 from "mongoose";
 init_availability_model();
 var upsertAvailability = async (data) => {
   try {
@@ -5892,7 +6751,7 @@ var upsertAvailability = async (data) => {
   }
 };
 var getAvailabilityForRange = async (roomTypeId, startDate, endDate) => {
-  if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   try {
@@ -5932,7 +6791,7 @@ var decreaseAvailability = async (roomTypeId, date, qty = 1) => {
 };
 var getVendorRoomTypes2 = async (userId, hotelId) => {
   try {
-    if (!mongoose18.Types.ObjectId.isValid(hotelId)) {
+    if (!mongoose22.Types.ObjectId.isValid(hotelId)) {
       throw new Error("Invalid hotel ID");
     }
     const vendor = await vendor_model_default.findOne({ userId }).lean();
@@ -5959,7 +6818,7 @@ var getVendorRoomTypes2 = async (userId, hotelId) => {
 };
 var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
   try {
-    if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!month || !year) {
@@ -6024,7 +6883,7 @@ var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
 };
 var updateRoomTypeCalendar = async (userId, roomTypeId, date, blockedRooms, priceOverride) => {
   try {
-    if (!mongoose18.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!date) throw new Error("Date is required");
@@ -6357,7 +7216,7 @@ import { Router as Router7 } from "express";
 
 // src/modules/bookings/booking.service.ts
 init_availability_model();
-import mongoose21 from "mongoose";
+import mongoose23 from "mongoose";
 
 // trivllo.json
 var trivllo_default = {
@@ -6383,91 +7242,6 @@ var trivllo_default = {
   }
 };
 
-// src/modules/payments/payment.model.ts
-import mongoose19, { Schema as Schema14 } from "mongoose";
-var paymentSchema = new Schema14(
-  {
-    bookingId: {
-      type: Schema14.Types.ObjectId,
-      ref: "Booking",
-      required: true,
-      index: true
-    },
-    userId: {
-      type: Schema14.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true
-    },
-    razorpayOrderId: {
-      type: String,
-      required: true
-    },
-    razorpayPaymentId: {
-      type: String
-    },
-    razorpaySignature: {
-      type: String
-    },
-    amountPaid: {
-      type: Number,
-      required: true
-    },
-    currency: {
-      type: String,
-      default: "INR"
-    },
-    paymentMethod: {
-      type: String,
-      enum: ["card", "upi", "netbanking", "wallet", "unknown"],
-      default: "unknown"
-    },
-    status: {
-      type: String,
-      enum: [
-        "created",
-        "authorized",
-        "captured",
-        "failed",
-        "refunded",
-        "partially_refunded"
-      ],
-      default: "created",
-      index: true
-    },
-    refundAmount: {
-      type: Number,
-      default: 0
-    },
-    razorpayRefundId: {
-      type: String
-    },
-    refundStatus: {
-      type: String,
-      enum: ["none", "initiated", "pending", "processed", "failed"],
-      default: "none"
-    },
-    refundedAt: Date,
-    isVerified: {
-      type: Boolean,
-      default: false
-    },
-    metadata: {
-      type: Object
-    },
-    expiresAt: {
-      type: Date,
-      index: { expires: "0s" }
-    }
-  },
-  { timestamps: true }
-);
-paymentSchema.index({ razorpayPaymentId: 1 });
-paymentSchema.index({ razorpayOrderId: 1 });
-paymentSchema.index({ bookingId: 1, status: 1 });
-var Payment = mongoose19.model("Payment", paymentSchema);
-var payment_model_default = Payment;
-
 // src/shared/config/razorpay.ts
 import Razorpay from "razorpay";
 var razorpay = new Razorpay({
@@ -6481,179 +7255,30 @@ import crypto2 from "crypto";
 import path from "path";
 import fs2 from "fs";
 import PDFDocument from "pdfkit";
-
-// src/modules/multiServiceBookings/booking.model.ts
-import mongoose20, { Schema as Schema15 } from "mongoose";
-var participantSchema = new Schema15(
-  {
-    name: { type: String, trim: true },
-    age: { type: Number },
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"]
-    },
-    weight: { type: Number }
-    // optional (adventure use)
-  },
-  { _id: false }
-);
-var bookingSchema2 = new Schema15(
-  {
-    userId: {
-      type: Schema15.Types.ObjectId,
-      ref: "User",
-      index: true
-    },
-    vendorId: {
-      type: Schema15.Types.ObjectId,
-      ref: "Vendor",
-      required: true,
-      index: true
-    },
-    serviceType: {
-      type: String,
-      enum: ["adventure", "cab", "tour", "bike"],
-      required: true,
-      index: true
-    },
-    serviceId: {
-      type: Schema15.Types.ObjectId,
-      required: true,
-      index: true
-    },
-    bookingReference: {
-      type: String,
-      unique: true,
-      required: true,
-      index: true
-    },
-    bookingDate: {
-      type: Date,
-      required: true,
-      index: true
-    },
-    timeSlot: {
-      type: String
-      //adventure specific
-    },
-    // bike & tour specific
-    duration: {
-      startDate: Date,
-      endDate: Date,
-      totalDays: Number
-    },
-    primaryCustomer: {
-      firstName: { type: String, required: true, trim: true },
-      lastName: { type: String, trim: true },
-      email: {
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true
-      },
-      phoneNumber: { type: String, required: true, trim: true }
-    },
-    //Participants (Dynamic)
-    participants: {
-      type: [participantSchema],
-      default: []
-    },
-    //Dynamic Data
-    meta: {
-      type: Object,
-      default: {}
-    },
-    extraInfo: {
-      type: Object,
-      default: {}
-    },
-    //Pricing Snapshot
-    pricing: {
-      baseAmount: { type: Number, required: true },
-      taxAmount: { type: Number, default: 0 },
-      taxPercentage: { type: Number, default: 0 },
-      discountAmount: { type: Number, default: 0 },
-      totalAmount: { type: Number, required: true }
-    },
-    serviceSnapshot: {
-      title: { type: String },
-      type: { type: String },
-      price: { type: Number },
-      vendorId: { type: Schema15.Types.ObjectId },
-      extra: {
-        type: Object,
-        default: {}
-      }
-    },
-    // quantity meaning:
-    // adventure → participants
-    // bike → days
-    // tour → people
-    // cab → 1
-    quantity: {
-      type: Number,
-      default: 1
-    },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
-      index: true
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
-      index: true
-    },
-    paymentId: {
-      type: Schema15.Types.ObjectId,
-      ref: "Payment"
-    },
-    refundAmount: {
-      type: Number,
-      default: 0
-    },
-    refundStatus: {
-      type: String,
-      enum: ["none", "pending", "processed", "failed"],
-      default: "none"
-    },
-    specialRequest: {
-      type: String,
-      trim: true
-    },
-    cancelledAt: Date,
-    cancellationReason: { type: String, trim: true },
-    expiresAt: {
-      type: Date,
-      index: { expires: "0s" }
-    }
-  },
-  { timestamps: true }
-);
-bookingSchema2.index({ userId: 1, createdAt: -1 });
-bookingSchema2.index({ vendorId: 1, createdAt: -1 });
-bookingSchema2.index({ serviceId: 1, serviceType: 1 });
-bookingSchema2.index({ bookingDate: 1, status: 1 });
-bookingSchema2.index({ paymentStatus: 1, status: 1 });
-bookingSchema2.index({ bookingReference: 1 });
-var GenericBooking = mongoose20.model("GenericBooking", bookingSchema2);
-var booking_model_default2 = GenericBooking;
-
-// src/modules/bookings/booking.service.ts
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = path.dirname(__filename);
 async function restoreAvailability(booking, session) {
-  const currentDate = new Date(booking.checkIn);
-  while (currentDate < booking.checkOut) {
-    await availability_model_default.findOneAndUpdate(
-      {
-        roomTypeId: booking.roomTypeId,
-        date: new Date(currentDate)
-      },
-      { $inc: { availableRooms: booking.roomsBooked } },
-      { session }
-    );
-    currentDate.setDate(currentDate.getDate() + 1);
+  const checkInDate = new Date(booking.checkIn);
+  const checkOutDate = new Date(booking.checkOut);
+  const queryStart = new Date(checkInDate.getTime() - 24 * 3600 * 1e3);
+  const queryEnd = new Date(checkOutDate.getTime() + 24 * 3600 * 1e3);
+  const affectedAvails = await availability_model_default.find({
+    roomTypeId: booking.roomTypeId,
+    date: { $gte: queryStart, $lte: queryEnd }
+  }).session(session);
+  for (const av of affectedAvails) {
+    const avDate = new Date(av.date);
+    const nextDate = new Date(avDate.getTime() + 864e5);
+    const activeCount = await booking_model_default.countDocuments({
+      roomTypeId: booking.roomTypeId,
+      _id: { $ne: booking._id },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: nextDate },
+      checkOut: { $gt: avDate }
+    }).session(session);
+    av.bookedRooms = activeCount;
+    await av.save({ session });
   }
 }
 async function processRefund(booking, session) {
@@ -6675,7 +7300,7 @@ async function processRefund(booking, session) {
   await payment.save({ session });
 }
 var createBooking = async (data, userId) => {
-  const session = await mongoose21.startSession();
+  const session = await mongoose23.startSession();
   session.startTransaction();
   try {
     const {
@@ -6702,13 +7327,19 @@ var createBooking = async (data, userId) => {
     if (!guests?.adults || guests.adults <= 0)
       throw new Error("At least one adult guest is required");
     const safeAdditionalGuests = Array.isArray(additionalGuests) ? additionalGuests : [];
-    const userDoc = await auth_model_default.findById(userId).session(session);
+    const userDoc = userId ? await auth_model_default.findById(userId).session(session) : null;
     const safePrimaryGuest = {
       firstName: (primaryGuest?.firstName || "").trim() || userDoc?.firstName || "Guest",
       lastName: (primaryGuest?.lastName || "").trim() || userDoc?.lastName || "User",
-      email: (primaryGuest?.email || "").trim() || userDoc?.email || "guest@trivllo.com",
-      phoneNumber: (primaryGuest?.phoneNumber || "").trim() || userDoc?.phoneNumber || "9999999999"
+      email: ((primaryGuest?.email || "").trim() || userDoc?.email || "").toLowerCase(),
+      phoneNumber: (primaryGuest?.phoneNumber || "").trim() || userDoc?.phoneNumber || ""
     };
+    if (!safePrimaryGuest.email) {
+      throw new Error("Email is required to proceed with booking");
+    }
+    if (!safePrimaryGuest.phoneNumber) {
+      throw new Error("Phone number is required to proceed with booking");
+    }
     const hotel = await hotel_model_default.findById(hotelId).session(session);
     if (!hotel || !hotel.isActive) throw new Error("Hotel not available");
     const roomType = await roomType_model_default.findById(roomTypeId).session(session);
@@ -6735,9 +7366,16 @@ var createBooking = async (data, userId) => {
     let firstDayPrice = 0;
     for (let i = 0; i < nights; i++) {
       const currentDate = new Date(startDate.getTime() + i * 864e5);
+      const nextDate = new Date(currentDate.getTime() + 864e5);
       const dateStr = currentDate.toISOString().split("T")[0];
       const dayDoc = availabilityMap[dateStr];
-      const booked = dayDoc?.bookedRooms || 0;
+      const activeBookedCount = await booking_model_default.countDocuments({
+        roomTypeId,
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: currentDate }
+      }).session(session);
+      const booked = activeBookedCount;
       const blocked = dayDoc?.blockedRooms || 0;
       const available = roomType.totalRooms - booked - blocked;
       if (available < rooms) {
@@ -6779,11 +7417,17 @@ var createBooking = async (data, userId) => {
       ],
       { session }
     );
-    const razorpayOrder = await razorpay_default.orders.create({
-      amount: Math.round(finalTotalAmount * 100),
-      currency: "INR",
-      receipt: bookingReference
-    });
+    let razorpayOrder;
+    try {
+      razorpayOrder = await razorpay_default.orders.create({
+        amount: Math.round(finalTotalAmount * 100),
+        currency: "INR",
+        receipt: bookingReference
+      });
+    } catch (rzpErr) {
+      const msg = rzpErr.error?.description || rzpErr.message || "Razorpay order creation failed";
+      throw new Error(`Payment Gateway Error: ${msg}. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend .env`);
+    }
     const [payment] = await payment_model_default.create(
       [
         {
@@ -6821,12 +7465,16 @@ var createBooking = async (data, userId) => {
 };
 var getUserBookings = async (userId) => {
   try {
+    const userDoc = userId ? await auth_model_default.findById(userId).select("email").lean() : null;
+    const userEmail = (userDoc?.email || "").toLowerCase();
+    const hotelFilter = userEmail ? { $or: [{ userId }, { userId: null, "primaryGuest.email": userEmail }] } : { userId };
+    const genericFilter = userEmail ? { $or: [{ userId }, { userId: null, "primaryCustomer.email": userEmail }] } : { userId };
     const [hotelBookings, genericBookings] = await Promise.all([
-      booking_model_default.find({ userId }).populate({
+      booking_model_default.find(hotelFilter).populate({
         path: "hotelId",
         select: "name images"
       }).lean(),
-      booking_model_default2.find({ userId }).lean()
+      booking_model_default2.find(genericFilter).lean()
     ]);
     const adventureIds = [];
     const bikeIds = [];
@@ -6890,13 +7538,24 @@ var getUserBookings = async (userId) => {
           service = tourMap.get(booking.serviceId.toString());
           break;
       }
+      const startDate = booking.duration?.startDate || booking.bookingDate || booking.createdAt;
+      const endDate = booking.duration?.endDate || booking.bookingDate || startDate;
       return {
         _id: booking._id,
         bookingReference: booking.bookingReference,
+        bookingId: booking.bookingReference,
         bookingType: booking.serviceType,
+        hotelId: booking.serviceId || booking._id,
+        hotelName: service?.title || booking.serviceSnapshot?.title || "Service",
         title: service?.title || booking.serviceSnapshot?.title || "Service",
         thumbnail: service?.images?.[0]?.url || null,
-        bookingDate: booking.duration?.startDate || booking.bookingDate,
+        checkIn: startDate,
+        checkOut: endDate,
+        bookingDate: startDate,
+        guests: {
+          adults: booking.participants?.length || 1,
+          children: 0
+        },
         status: booking.status,
         paymentStatus: booking.paymentStatus,
         totalAmount: booking.pricing?.totalAmount || 0,
@@ -6906,10 +7565,19 @@ var getUserBookings = async (userId) => {
     const formattedHotelBookings = hotelBookings.map((booking) => ({
       _id: booking._id,
       bookingReference: booking.bookingReference,
+      bookingId: booking.bookingReference,
       bookingType: "hotel",
+      hotelId: booking.hotelId?._id || booking.hotelId,
+      hotelName: booking.hotelId?.name || "Hotel",
       title: booking.hotelId?.name || "Hotel",
       thumbnail: booking.hotelId?.images?.[0]?.url || null,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
       bookingDate: booking.checkIn,
+      guests: {
+        adults: booking.guests?.adults || 1,
+        children: booking.guests?.children || 0
+      },
       status: booking.status,
       paymentStatus: booking.paymentStatus,
       totalAmount: booking.totalAmount,
@@ -7229,7 +7897,7 @@ var getRefundPreview = async (bookingId, userId) => {
   }
 };
 var cancelBooking = async (bookingId, userId, reason) => {
-  const session = await mongoose21.startSession();
+  const session = await mongoose23.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findOne({
@@ -7297,7 +7965,7 @@ var cancelBooking = async (bookingId, userId, reason) => {
   }
 };
 var adminHandleRefund = async (bookingId, action) => {
-  const session = await mongoose21.startSession();
+  const session = await mongoose23.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findById(bookingId).session(session);
@@ -7328,7 +7996,7 @@ var adminHandleRefund = async (bookingId, action) => {
     throw err;
   }
 };
-var getVendorBookings = async (vendorId, queryParams) => {
+var getVendorBookings = async (vendorId, queryParams, activeHotelId) => {
   const {
     page = 1,
     limit = 10,
@@ -7336,11 +8004,22 @@ var getVendorBookings = async (vendorId, queryParams) => {
     search,
     startDate,
     endDate,
-    sort = "-createdAt"
+    sort = "-createdAt",
+    hotelId
   } = queryParams;
   const skip = (page - 1) * limit;
-  const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h) => h._id);
+  let hotelIds = [];
+  const targetHotelId = hotelId || activeHotelId;
+  if (targetHotelId && mongoose23.Types.ObjectId.isValid(targetHotelId)) {
+    const activeHotel = await hotel_model_default.findOne({ _id: targetHotelId, vendorId }, "_id").lean();
+    if (activeHotel) {
+      hotelIds = [activeHotel._id];
+    }
+  }
+  if (hotelIds.length === 0) {
+    const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
+    hotelIds = hotels.length > 0 ? [hotels[0]._id] : [];
+  }
   const filter = {
     hotelId: { $in: hotelIds }
   };
@@ -7448,7 +8127,7 @@ var getVendorInvoices = async (vendorId, queryParams) => {
   };
 };
 var generateInvoicePdf = async (bookingId, vendorId, res) => {
-  if (!mongoose21.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose23.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId).populate({
@@ -7575,9 +8254,18 @@ var generateInvoicePdf = async (bookingId, vendorId, res) => {
   });
   doc.end();
 };
-var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6) => {
-  const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
-  const hotelIds = hotels.map((h) => h._id);
+var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6, activeHotelId) => {
+  let hotelIds = [];
+  if (activeHotelId && mongoose23.Types.ObjectId.isValid(activeHotelId)) {
+    const activeHotel = await hotel_model_default.findOne({ _id: activeHotelId, vendorId }, "_id").lean();
+    if (activeHotel) {
+      hotelIds = [activeHotel._id];
+    }
+  }
+  if (hotelIds.length === 0) {
+    const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
+    hotelIds = hotels.length > 0 ? [hotels[0]._id] : [];
+  }
   const today = /* @__PURE__ */ new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
@@ -7590,12 +8278,19 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
     today.getMonth() - (revenueMonths - 1),
     1
   );
+  try {
+    for (const hId of hotelIds) {
+      await syncAllRoomsForHotel(hId);
+    }
+  } catch (syncErr) {
+    logger_default.warn("Room sync warning in getVendorDashboard:", syncErr);
+  }
   const [
     newBookings,
     todayCheckIns,
     todayCheckOuts,
     totalRevenueAgg,
-    totalRooms,
+    roomTypeTotalAgg,
     occupiedRooms,
     revenueAgg,
     reservationAgg,
@@ -7607,11 +8302,19 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
     }),
     booking_model_default.countDocuments({
       hotelId: { $in: hotelIds },
-      checkIn: { $gte: today, $lt: tomorrow }
+      $or: [
+        { actualCheckInAt: { $gte: today, $lt: tomorrow } },
+        { status: "checked_in", updatedAt: { $gte: today, $lt: tomorrow } },
+        { checkIn: { $gte: today, $lt: tomorrow } }
+      ]
     }),
     booking_model_default.countDocuments({
       hotelId: { $in: hotelIds },
-      checkOut: { $gte: today, $lt: tomorrow }
+      $or: [
+        { actualCheckOutAt: { $gte: today, $lt: tomorrow } },
+        { status: "checked_out", updatedAt: { $gte: today, $lt: tomorrow } },
+        { checkOut: { $gte: today, $lt: tomorrow } }
+      ]
     }),
     booking_model_default.aggregate([
       {
@@ -7628,9 +8331,20 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
         }
       }
     ]),
-    room_model_default.countDocuments({
-      hotelId: { $in: hotelIds }
-    }),
+    roomType_model_default.aggregate([
+      {
+        $match: {
+          hotelId: { $in: hotelIds },
+          isActive: true
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalRooms" }
+        }
+      }
+    ]),
     booking_model_default.countDocuments({
       hotelId: { $in: hotelIds },
       status: { $in: ["checked_in", "staying"] }
@@ -7657,7 +8371,7 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
       {
         $match: {
           hotelId: { $in: hotelIds },
-          createdAt: { $gte: lastDays }
+          createdAt: { $gte: new Date(today.getTime() - (reservationDays + 1) * 864e5) }
         }
       },
       {
@@ -7666,7 +8380,8 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
             date: {
               $dateToString: {
                 format: "%Y-%m-%d",
-                date: "$createdAt"
+                date: "$createdAt",
+                timezone: "+05:30"
               }
             }
           },
@@ -7684,16 +8399,15 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
       }
     ]),
     booking_model_default.find({
-      hotelId: { $in: hotelIds },
-      checkIn: { $lte: today },
-      checkOut: { $gte: today },
-      status: { $in: ["confirmed", "checked_in", "staying"] }
+      hotelId: { $in: hotelIds }
     }).select(
-      "bookingReference primaryGuest roomTypeId roomNumber checkIn checkOut status"
-    ).populate("roomTypeId", "name").sort({ checkIn: 1 }).limit(10).lean()
+      "bookingReference primaryGuest roomTypeId roomNumber checkIn checkOut status createdAt"
+    ).populate("roomTypeId", "name").sort({ createdAt: -1 }).limit(10).lean()
   ]);
   const totalRevenue = totalRevenueAgg[0]?.total || 0;
-  const availableRooms = totalRooms - occupiedRooms;
+  const roomTypesTotal = roomTypeTotalAgg[0]?.total;
+  let totalRooms = typeof roomTypesTotal === "number" && roomTypesTotal > 0 ? roomTypesTotal : await room_model_default.countDocuments({ hotelId: { $in: hotelIds } });
+  const availableRooms = Math.max(0, totalRooms - occupiedRooms);
   const revenueMap = /* @__PURE__ */ new Map();
   revenueAgg.forEach((r) => {
     revenueMap.set(`${r._id.year}-${r._id.month}`, r.revenue);
@@ -7712,10 +8426,13 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
     reservationMap.set(r._id.date, r);
   });
   const reservationChart = [];
-  for (let i = 0; i < reservationDays; i++) {
-    const d = new Date(lastDays);
-    d.setDate(lastDays.getDate() + i);
-    const key2 = d.toISOString().split("T")[0];
+  for (let i = reservationDays - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const key2 = `${year}-${month}-${day}`;
     const found = reservationMap.get(key2);
     reservationChart.push({
       date: d.toLocaleDateString("en-US", { day: "numeric", month: "short" }),
@@ -7725,8 +8442,8 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
   }
   const formattedRecent = recentBookings.map((b) => ({
     bookingReference: b.bookingReference,
-    guestName: `${b.primaryGuest.firstName} ${b.primaryGuest.lastName}`,
-    room: `${b.roomTypeId?.name || ""} ${b.roomNumber || ""}`,
+    guestName: b.primaryGuest ? `${b.primaryGuest.firstName || ""} ${b.primaryGuest.lastName || ""}`.trim() : "Guest",
+    room: `${b.roomTypeId?.name || "Room"} ${b.roomNumber || ""}`.trim(),
     checkIn: b.checkIn,
     checkOut: b.checkOut,
     status: b.status
@@ -7749,27 +8466,54 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
   };
 };
 var validateOwnership = async (bookingId, vendorId) => {
-  if (!mongoose21.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose23.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId);
-  if (!booking) throw new Error("Booking not found");
+  if (!booking) {
+    const error = new Error("Booking not found");
+    error.statusCode = 404;
+    throw error;
+  }
   const hotel = await hotel_model_default.findOne({
     _id: booking.hotelId,
     vendorId
   });
-  if (!hotel) throw new Error("Unauthorized access");
+  if (!hotel) {
+    const error = new Error("Unauthorized access");
+    error.statusCode = 403;
+    throw error;
+  }
   return booking;
 };
 var checkInBooking = async (bookingId, vendorId) => {
   const booking = await validateOwnership(bookingId, vendorId);
+  if (booking.status === "checked_in" || booking.status === "staying") {
+    return booking;
+  }
+  if (booking.status === "checked_out") {
+    const error = new Error("Guest has already checked out from this booking");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (booking.status === "cancelled") {
+    const error = new Error("This booking has been cancelled");
+    error.statusCode = 400;
+    throw error;
+  }
   if (booking.status !== "confirmed") {
-    throw new Error("Only confirmed bookings can be checked in");
+    const error = new Error(`Cannot check in booking with status: ${booking.status}`);
+    error.statusCode = 400;
+    throw error;
   }
   const today = /* @__PURE__ */ new Date();
   today.setHours(0, 0, 0, 0);
-  if (booking.checkIn > today) {
-    throw new Error("Cannot check in before check-in date");
+  const checkInDate = new Date(booking.checkIn);
+  checkInDate.setHours(0, 0, 0, 0);
+  if (checkInDate > today) {
+    const error = new Error(`Cannot check in before check-in date (${checkInDate.toLocaleDateString("en-IN")})`);
+    error.statusCode = 400;
+    throw error;
   }
   booking.status = "checked_in";
   booking.actualCheckInAt = /* @__PURE__ */ new Date();
@@ -7778,22 +8522,104 @@ var checkInBooking = async (bookingId, vendorId) => {
 };
 var markBookingStaying = async (bookingId, vendorId) => {
   const booking = await validateOwnership(bookingId, vendorId);
+  if (booking.status === "staying") {
+    return booking;
+  }
+  if (booking.status === "checked_out") {
+    const error = new Error("Guest has already checked out");
+    error.statusCode = 400;
+    throw error;
+  }
   if (booking.status !== "checked_in") {
-    throw new Error("Guest must be checked in first");
+    const error = new Error("Guest must be checked in first before marking staying");
+    error.statusCode = 400;
+    throw error;
   }
   booking.status = "staying";
   await booking.save();
   return booking;
 };
-var checkOutBooking = async (bookingId, vendorId) => {
-  const booking = await validateOwnership(bookingId, vendorId);
-  if (!["checked_in", "staying"].includes(booking.status)) {
-    throw new Error("Booking not eligible for checkout");
+var checkOutBooking = async (bookingId, vendorId, forceEarlyCheckout) => {
+  const session = await mongoose23.startSession();
+  session.startTransaction();
+  try {
+    const booking = await validateOwnership(bookingId, vendorId);
+    if (booking.status === "checked_out") {
+      await session.abortTransaction();
+      session.endSession();
+      return {
+        earlyCheckoutWarning: false,
+        booking,
+        isEarlyCheckout: false,
+        message: "Guest has already checked out."
+      };
+    }
+    if (!["checked_in", "staying"].includes(booking.status)) {
+      await session.abortTransaction();
+      session.endSession();
+      const error = new Error("Booking not eligible for checkout (guest must be checked in first)");
+      error.statusCode = 400;
+      throw error;
+    }
+    const now = /* @__PURE__ */ new Date();
+    now.setHours(0, 0, 0, 0);
+    const originalCheckOut = new Date(booking.checkOut);
+    originalCheckOut.setHours(0, 0, 0, 0);
+    const isEarlyCheckout = now < originalCheckOut;
+    if (isEarlyCheckout && !forceEarlyCheckout) {
+      await session.abortTransaction();
+      session.endSession();
+      return {
+        earlyCheckoutWarning: true,
+        message: `Guest is booked until ${originalCheckOut.toDateString()}. Checking out early will free up the room for the remaining dates. Do you want to proceed?`,
+        originalCheckOut: booking.checkOut,
+        bookingId: booking._id
+      };
+    }
+    booking.status = "checked_out";
+    booking.actualCheckOutAt = /* @__PURE__ */ new Date();
+    await booking.save({ session });
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    const queryStart = new Date(checkInDate.getTime() - 24 * 3600 * 1e3);
+    const queryEnd = new Date(checkOutDate.getTime() + 24 * 3600 * 1e3);
+    const affectedAvails = await availability_model_default.find({
+      roomTypeId: booking.roomTypeId,
+      date: { $gte: queryStart, $lte: queryEnd }
+    }).session(session);
+    for (const av of affectedAvails) {
+      const avDate = new Date(av.date);
+      const nextDate = new Date(avDate.getTime() + 864e5);
+      const activeCount = await booking_model_default.countDocuments({
+        roomTypeId: booking.roomTypeId,
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: avDate }
+      }).session(session);
+      av.bookedRooms = activeCount;
+      await av.save({ session });
+    }
+    await session.commitTransaction();
+    session.endSession();
+    return {
+      earlyCheckoutWarning: false,
+      booking,
+      isEarlyCheckout,
+      message: isEarlyCheckout ? `Guest checked out early. Rooms freed from ${now.toDateString()} to ${originalCheckOut.toDateString()}.` : "Guest checked out successfully."
+    };
+  } catch (err) {
+    try {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+    } catch (abortErr) {
+      logger_default.error("Error aborting checkout transaction:", abortErr);
+    } finally {
+      session.endSession();
+    }
+    logger_default.error("Service Error: checkOutBooking", err);
+    throw err;
   }
-  booking.status = "checked_out";
-  booking.actualCheckOutAt = /* @__PURE__ */ new Date();
-  await booking.save();
-  return booking;
 };
 var booking_service = {
   createBooking,
@@ -7814,7 +8640,7 @@ var booking_service = {
 var booking_service_default = booking_service;
 
 // src/modules/vendorBank/bank.model.ts
-import mongoose22, { Schema as Schema16 } from "mongoose";
+import mongoose24, { Schema as Schema18 } from "mongoose";
 
 // src/shared/utils/encryption.ts
 import crypto3 from "crypto";
@@ -7835,10 +8661,10 @@ var decrypt = (text) => {
 };
 
 // src/modules/vendorBank/bank.model.ts
-var vendorBankSchema = new Schema16(
+var vendorBankSchema = new Schema18(
   {
     vendorId: {
-      type: Schema16.Types.ObjectId,
+      type: Schema18.Types.ObjectId,
       ref: "Vendor",
       required: true,
       unique: false
@@ -7937,7 +8763,7 @@ vendorBankSchema.post("find", function(docs) {
     }
   });
 });
-var VendorBank = mongoose22.model("VendorBank", vendorBankSchema);
+var VendorBank = mongoose24.model("VendorBank", vendorBankSchema);
 var bank_model_default = VendorBank;
 
 // src/modules/vendors/vendor.service.ts
@@ -7947,11 +8773,11 @@ init_service_model();
 init_tourService_model();
 
 // src/modules/admin/promotion/promotion.model.ts
-import mongoose27, { Schema as Schema21 } from "mongoose";
-var promotionSchema = new Schema21(
+import mongoose29, { Schema as Schema23 } from "mongoose";
+var promotionSchema = new Schema23(
   {
     vendorId: {
-      type: Schema21.Types.ObjectId,
+      type: Schema23.Types.ObjectId,
       ref: "Vendor",
       required: [true, "Promotion must be linked to a Vendor"],
       index: true
@@ -7963,7 +8789,7 @@ var promotionSchema = new Schema21(
       index: true
     },
     serviceId: {
-      type: Schema21.Types.ObjectId,
+      type: Schema23.Types.ObjectId,
       required: true,
       index: true
     },
@@ -7994,7 +8820,7 @@ var promotionSchema = new Schema21(
       type: Date
     },
     approvedBy: {
-      type: Schema21.Types.ObjectId,
+      type: Schema23.Types.ObjectId,
       ref: "User"
     },
     rejectedAt: {
@@ -8011,7 +8837,7 @@ var promotionSchema = new Schema21(
 );
 promotionSchema.index({ vendorId: 1, status: 1 });
 promotionSchema.index({ serviceId: 1, status: 1 });
-var Promotion = mongoose27.model("Promotion", promotionSchema);
+var Promotion = mongoose29.model("Promotion", promotionSchema);
 var promotion_model_default = Promotion;
 
 // src/modules/vendors/vendor.service.ts
@@ -8039,10 +8865,19 @@ var getVendorMe = async (userId) => {
     const ServiceModel = vendor.serviceType ? SERVICE_MODELS[vendor.serviceType] : null;
     let serviceData = null;
     if (ServiceModel) {
-      serviceData = await ServiceModel.findOne({
-        vendorId: vendor._id,
-        isActive: true
-      });
+      if (vendor.activePropertyId) {
+        serviceData = await ServiceModel.findById(vendor.activePropertyId);
+      }
+      if (!serviceData) {
+        serviceData = await ServiceModel.findOne({
+          vendorId: vendor._id,
+          isActive: true
+        });
+        if (serviceData && !vendor.activePropertyId) {
+          vendor.activePropertyId = serviceData._id;
+          await vendor.save();
+        }
+      }
     }
     let serviceDetails = null;
     if (serviceData) {
@@ -8189,6 +9024,7 @@ var getVendorMe = async (userId) => {
       serviceDetails
     };
     if (vendor.status === "approved") {
+      const propertyCount = ServiceModel ? await ServiceModel.countDocuments({ vendorId: vendor._id, isActive: true }) : 0;
       response.approvedData = {
         vendorName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
         vendorEmail: user.email,
@@ -8203,7 +9039,9 @@ var getVendorMe = async (userId) => {
         bikeId: serviceData?._id || null,
         tourId: serviceData?._id || null,
         adventureId: serviceData?._id || null,
-        serviceName: serviceData?.name || null
+        serviceName: serviceData?.name || null,
+        activePropertyId: vendor.activePropertyId || null,
+        propertyCount
       };
     }
     return response;
@@ -8316,10 +9154,19 @@ var getVendorMyListing = async (userId) => {
     const ServiceModel = vendor.serviceType ? SERVICE_MODELS[vendor.serviceType] : null;
     let serviceData = null;
     if (ServiceModel) {
-      serviceData = await ServiceModel.findOne({
-        vendorId: vendor._id,
-        isActive: true
-      });
+      if (vendor.activePropertyId) {
+        serviceData = await ServiceModel.findById(vendor.activePropertyId);
+      }
+      if (!serviceData) {
+        serviceData = await ServiceModel.findOne({
+          vendorId: vendor._id,
+          isActive: true
+        });
+        if (serviceData && !vendor.activePropertyId) {
+          vendor.activePropertyId = serviceData._id;
+          await vendor.save();
+        }
+      }
     }
     let subServices = [];
     if (serviceData) {
@@ -8510,10 +9357,20 @@ var getPropertySettings = async (userId) => {
     if (!ServiceModel) {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
-    const serviceData = await ServiceModel.findOne({
-      vendorId: vendor._id,
-      isActive: true
-    });
+    let serviceData = null;
+    if (vendor.activePropertyId) {
+      serviceData = await ServiceModel.findById(vendor.activePropertyId);
+    }
+    if (!serviceData) {
+      serviceData = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true
+      });
+      if (serviceData && !vendor.activePropertyId) {
+        vendor.activePropertyId = serviceData._id;
+        await vendor.save();
+      }
+    }
     if (!serviceData) {
       throw new Error("Property listing not found for this vendor");
     }
@@ -8558,10 +9415,20 @@ var updatePropertySettings = async (userId, payload) => {
     if (!ServiceModel) {
       throw new Error(`Unsupported service type: ${vendor.serviceType}`);
     }
-    const serviceData = await ServiceModel.findOne({
-      vendorId: vendor._id,
-      isActive: true
-    });
+    let serviceData = null;
+    if (vendor.activePropertyId) {
+      serviceData = await ServiceModel.findById(vendor.activePropertyId);
+    }
+    if (!serviceData) {
+      serviceData = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true
+      });
+      if (serviceData && !vendor.activePropertyId) {
+        vendor.activePropertyId = serviceData._id;
+        await vendor.save();
+      }
+    }
     if (!serviceData) {
       throw new Error("Property listing not found for this vendor");
     }
@@ -8829,7 +9696,8 @@ var VendorController = class {
       }
       const result = await booking_service_default.getVendorBookings(
         vendor._id,
-        req.query
+        req.query,
+        vendor.activePropertyId
       );
       res.status(200).json({
         success: true,
@@ -8875,9 +9743,13 @@ var VendorController = class {
         });
         return;
       }
+      const query = {
+        ...req.query,
+        hotelId: req.query.hotelId || vendor.activePropertyId?.toString()
+      };
       const result = await roomType_service_default.getVendorRoomTypes(
         vendor._id,
-        req.query
+        query
       );
       res.status(200).json({
         success: true,
@@ -8960,7 +9832,7 @@ var VendorController = class {
   // vendor dashboard
   async getVendorDashboard(req, res, next) {
     try {
-      const vendor = await vendor_model_default.findOne({ userId: req.user._id }).select("_id status").lean();
+      const vendor = await vendor_model_default.findOne({ userId: req.user._id }).select("_id status activePropertyId").lean();
       if (!vendor || vendor.status !== "approved") {
         res.status(403).json({
           success: false,
@@ -8970,10 +9842,12 @@ var VendorController = class {
       }
       const reservationDays = parseInt(req.query.reservationDays) || 7;
       const revenueMonths = parseInt(req.query.revenueMonths) || 6;
+      const activeHotelId = req.query.hotelId || req.query.propertyId || vendor.activePropertyId;
       const data = await booking_service_default.getVendorDashboard(
         vendor._id,
         reservationDays,
-        revenueMonths
+        revenueMonths,
+        activeHotelId
       );
       res.status(200).json({
         success: true,
@@ -9028,10 +9902,22 @@ var VendorController = class {
         res.status(403).json({ message: "Unauthorized vendor" });
         return;
       }
+      const forceEarlyCheckout = req.body?.forceEarlyCheckout === true;
       const result = await booking_service_default.checkOutBooking(
         req.params.id,
-        vendor._id
+        vendor._id,
+        forceEarlyCheckout
       );
+      if (result.earlyCheckoutWarning) {
+        res.status(200).json({
+          success: true,
+          earlyCheckoutWarning: true,
+          message: result.message,
+          originalCheckOut: result.originalCheckOut,
+          bookingId: result.bookingId
+        });
+        return;
+      }
       res.status(200).json({ success: true, data: result });
     } catch (err) {
       logger_default.error("Check-out Error:", err);
@@ -9253,9 +10139,10 @@ var BookingController = class {
   //Create Booking
   async createBooking(req, res, next) {
     try {
+      const userId = req.user?._id || null;
       const booking = await booking_service_default.createBooking(
         req.body,
-        req.user._id
+        userId
       );
       res.status(201).json({
         success: true,
@@ -9286,10 +10173,18 @@ var BookingController = class {
   // user booking invoice download
   async downloadMyInvoice(req, res, next) {
     try {
-      const booking = await booking_model_default.findOne({
-        _id: req.params.bookingId,
-        userId: req.user._id
-      }).populate({
+      const user = req.user;
+      const filter = { _id: req.params.bookingId };
+      if (user?._id) {
+        filter.$or = [
+          { userId: user._id },
+          { "primaryGuest.email": (user.email || "").toLowerCase() },
+          { paymentStatus: "paid" }
+        ];
+      } else {
+        filter.paymentStatus = "paid";
+      }
+      const booking = await booking_model_default.findOne(filter).populate({
         path: "roomTypeId",
         select: "name basePrice discountPrice roomSizeSqm beds amenities"
       }).lean();
@@ -9374,11 +10269,11 @@ var BookingController = class {
 };
 
 // src/modules/task/task.model.ts
-import mongoose28, { Schema as Schema22 } from "mongoose";
-var taskSchema = new Schema22(
+import mongoose30, { Schema as Schema24 } from "mongoose";
+var taskSchema = new Schema24(
   {
     vendorId: {
-      type: Schema22.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -9410,11 +10305,11 @@ var taskSchema = new Schema22(
   { timestamps: true }
 );
 taskSchema.index({ vendorId: 1, status: 1 });
-var Task = mongoose28.model("Task", taskSchema);
+var Task = mongoose30.model("Task", taskSchema);
 var task_model_default = Task;
 
 // src/modules/task/task.service.ts
-import mongoose29 from "mongoose";
+import mongoose31 from "mongoose";
 var getTasks = async (vendorId, query = {}) => {
   const { page = 1, limit = 10, status } = query;
   const filter = { vendorId };
@@ -9433,7 +10328,7 @@ var createTask = async (vendorId, data) => {
   return await task_model_default.create({ ...data, vendorId });
 };
 var updateTask = async (taskId, vendorId, data) => {
-  if (!mongoose29.Types.ObjectId.isValid(taskId)) {
+  if (!mongoose31.Types.ObjectId.isValid(taskId)) {
     throw new Error("Invalid task id");
   }
   const task = await task_model_default.findOneAndUpdate({ _id: taskId, vendorId }, data, {
@@ -9683,11 +10578,11 @@ var vendor_routes_default = router7;
 import { Router as Router8 } from "express";
 
 // src/modules/policies/policy.model.ts
-import mongoose30, { Schema as Schema23 } from "mongoose";
-var policySchema = new Schema23(
+import mongoose32, { Schema as Schema25 } from "mongoose";
+var policySchema = new Schema25(
   {
     hotelId: {
-      type: Schema23.Types.ObjectId,
+      type: Schema25.Types.ObjectId,
       ref: "Hotel",
       required: true,
       unique: true
@@ -9705,7 +10600,7 @@ var policySchema = new Schema23(
   },
   { timestamps: true }
 );
-var HotelPolicy = mongoose30.model("HotelPolicy", policySchema);
+var HotelPolicy = mongoose32.model("HotelPolicy", policySchema);
 var policy_model_default = HotelPolicy;
 
 // src/modules/policies/policy.service.ts
@@ -9791,24 +10686,23 @@ var policy_routes_default = router8;
 import { Router as Router9 } from "express";
 var router9 = Router9();
 var bookingController2 = new BookingController();
-router9.use(protect, authorize("user"));
-router9.post("/", bookingController2.createBooking);
-router9.get("/my-bookings", bookingController2.getMyBookings);
-router9.get("/my-bookings/:bookingId/download", bookingController2.downloadMyInvoice);
-router9.patch("/:id/cancel", bookingController2.cancelBooking);
-router9.get("/:id/refund-preview", bookingController2.getRefundPreview);
-router9.get("/:id", bookingController2.getBookingById);
+router9.post("/", optionalProtect, bookingController2.createBooking);
+router9.get("/my-bookings", protect, authorize("user"), bookingController2.getMyBookings);
+router9.get("/my-bookings/:bookingId/download", optionalProtect, bookingController2.downloadMyInvoice);
+router9.patch("/:id/cancel", protect, authorize("user"), bookingController2.cancelBooking);
+router9.get("/:id/refund-preview", protect, authorize("user"), bookingController2.getRefundPreview);
+router9.get("/:id", protect, authorize("user"), bookingController2.getBookingById);
 var booking_routes_default = router9;
 
 // src/modules/payments/payment.routes.ts
 import { Router as Router10 } from "express";
 
 // src/modules/payments/payment.service.ts
-import mongoose31 from "mongoose";
+import mongoose33 from "mongoose";
 import crypto4 from "crypto";
 init_availability_model();
 var verifyPayment = async (data) => {
-  const session = await mongoose31.startSession();
+  const session = await mongoose33.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -9869,36 +10763,41 @@ var verifyPayment = async (data) => {
     }
     const startDate = new Date(booking.checkIn);
     for (let i = 0; i < booking.nights; i++) {
-      const currentDate = new Date(startDate.getTime() + i * 864e5);
-      currentDate.setHours(0, 0, 0, 0);
+      const d = new Date(startDate.getTime() + i * 864e5);
+      const currentDate = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const nextDate = new Date(currentDate.getTime() + 864e5);
       const existingDoc = await availability_model_default.findOne({
         roomTypeId: booking.roomTypeId,
         date: currentDate
       }).session(session);
+      const activeBookedCount = await booking_model_default.countDocuments({
+        roomTypeId: booking.roomTypeId,
+        _id: { $ne: booking._id },
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: currentDate }
+      }).session(session);
+      const blockedRooms = existingDoc?.blockedRooms || 0;
+      const bookedRooms = activeBookedCount;
+      const available = roomTypeData.totalRooms - bookedRooms - blockedRooms;
+      if (available < booking.roomsBooked) {
+        throw new Error(
+          `Rooms just sold out for ${d.toDateString()}`
+        );
+      }
       if (existingDoc) {
-        const available = roomTypeData.totalRooms - existingDoc.bookedRooms - existingDoc.blockedRooms;
-        if (available < booking.roomsBooked) {
-          throw new Error(
-            `Rooms just sold out for ${currentDate.toDateString()}`
-          );
-        }
         await availability_model_default.updateOne(
           { _id: existingDoc._id },
-          { $inc: { bookedRooms: booking.roomsBooked } },
+          { $set: { bookedRooms: bookedRooms + booking.roomsBooked } },
           { session }
         );
       } else {
-        if (booking.roomsBooked > roomTypeData.totalRooms) {
-          throw new Error(
-            `Rooms just sold out for ${currentDate.toDateString()}`
-          );
-        }
         await availability_model_default.create(
           [
             {
               roomTypeId: booking.roomTypeId,
               date: currentDate,
-              bookedRooms: booking.roomsBooked,
+              bookedRooms: bookedRooms + booking.roomsBooked,
               blockedRooms: 0
             }
           ],
@@ -9979,103 +10878,32 @@ var PaymentController = class {
 // src/modules/payments/payment.routes.ts
 var router10 = Router10();
 var paymentController = new PaymentController();
-router10.post("/verify", protect, paymentController.verifyPayment);
+router10.post("/verify", optionalProtect, paymentController.verifyPayment);
 var payment_routes_default = router10;
 
 // src/modules/reviews/review.routes.ts
 import { Router as Router11 } from "express";
 
 // src/modules/reviews/review.service.ts
-import mongoose33 from "mongoose";
-
-// src/modules/reviews/review.model.ts
-import mongoose32, { Schema as Schema24 } from "mongoose";
-var reviewSchema = new Schema24(
-  {
-    userId: {
-      type: Schema24.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-    bookingId: {
-      type: Schema24.Types.ObjectId,
-      required: true,
-      unique: true
-    },
-    companyId: {
-      type: Schema24.Types.ObjectId,
-      required: true
-    },
-    companyName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    companyType: {
-      type: String,
-      enum: ["hotel", "adventure", "tour", "cab", "bike"],
-      required: true
-    },
-    vendorId: {
-      type: Schema24.Types.ObjectId,
-      ref: "Vendor",
-      required: true
-    },
-    rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5
-    },
-    comment: {
-      type: String,
-      trim: true,
-      maxlength: 1e3
-    },
-    vendorReply: {
-      message: {
-        type: String,
-        trim: true,
-        maxlength: 1e3
-      },
-      repliedAt: Date
-    },
-    isFlagged: {
-      type: Boolean,
-      default: false
-    },
-    flagReason: {
-      type: String,
-      default: "",
-      trim: true
-    }
-  },
-  {
-    timestamps: true
-  }
-);
-reviewSchema.index({ bookingId: 1 }, { unique: true });
-reviewSchema.index({
-  companyType: 1,
-  companyId: 1
-});
-var Review = mongoose32.model("Review", reviewSchema);
-var review_model_default = Review;
-
-// src/modules/reviews/review.service.ts
+import mongoose35 from "mongoose";
 init_service_model();
 init_bikeService_model();
 init_cabService_model();
 init_tourService_model();
 
 // src/modules/reviews/helpers/updateCompanyRating.ts
+import mongoose34 from "mongoose";
 var updateCompanyRating = async (companyType, companyId) => {
   try {
+    const companyObjectId = mongoose34.Types.ObjectId.isValid(companyId) ? new mongoose34.Types.ObjectId(companyId) : companyId;
     const stats = await review_model_default.aggregate([
       {
         $match: {
           companyType,
-          companyId
+          $or: [
+            { companyId: companyObjectId },
+            { companyId: String(companyId) }
+          ]
         }
       },
       {
@@ -10146,27 +10974,26 @@ var getCompanyReviews = async (companyType, companyId, query = {}) => {
     if (!allowedTypes.includes(companyType)) {
       throw new Error("Invalid company type");
     }
-    if (!mongoose33.Types.ObjectId.isValid(companyId)) {
+    if (!mongoose35.Types.ObjectId.isValid(companyId)) {
       throw new Error("Invalid company id");
     }
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
+    const companyObjectId = mongoose35.Types.ObjectId.isValid(companyId) ? new mongoose35.Types.ObjectId(companyId) : companyId;
+    const matchCompany = {
+      companyType,
+      $or: [
+        { companyId: companyObjectId },
+        { companyId: String(companyId) }
+      ]
+    };
     const [reviews, total, stats] = await Promise.all([
-      review_model_default.find({
-        companyType,
-        companyId
-      }).populate("userId", "firstName lastName avatar").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      review_model_default.countDocuments({
-        companyType,
-        companyId
-      }),
+      review_model_default.find(matchCompany).populate("userId", "firstName lastName avatar").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      review_model_default.countDocuments(matchCompany),
       review_model_default.aggregate([
         {
-          $match: {
-            companyType,
-            companyId: new mongoose33.Types.ObjectId(companyId)
-          }
+          $match: matchCompany
         },
         {
           $group: {
@@ -10176,22 +11003,41 @@ var getCompanyReviews = async (companyType, companyId, query = {}) => {
             },
             totalReviews: {
               $sum: 1
-            }
+            },
+            avgFacilities: { $avg: "$breakdown.facilities" },
+            avgCleanliness: { $avg: "$breakdown.cleanliness" },
+            avgServices: { $avg: "$breakdown.services" },
+            avgComfort: { $avg: "$breakdown.comfort" },
+            avgLocation: { $avg: "$breakdown.location" }
           }
         }
       ])
     ]);
+    const totalReviews = stats[0]?.totalReviews ?? total ?? 0;
+    const avgRating = stats[0]?.averageRating ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length : 0);
+    const avgFacilities = stats[0]?.avgFacilities ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.facilities || 0), 0) / reviews.length : 0);
+    const avgCleanliness = stats[0]?.avgCleanliness ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.cleanliness || 0), 0) / reviews.length : 0);
+    const avgServices = stats[0]?.avgServices ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.services || 0), 0) / reviews.length : 0);
+    const avgComfort = stats[0]?.avgComfort ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.comfort || 0), 0) / reviews.length : 0);
+    const avgLocation = stats[0]?.avgLocation ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.location || 0), 0) / reviews.length : 0);
     return {
       reviews,
       summary: {
-        averageRating: stats[0]?.averageRating?.toFixed(1) || 0,
-        totalReviews: stats[0]?.totalReviews || 0
+        averageRating: Number(avgRating.toFixed(1)),
+        totalReviews,
+        breakdown: {
+          facilities: Number(avgFacilities.toFixed(1)),
+          cleanliness: Number(avgCleanliness.toFixed(1)),
+          services: Number(avgServices.toFixed(1)),
+          comfort: Number(avgComfort.toFixed(1)),
+          location: Number(avgLocation.toFixed(1))
+        }
       },
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit)
+        total: totalReviews,
+        pages: Math.ceil(totalReviews / limit)
       }
     };
   } catch (error) {
@@ -10208,17 +11054,18 @@ var getUserReviews = async (userId) => {
     );
     const hotelBookings = await booking_model_default.find({
       userId,
-      status: "completed"
+      status: { $in: ["completed", "checked_out"] }
     }).populate("hotelId", "name images rating").lean();
     const genericBookings = await booking_model_default2.find({
       userId,
-      status: "completed"
+      status: { $in: ["completed", "checked_out"] }
     }).lean();
     const pendingHotelReviews = hotelBookings.filter((booking) => !reviewedBookingIds.includes(booking._id.toString())).map((booking) => ({
       bookingId: booking._id,
       companyId: booking.hotelId?._id,
       companyType: "hotel",
-      companyName: booking.hotelId?.name || "",
+      companyName: booking.hotelId?.name || "Hotel",
+      companyImage: booking.hotelId?.images?.[0]?.url || "",
       bookingReference: booking.bookingReference,
       bookingDate: booking.createdAt
     }));
@@ -10240,7 +11087,7 @@ var getUserReviews = async (userId) => {
 };
 var createReview = async (userId, body) => {
   try {
-    const { bookingId, rating, comment } = body;
+    const { bookingId, rating, comment, breakdown } = body;
     if (!bookingId) {
       throw new Error("Booking ID is required");
     }
@@ -10259,7 +11106,7 @@ var createReview = async (userId, body) => {
     const hotelBooking = await booking_model_default.findOne({
       _id: bookingId,
       userId,
-      status: "completed"
+      status: { $in: ["completed", "checked_out"] }
     });
     if (hotelBooking) {
       const hotel = await hotel_model_default.findById(hotelBooking.hotelId);
@@ -10274,7 +11121,8 @@ var createReview = async (userId, body) => {
         companyType: "hotel",
         vendorId: hotel.vendorId,
         rating,
-        comment
+        comment,
+        ...breakdown && { breakdown }
       });
       await updateCompanyRating("hotel", hotel._id);
       return {
@@ -10285,10 +11133,10 @@ var createReview = async (userId, body) => {
     const booking = await booking_model_default2.findOne({
       _id: bookingId,
       userId,
-      status: "completed"
+      status: { $in: ["completed", "checked_out"] }
     });
     if (!booking) {
-      throw new Error("Completed booking not found");
+      throw new Error("Completed or checked-out booking not found");
     }
     let companyId;
     let vendorId;
@@ -10361,7 +11209,8 @@ var createReview = async (userId, body) => {
       companyType: booking.serviceType,
       vendorId,
       rating,
-      comment
+      comment,
+      ...breakdown && { breakdown }
     });
     await updateCompanyRating(booking.serviceType, companyId);
     return {
@@ -10375,7 +11224,7 @@ var createReview = async (userId, body) => {
 };
 var updateReview = async (userId, reviewId, body) => {
   try {
-    const { rating, comment } = body;
+    const { rating, comment, breakdown } = body;
     const review = await review_model_default.findOne({
       _id: reviewId,
       userId
@@ -10398,6 +11247,9 @@ var updateReview = async (userId, reviewId, body) => {
     if (comment !== void 0) {
       review.comment = comment;
     }
+    if (breakdown) {
+      review.breakdown = { ...review.breakdown || {}, ...breakdown };
+    }
     await review.save();
     await updateCompanyRating(review.companyType, review.companyId);
     return {
@@ -10414,18 +11266,19 @@ var getVendorReviews = async (vendorId, query = {}) => {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
+    const vendorObjectId = mongoose35.Types.ObjectId.isValid(vendorId) ? new mongoose35.Types.ObjectId(vendorId) : vendorId;
+    const matchVendor = {
+      $or: [
+        { vendorId: vendorObjectId },
+        { vendorId: String(vendorId) }
+      ]
+    };
     const [reviews, total, stats] = await Promise.all([
-      review_model_default.find({
-        vendorId
-      }).populate("userId", "firstName lastName avatar").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      review_model_default.countDocuments({
-        vendorId
-      }),
+      review_model_default.find(matchVendor).populate("userId", "firstName lastName avatar").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      review_model_default.countDocuments(matchVendor),
       review_model_default.aggregate([
         {
-          $match: {
-            vendorId
-          }
+          $match: matchVendor
         },
         {
           $group: {
@@ -10435,22 +11288,41 @@ var getVendorReviews = async (vendorId, query = {}) => {
             },
             totalReviews: {
               $sum: 1
-            }
+            },
+            avgFacilities: { $avg: "$breakdown.facilities" },
+            avgCleanliness: { $avg: "$breakdown.cleanliness" },
+            avgServices: { $avg: "$breakdown.services" },
+            avgComfort: { $avg: "$breakdown.comfort" },
+            avgLocation: { $avg: "$breakdown.location" }
           }
         }
       ])
     ]);
+    const totalReviews = stats[0]?.totalReviews ?? total ?? 0;
+    const avgRating = stats[0]?.averageRating ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length : 0);
+    const avgFacilities = stats[0]?.avgFacilities ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.facilities || 0), 0) / reviews.length : 0);
+    const avgCleanliness = stats[0]?.avgCleanliness ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.cleanliness || 0), 0) / reviews.length : 0);
+    const avgServices = stats[0]?.avgServices ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.services || 0), 0) / reviews.length : 0);
+    const avgComfort = stats[0]?.avgComfort ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.comfort || 0), 0) / reviews.length : 0);
+    const avgLocation = stats[0]?.avgLocation ?? (reviews.length > 0 ? reviews.reduce((acc, r) => acc + (r.breakdown?.location || 0), 0) / reviews.length : 0);
     return {
       summary: {
-        totalReviews: stats[0]?.totalReviews || 0,
-        averageRating: Number((stats[0]?.averageRating || 0).toFixed(1))
+        totalReviews,
+        averageRating: Number(avgRating.toFixed(1)),
+        breakdown: {
+          facilities: Number(avgFacilities.toFixed(1)),
+          cleanliness: Number(avgCleanliness.toFixed(1)),
+          services: Number(avgServices.toFixed(1)),
+          comfort: Number(avgComfort.toFixed(1)),
+          location: Number(avgLocation.toFixed(1))
+        }
       },
       reviews,
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit)
+        total: totalReviews,
+        pages: Math.ceil(totalReviews / limit)
       }
     };
   } catch (error) {
@@ -11023,8 +11895,8 @@ var bank_routes_default = router14;
 import { Router as Router15 } from "express";
 
 // src/modules/support/support.model.ts
-import mongoose34, { Schema as Schema25 } from "mongoose";
-var messageSchema = new Schema25(
+import mongoose36, { Schema as Schema26 } from "mongoose";
+var messageSchema = new Schema26(
   {
     sender: {
       type: String,
@@ -11045,10 +11917,10 @@ var messageSchema = new Schema25(
   },
   { timestamps: true }
 );
-var supportSchema = new Schema25(
+var supportSchema = new Schema26(
   {
     userId: {
-      type: Schema25.Types.ObjectId,
+      type: Schema26.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
@@ -11100,7 +11972,7 @@ var supportSchema = new Schema25(
   { timestamps: true }
 );
 supportSchema.index({ status: 1, createdAt: -1 });
-var Support = mongoose34.model("Support", supportSchema);
+var Support = mongoose36.model("Support", supportSchema);
 var support_model_default = Support;
 
 // src/modules/support/support.service.ts
@@ -11311,7 +12183,7 @@ var support_routes_default = router15;
 import { Router as Router16 } from "express";
 
 // src/modules/adventure/category/adventure.service.ts
-import mongoose35 from "mongoose";
+import mongoose37 from "mongoose";
 init_service_model();
 var attachFavoriteFlag2 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
@@ -11448,7 +12320,7 @@ var getAdventures = async (query = {}, userId = null) => {
 };
 var getAdventureDetails = async (id, userId = null) => {
   try {
-    if (!mongoose35.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11651,7 +12523,7 @@ var getVendorAdventures = async (vendorId) => {
 };
 var getVendorAdventureDetails = async (id, vendorId) => {
   try {
-    if (!mongoose35.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11703,7 +12575,7 @@ var getVendorAdventureDetails = async (id, vendorId) => {
 };
 var updateAdventure = async (id, data, vendorId) => {
   try {
-    if (!mongoose35.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11752,7 +12624,7 @@ var updateAdventure = async (id, data, vendorId) => {
 };
 var deleteAdventure = async (id, vendorId) => {
   try {
-    if (!mongoose35.Types.ObjectId.isValid(id)) {
+    if (!mongoose37.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -11977,7 +12849,7 @@ import { Router as Router17 } from "express";
 
 // src/modules/adventure/service/service.service.ts
 init_service_model();
-import mongoose36 from "mongoose";
+import mongoose38 from "mongoose";
 var checkIsFavorite2 = async (itemId, userId, itemType) => {
   if (!userId || !itemId) return false;
   const fav = await favorite_model_default.findOne({
@@ -11989,7 +12861,7 @@ var checkIsFavorite2 = async (itemId, userId, itemType) => {
 };
 var getServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose36.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findOne({
@@ -12103,7 +12975,7 @@ var getVendorServices = async (vendorId) => {
 };
 var getVendorServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose36.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(serviceId).populate({
@@ -12201,7 +13073,7 @@ var createService = async (data, vendorId) => {
 };
 var updateService = async (id, data, vendorId) => {
   try {
-    if (!mongoose36.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -12260,7 +13132,7 @@ var updateService = async (id, data, vendorId) => {
 };
 var deleteService = async (id, vendorId) => {
   try {
-    if (!mongoose36.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -12594,7 +13466,7 @@ import { Router as Router19 } from "express";
 
 // src/modules/cab/service/cabService.service.ts
 init_cabService_model();
-import mongoose37 from "mongoose";
+import mongoose39 from "mongoose";
 var attachFavoriteFlag3 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -12715,7 +13587,7 @@ var getCabs = async (query, userId = null) => {
 };
 var getCabCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await cab_model_default.findOne({
@@ -12780,7 +13652,7 @@ var getCabCompanyDetails = async (id, userId = null) => {
 };
 var getCabServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findOne({
@@ -12859,7 +13731,7 @@ var createCabService = async (data, vendorId) => {
       features = [],
       images = []
     } = data;
-    if (!cabId || !mongoose37.Types.ObjectId.isValid(cabId)) {
+    if (!cabId || !mongoose39.Types.ObjectId.isValid(cabId)) {
       throw new Error("Valid cabId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -12963,7 +13835,7 @@ var getVendorCabServices = async (query = {}, vendorId) => {
 };
 var getVendorCabServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate("cab", "name vendorId").lean();
@@ -13009,7 +13881,7 @@ var getVendorCabServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorCabService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -13059,7 +13931,7 @@ var updateVendorCabService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorCabService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -13440,7 +14312,7 @@ import { Router as Router21 } from "express";
 
 // src/modules/bike/service/bikeService.service.ts
 init_bikeService_model();
-import mongoose38 from "mongoose";
+import mongoose40 from "mongoose";
 var attachFavoriteFlag4 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -13556,7 +14428,7 @@ var getBikes = async (query, userId = null) => {
 };
 var getBikeCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(id)) {
+    if (!mongoose40.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await bike_model_default.findOne({
@@ -13627,7 +14499,7 @@ var getBikeCompanyDetails = async (id, userId = null) => {
 };
 var getBikeServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(id)) {
+    if (!mongoose40.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findOne({
@@ -13691,7 +14563,7 @@ var getBikeServiceDetails = async (id, userId = null) => {
 var calculateBikePrice = async (body) => {
   try {
     const { serviceId, startDate, endDate } = body;
-    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     if (!startDate || !endDate) {
@@ -13754,7 +14626,7 @@ var createBikeService = async (data, vendorId) => {
       meta = {},
       images = []
     } = data;
-    if (!bikeId || !mongoose38.Types.ObjectId.isValid(bikeId)) {
+    if (!bikeId || !mongoose40.Types.ObjectId.isValid(bikeId)) {
       throw new Error("Valid bikeId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -13846,7 +14718,7 @@ var getVendorBikeServices = async (query = {}, vendorId) => {
 };
 var getVendorBikeServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate("bike", "name vendorId").lean();
@@ -13889,7 +14761,7 @@ var getVendorBikeServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorBikeService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -13936,7 +14808,7 @@ var updateVendorBikeService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorBikeService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -14324,6 +15196,7 @@ var createTourCompany = async (data, vendor) => {
     }
     vendor.currentStep = 4;
     vendor.registrationStep = Math.max(vendor.registrationStep, 4);
+    vendor.activePropertyId = tourCompany._id;
     if (vendor.status === "rejected") {
       vendor.status = "draft";
       vendor.rejectedStep = null;
@@ -14429,9 +15302,15 @@ var getAllTourCompanies = async (query = {}) => {
     const formattedCompanies = companies.map((company) => {
       const companyIdStr = company._id.toString();
       const resolvedLogo = company.logo?.url || company.vendorId?.logo?.url || company.images?.[0]?.url || `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
+      const rating = company.rating?.average && company.rating.average > 0 ? company.rating.average : 4.8;
+      const numReviews = company.rating?.count && company.rating.count > 0 ? company.rating.count : 142;
       return {
         ...company,
         logo: resolvedLogo,
+        image: company.images?.[0]?.url || resolvedLogo,
+        rating,
+        numReviews,
+        amenities: company.features?.length ? company.features.slice(0, 3) : ["Guided Tour", "Safety Gear", "Expert Guides"],
         startingPrice: priceMap[companyIdStr] || 999,
         totalTours: countMap[companyIdStr] || 0,
         city: company.location?.city || "India"
@@ -14663,7 +15542,15 @@ import { Router as Router23 } from "express";
 
 // src/modules/tour/service/tourService.service.ts
 init_tourService_model();
-import mongoose39 from "mongoose";
+import mongoose41 from "mongoose";
+var optimizeCloudinary2 = (url, transform = "f_auto,q_auto") => {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
+    return url;
+  }
+  const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
+  if (url.includes(`${marker}${transform}/`)) return url;
+  return url.replace(marker, `${marker}${transform}/`);
+};
 var attachFavoriteFlag5 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -14893,7 +15780,7 @@ var getTours = async (query, userId = null) => {
 };
 var getCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(id)) {
+    if (!mongoose41.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await tour_model_default.findOne({
@@ -14916,6 +15803,11 @@ var getCompanyDetails = async (id, userId = null) => {
         (effectivePrice * taxPercentage / 100).toFixed(2)
       );
       const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
+      const optimizedServiceImages = (service.images || []).map((img) => {
+        const u = typeof img === "string" ? img : img?.url;
+        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_800,c_limit");
+        return typeof img === "string" ? opt : { ...img, url: opt };
+      });
       return {
         serviceId: service._id,
         serviceType: "tour",
@@ -14926,12 +15818,17 @@ var getCompanyDetails = async (id, userId = null) => {
         totalTax,
         totalPriceWithTax,
         taxPercentage,
-        thumbnail: service.images?.[0] || null,
-        thumbnails: service.images || [],
+        thumbnail: optimizedServiceImages[0] || null,
+        thumbnails: optimizedServiceImages,
         features: service.features || []
       };
     });
     const isFavorite = await checkIsFavorite5(company._id, userId, "tour");
+    const optimizedCompanyImages = (company.images || []).map((img) => {
+      const u = typeof img === "string" ? img : img?.url;
+      const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
+      return typeof img === "string" ? opt : { ...img, url: opt };
+    });
     const formattedCompany = {
       companyId: company._id,
       serviceType: "tour",
@@ -14942,7 +15839,7 @@ var getCompanyDetails = async (id, userId = null) => {
       state: company.location?.state,
       rating: company.rating?.average || 0,
       reviews: company.rating?.count || 0,
-      images: company.images || [],
+      images: optimizedCompanyImages,
       features: company.features || []
     };
     return {
@@ -14956,7 +15853,7 @@ var getCompanyDetails = async (id, userId = null) => {
 };
 var getTourServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(id)) {
+    if (!mongoose41.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findOne({
@@ -14995,7 +15892,11 @@ var getTourServiceDetails = async (id, userId = null) => {
       totalTax,
       totalPriceWithTax,
       taxPercentage,
-      images: service.images || [],
+      images: (service.images || []).map((img) => {
+        const u = typeof img === "string" ? img : img?.url;
+        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
+        return typeof img === "string" ? opt : { ...img, url: opt };
+      }),
       features: service.features || [],
       tourType: service.tourType || [],
       amenities: service.amenities || [],
@@ -15010,7 +15911,11 @@ var getTourServiceDetails = async (id, userId = null) => {
       name: company?.name,
       city: company?.location?.city,
       rating: company?.rating?.average || 0,
-      images: company?.images || [],
+      images: (company?.images || []).map((img) => {
+        const u = typeof img === "string" ? img : img?.url;
+        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
+        return typeof img === "string" ? opt : { ...img, url: opt };
+      }),
       description: company?.description
     };
     return {
@@ -15041,7 +15946,7 @@ var createTourService = async (data, vendorId) => {
       maxPeople = 10
     } = data;
     let targetTourId = tourId;
-    if (!targetTourId || !mongoose39.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose41.Types.ObjectId.isValid(targetTourId)) {
       const company = await tour_model_default.findOne({
         vendorId,
         isActive: true
@@ -15050,7 +15955,7 @@ var createTourService = async (data, vendorId) => {
         targetTourId = company._id;
       }
     }
-    if (!targetTourId || !mongoose39.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose41.Types.ObjectId.isValid(targetTourId)) {
       throw new Error("Valid tourId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -15156,7 +16061,7 @@ var getVendorTourServices = async (query = {}, vendorId) => {
 };
 var getVendorTourServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate("tour", "name vendorId").lean();
@@ -15198,7 +16103,7 @@ var getVendorTourServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorTourService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -15258,7 +16163,7 @@ var updateVendorTourService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorTourService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -15312,7 +16217,7 @@ var TourServiceController = class {
   //user side
   async getTours(req, res, next) {
     try {
-      const userId = req.user._id || null;
+      const userId = req.user?._id || null;
       const data = await tourService_service_default.getTours(req.query, userId);
       res.status(200).json({
         success: true,
@@ -15326,7 +16231,7 @@ var TourServiceController = class {
   async getCompanyDetails(req, res, next) {
     try {
       const { id } = req.params;
-      const userId = req.user._id || null;
+      const userId = req.user?._id || null;
       const data = await tourService_service_default.getCompanyDetails(id, userId);
       res.status(200).json({
         success: true,
@@ -15340,7 +16245,7 @@ var TourServiceController = class {
   async getTourServiceDetails(req, res, next) {
     try {
       const { id } = req.params;
-      const userId = req.user._id || null;
+      const userId = req.user?._id || null;
       const data = await tourService_service_default.getTourServiceDetails(id, userId);
       res.status(200).json({
         success: true,
@@ -15514,99 +16419,14 @@ var tourService_routes_default = router23;
 import { Router as Router24 } from "express";
 
 // src/modules/multiServiceBookings/booking.service.ts
-import mongoose41 from "mongoose";
+import mongoose42 from "mongoose";
 import crypto5 from "crypto";
-
-// src/modules/multiServiceBookings/payment.model.ts
-import mongoose40, { Schema as Schema26 } from "mongoose";
-var paymentSchema2 = new Schema26(
-  {
-    bookingId: {
-      type: Schema26.Types.ObjectId,
-      ref: "Booking",
-      required: true
-    },
-    userId: {
-      type: Schema26.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-    gateway: {
-      type: String,
-      enum: ["razorpay"],
-      default: "razorpay"
-    },
-    gatewayOrderId: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    gatewayPaymentId: {
-      type: String,
-      index: true
-    },
-    gatewaySignature: {
-      type: String
-    },
-    amount: {
-      type: Number,
-      required: true
-    },
-    currency: {
-      type: String,
-      default: "INR"
-    },
-    status: {
-      type: String,
-      enum: ["created", "authorized", "captured", "failed", "refunded"],
-      default: "created"
-    },
-    paymentMethod: {
-      type: String,
-      enum: ["card", "upi", "netbanking", "wallet", "unknown"],
-      default: "unknown"
-    },
-    isVerified: {
-      type: Boolean,
-      default: false
-    },
-    refundAmount: {
-      type: Number,
-      default: 0
-    },
-    refundStatus: {
-      type: String,
-      enum: ["none", "pending", "processed", "failed"],
-      default: "none"
-    },
-    refundedAt: Date,
-    metadata: {
-      serviceType: String,
-      bookingReference: String,
-      extra: {
-        type: Object,
-        default: {}
-      }
-    },
-    expiresAt: {
-      type: Date,
-      index: { expires: "0s" }
-    }
-  },
-  { timestamps: true }
-);
-paymentSchema2.index({ bookingId: 1, status: 1 });
-paymentSchema2.index({ userId: 1, createdAt: -1 });
-var GenericPayment = mongoose40.model("GenericPayment", paymentSchema2);
-var payment_model_default2 = GenericPayment;
-
-// src/modules/multiServiceBookings/booking.service.ts
 init_service_model();
 init_cabService_model();
 init_bikeService_model();
 init_tourService_model();
 var createBooking2 = async (data, userId) => {
-  const session = await mongoose41.startSession();
+  const session = await mongoose42.startSession();
   session.startTransaction();
   try {
     const {
@@ -15621,6 +16441,18 @@ var createBooking2 = async (data, userId) => {
     if (!serviceType || !serviceId || !bookingDate) {
       throw new Error("serviceType, serviceId and bookingDate are required");
     }
+    if (!primaryCustomer?.email?.trim()) {
+      throw new Error("Email is required to proceed with booking");
+    }
+    if (!primaryCustomer?.phoneNumber?.trim()) {
+      throw new Error("Phone number is required to proceed with booking");
+    }
+    const safePrimaryCustomer = {
+      firstName: (primaryCustomer?.firstName || "").trim(),
+      lastName: (primaryCustomer?.lastName || "").trim(),
+      email: (primaryCustomer?.email || "").trim().toLowerCase(),
+      phoneNumber: (primaryCustomer?.phoneNumber || "").trim()
+    };
     let service;
     let vendorId;
     if (serviceType === "adventure") {
@@ -15732,7 +16564,7 @@ var createBooking2 = async (data, userId) => {
           bookingDate,
           timeSlot,
           duration,
-          primaryCustomer,
+          primaryCustomer: safePrimaryCustomer,
           participants,
           meta,
           extraInfo,
@@ -15800,7 +16632,7 @@ var createBooking2 = async (data, userId) => {
   }
 };
 var verifyPayment2 = async (data) => {
-  const session = await mongoose41.startSession();
+  const session = await mongoose42.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -15946,7 +16778,7 @@ var booking_service_default2 = multiServiceBookingService;
 var MultiServiceBookingController = class {
   async createBooking(req, res, next) {
     try {
-      const userId = req.user._id;
+      const userId = req.user?._id || null;
       const result = await booking_service_default2.createBooking(req.body, userId);
       res.status(201).json({
         success: true,
@@ -15974,13 +16806,8 @@ var MultiServiceBookingController = class {
 // src/modules/multiServiceBookings/booking.routes.ts
 var router24 = Router24();
 var bookingController3 = new MultiServiceBookingController();
-router24.use(protect);
-router24.post("/booking", authorize("user"), bookingController3.createBooking);
-router24.post(
-  "/verify-payment",
-  authorize("user"),
-  bookingController3.verifyPayment
-);
+router24.post("/booking", optionalProtect, bookingController3.createBooking);
+router24.post("/verify-payment", optionalProtect, bookingController3.verifyPayment);
 var booking_routes_default2 = router24;
 
 // src/modules/multiServiceVendor/vendor.routes.ts
@@ -16274,7 +17101,7 @@ var dashboard_routes_default = router25;
 import { Router as Router26 } from "express";
 
 // src/modules/multiServiceVendor/booking/booking.service.ts
-import mongoose42 from "mongoose";
+import mongoose43 from "mongoose";
 var getVendorBookings3 = async (query = {}, vendor) => {
   try {
     const { status, search, page = 1, limit = 10 } = query;
@@ -16337,7 +17164,7 @@ var getVendorBookings3 = async (query = {}, vendor) => {
 };
 var getVendorBookingById = async (bookingId, vendor) => {
   try {
-    if (!mongoose42.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose43.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking id");
     }
     const booking = await booking_model_default2.findOne({
@@ -16733,7 +17560,7 @@ import bcrypt2 from "bcryptjs";
 import jwt4 from "jsonwebtoken";
 
 // src/modules/vendorAccountGroup/accountGroup.model.ts
-import mongoose43, { Schema as Schema27 } from "mongoose";
+import mongoose44, { Schema as Schema27 } from "mongoose";
 var vendorAccountGroupSchema = new Schema27(
   {
     accounts: [
@@ -16766,7 +17593,7 @@ var vendorAccountGroupSchema = new Schema27(
 vendorAccountGroupSchema.index({
   "accounts.vendorId": 1
 });
-var VendorAccountGroup = mongoose43.model("VendorAccountGroup", vendorAccountGroupSchema);
+var VendorAccountGroup = mongoose44.model("VendorAccountGroup", vendorAccountGroupSchema);
 var accountGroup_model_default = VendorAccountGroup;
 
 // src/modules/vendorAccountGroup/accountGroup.service.ts
@@ -17038,16 +17865,644 @@ router29.post(
 );
 var accountGroup_routes_default = router29;
 
-// src/modules/admin/property/property.routes.ts
+// src/modules/vendorProperty/property.routes.ts
 import { Router as Router30 } from "express";
 
-// src/modules/admin/property/property.service.ts
+// src/modules/vendorProperty/property.service.ts
 import mongoose45 from "mongoose";
+var SERVICE_MODELS4 = {
+  hotel: hotel_model_default,
+  cab: cab_model_default,
+  bike: bike_model_default,
+  tour: tour_model_default,
+  adventure: adventure_model_default
+};
+var MAX_PROPERTIES = 10;
+var getVendorProperties = async (userId) => {
+  try {
+    const vendor = await vendor_model_default.findOne({ userId });
+    if (!vendor) throw new Error("Vendor not found");
+    if (vendor.status !== "approved") throw new Error("Vendor not approved");
+    if (!vendor.serviceType) throw new Error("No service type set");
+    const ServiceModel = SERVICE_MODELS4[vendor.serviceType];
+    if (!ServiceModel) throw new Error("Invalid service type");
+    const properties = await ServiceModel.find({
+      vendorId: vendor._id
+    }).select("_id name description address city images location verificationStatus rating isActive createdAt").sort({ createdAt: -1 }).lean();
+    return {
+      activePropertyId: vendor.activePropertyId?.toString() || null,
+      serviceType: vendor.serviceType,
+      vendorId: vendor._id,
+      properties: properties.map((p) => ({
+        _id: p._id,
+        name: p.name,
+        description: (p.description || "").slice(0, 100),
+        city: p.city || p.address?.city || p.location?.city || "",
+        image: p.images?.[0]?.url || null,
+        isCurrentlyActive: p._id.toString() === vendor.activePropertyId?.toString(),
+        verificationStatus: p.verificationStatus || "pending",
+        isActive: p.isActive ?? false,
+        rating: typeof p.rating === "number" ? p.rating : p.rating?.average || 0,
+        createdAt: p.createdAt
+      }))
+    };
+  } catch (error) {
+    logger_default.error("Service Error: getVendorProperties", error);
+    throw error;
+  }
+};
+var addVendorProperty = async (userId, propertyData) => {
+  try {
+    const vendor = await vendor_model_default.findOne({ userId });
+    if (!vendor) throw new Error("Vendor not found");
+    if (vendor.status !== "approved")
+      throw new Error("Only approved vendors can add new properties");
+    if (!vendor.serviceType) throw new Error("No service type set");
+    const ServiceModel = SERVICE_MODELS4[vendor.serviceType];
+    if (!ServiceModel) throw new Error("Invalid service type");
+    const existingCount = await ServiceModel.countDocuments({
+      vendorId: vendor._id
+    });
+    if (existingCount >= MAX_PROPERTIES) {
+      throw new Error(
+        `Maximum ${MAX_PROPERTIES} properties allowed per vendor account`
+      );
+    }
+    let newProperty;
+    switch (vendor.serviceType) {
+      case "hotel": {
+        const city = (propertyData.city || propertyData.hotelCity || propertyData.address?.city || "").trim();
+        const location = propertyData.location || {
+          type: "Point",
+          coordinates: [72.8777, 19.076]
+        };
+        let addressObj;
+        if (typeof propertyData.address === "object" && propertyData.address !== null) {
+          addressObj = {
+            buildingName: propertyData.address.buildingName || propertyData.buildingName || "",
+            doorNumber: propertyData.address.doorNumber || propertyData.doorNumber || "",
+            streetAddress: propertyData.address.streetAddress || propertyData.address.address || propertyData.hotelAddress || "",
+            areaName: propertyData.address.areaName || propertyData.areaName || "",
+            city: propertyData.address.city || city || "Default City",
+            district: propertyData.address.district || propertyData.district || "",
+            state: propertyData.address.state || propertyData.state || "",
+            postalCode: propertyData.address.postalCode || propertyData.postalCode || "",
+            country: propertyData.address.country || propertyData.country || "India",
+            countryCode: propertyData.address.countryCode || propertyData.countryCode || "IN",
+            landmark: propertyData.address.landmark || propertyData.landmark || "",
+            directions: propertyData.address.directions || propertyData.directions || "",
+            formattedAddress: propertyData.address.formattedAddress || propertyData.formattedAddress || "",
+            location: propertyData.address.location || location,
+            placeId: propertyData.address.placeId || "",
+            timeZone: propertyData.address.timeZone || ""
+          };
+        } else {
+          const rawAddr = (propertyData.address || propertyData.hotelAddress || "").trim();
+          addressObj = {
+            streetAddress: rawAddr,
+            city: city || "Default City",
+            country: "India",
+            countryCode: "IN",
+            formattedAddress: rawAddr || city,
+            location
+          };
+        }
+        if (!addressObj.formattedAddress) {
+          const parts = [
+            addressObj.doorNumber,
+            addressObj.buildingName,
+            addressObj.streetAddress,
+            addressObj.areaName,
+            addressObj.landmark,
+            addressObj.city,
+            addressObj.district,
+            addressObj.state,
+            addressObj.postalCode,
+            addressObj.country
+          ].filter(Boolean);
+          addressObj.formattedAddress = parts.join(", ");
+        }
+        newProperty = await hotel_model_default.create({
+          vendorId: vendor._id,
+          name: (propertyData.name || propertyData.hotelName || "").trim(),
+          description: (propertyData.description || "").trim(),
+          address: addressObj,
+          city: addressObj.city || city,
+          location: addressObj.location || location,
+          images: propertyData.images || [],
+          documents: propertyData.documents || [],
+          amenities: propertyData.amenities || [],
+          accessibility: propertyData.accessibility || {},
+          verificationStatus: "pending",
+          isActive: false,
+          // Admin must approve
+          createdBy: userId
+        });
+        break;
+      }
+      case "tour": {
+        const city = (propertyData.location?.city || propertyData.city || "").trim();
+        const state = (propertyData.location?.state || propertyData.state || "").trim();
+        const country = (propertyData.location?.country || propertyData.country || "India").trim();
+        const coords = {
+          lat: propertyData.coordinates?.lat || propertyData.lat || null,
+          lng: propertyData.coordinates?.lng || propertyData.lng || null
+        };
+        let addressObj;
+        if (typeof propertyData.address === "object" && propertyData.address !== null) {
+          addressObj = {
+            buildingName: propertyData.address.buildingName || "",
+            doorNumber: propertyData.address.doorNumber || "",
+            streetAddress: propertyData.address.streetAddress || propertyData.address.address || "",
+            areaName: propertyData.address.areaName || "",
+            city: propertyData.address.city || city || "Default City",
+            district: propertyData.address.district || "",
+            state: propertyData.address.state || state || "",
+            postalCode: propertyData.address.postalCode || "",
+            country: propertyData.address.country || country || "India",
+            countryCode: propertyData.address.countryCode || "IN",
+            landmark: propertyData.address.landmark || "",
+            directions: propertyData.address.directions || "",
+            formattedAddress: propertyData.address.formattedAddress || "",
+            location: {
+              type: "Point",
+              coordinates: [
+                coords.lng || 72.8777,
+                coords.lat || 19.076
+              ]
+            }
+          };
+        } else {
+          const rawAddr = (propertyData.address || "").trim();
+          addressObj = {
+            streetAddress: rawAddr,
+            city: city || "Default City",
+            state,
+            country: country || "India",
+            countryCode: "IN",
+            formattedAddress: rawAddr || city,
+            location: {
+              type: "Point",
+              coordinates: [
+                coords.lng || 72.8777,
+                coords.lat || 19.076
+              ]
+            }
+          };
+        }
+        if (!addressObj.formattedAddress) {
+          const parts = [
+            addressObj.streetAddress,
+            addressObj.areaName,
+            addressObj.city,
+            addressObj.state,
+            addressObj.country
+          ].filter(Boolean);
+          addressObj.formattedAddress = parts.join(", ");
+        }
+        newProperty = await tour_model_default.create({
+          vendorId: vendor._id,
+          name: (propertyData.name || "").trim(),
+          location: { city, state, country },
+          address: addressObj,
+          coordinates: coords,
+          images: propertyData.images || [],
+          documents: propertyData.documents || [],
+          description: (propertyData.description || "").trim(),
+          features: propertyData.features || [],
+          tags: propertyData.tags || [],
+          verificationStatus: "pending",
+          isActive: false,
+          // Admin must approve
+          createdBy: userId
+        });
+        break;
+      }
+      default:
+        throw new Error(
+          `Adding additional properties is not supported for service type: ${vendor.serviceType}`
+        );
+    }
+    return {
+      _id: newProperty._id,
+      name: newProperty.name,
+      verificationStatus: newProperty.verificationStatus,
+      isActive: newProperty.isActive,
+      message: "Property added successfully. It will be visible after admin approval."
+    };
+  } catch (error) {
+    logger_default.error("Service Error: addVendorProperty", error);
+    throw error;
+  }
+};
+var switchActiveProperty = async (userId, propertyId) => {
+  try {
+    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+      throw new Error("Invalid property ID");
+    }
+    const vendor = await vendor_model_default.findOne({ userId });
+    if (!vendor) throw new Error("Vendor not found");
+    if (vendor.status !== "approved") throw new Error("Vendor not approved");
+    if (!vendor.serviceType) throw new Error("No service type set");
+    const ServiceModel = SERVICE_MODELS4[vendor.serviceType];
+    if (!ServiceModel) throw new Error("Invalid service type");
+    const property = await ServiceModel.findOne({
+      _id: propertyId,
+      vendorId: vendor._id,
+      isActive: true,
+      verificationStatus: "verified"
+    });
+    if (!property) {
+      throw new Error(
+        "Property not found, not approved, or does not belong to this vendor"
+      );
+    }
+    vendor.activePropertyId = property._id;
+    await vendor.save();
+    return {
+      activePropertyId: property._id,
+      name: property.name,
+      city: property.city || property.address?.city || property.location?.city || "",
+      serviceType: vendor.serviceType
+    };
+  } catch (error) {
+    logger_default.error("Service Error: switchActiveProperty", error);
+    throw error;
+  }
+};
+var getActiveProperty = async (userId) => {
+  try {
+    const vendor = await vendor_model_default.findOne({ userId });
+    if (!vendor) throw new Error("Vendor not found");
+    if (!vendor.serviceType) throw new Error("No service type set");
+    const ServiceModel = SERVICE_MODELS4[vendor.serviceType];
+    if (!ServiceModel) return null;
+    if (!vendor.activePropertyId) {
+      const firstProperty = await ServiceModel.findOne({
+        vendorId: vendor._id,
+        isActive: true,
+        verificationStatus: "verified"
+      });
+      if (firstProperty) {
+        vendor.activePropertyId = firstProperty._id;
+        await vendor.save();
+      } else {
+        return null;
+      }
+    }
+    const property = await ServiceModel.findById(vendor.activePropertyId).lean();
+    if (!property) return null;
+    return {
+      _id: property._id,
+      name: property.name,
+      city: property.city || property.address?.city || property.location?.city || "",
+      image: property.images?.[0]?.url || null,
+      verificationStatus: property.verificationStatus,
+      isActive: property.isActive
+    };
+  } catch (error) {
+    logger_default.error("Service Error: getActiveProperty", error);
+    throw error;
+  }
+};
+var getPendingAdditionalProperties = async (query = {}) => {
+  try {
+    const { page = 1, limit = 10, serviceType } = query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const approvedVendorIds = await vendor_model_default.find({ status: "approved" }).select("_id").lean();
+    const vendorIdList = approvedVendorIds.map((v) => v._id);
+    if (vendorIdList.length === 0) {
+      return { properties: [], total: 0, page: Number(page), limit: Number(limit) };
+    }
+    const typesToQuery = serviceType ? [serviceType] : ["hotel", "tour"];
+    const allPending = [];
+    for (const type of typesToQuery) {
+      const Model29 = SERVICE_MODELS4[type];
+      if (!Model29) continue;
+      const pendingProps = await Model29.find({
+        vendorId: { $in: vendorIdList },
+        verificationStatus: "pending",
+        isActive: false
+      }).populate({
+        path: "vendorId",
+        select: "businessName businessEmail serviceType propertyId userId",
+        populate: {
+          path: "userId",
+          select: "firstName lastName email"
+        }
+      }).sort({ createdAt: -1 }).lean();
+      for (const prop of pendingProps) {
+        const verifiedCount = await Model29.countDocuments({
+          vendorId: prop.vendorId?._id || prop.vendorId,
+          verificationStatus: "verified",
+          isActive: true
+        });
+        if (verifiedCount > 0) {
+          allPending.push({
+            _id: prop._id,
+            vendorId: prop.vendorId?._id || prop.vendorId,
+            serviceType: type,
+            name: prop.name,
+            description: (prop.description || "").slice(0, 150),
+            city: prop.city || prop.address?.city || prop.location?.city || "",
+            image: prop.images?.[0]?.url || null,
+            verificationStatus: prop.verificationStatus,
+            createdAt: prop.createdAt,
+            vendor: {
+              _id: prop.vendorId?._id,
+              businessName: prop.vendorId?.businessName,
+              businessEmail: prop.vendorId?.businessEmail,
+              propertyId: prop.vendorId?.propertyId,
+              ownerName: prop.vendorId?.userId ? `${prop.vendorId.userId.firstName || ""} ${prop.vendorId.userId.lastName || ""}`.trim() : "",
+              ownerEmail: prop.vendorId?.userId?.email || ""
+            }
+          });
+        }
+      }
+    }
+    const total = allPending.length;
+    const paged = allPending.slice(skip, skip + Number(limit));
+    return {
+      properties: paged,
+      total,
+      page: Number(page),
+      limit: Number(limit)
+    };
+  } catch (error) {
+    logger_default.error("Service Error: getPendingAdditionalProperties", error);
+    throw error;
+  }
+};
+var approveAdditionalProperty = async (serviceType, propertyId, adminId) => {
+  try {
+    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+      throw new Error("Invalid property ID");
+    }
+    const Model29 = SERVICE_MODELS4[serviceType];
+    if (!Model29) throw new Error("Invalid service type");
+    const property = await Model29.findById(propertyId);
+    if (!property) throw new Error("Property not found");
+    if (property.verificationStatus === "verified" && property.isActive) {
+      throw new Error("Property is already approved");
+    }
+    const vendor = await vendor_model_default.findById(property.vendorId);
+    if (!vendor || vendor.status !== "approved") {
+      throw new Error("Vendor is not approved");
+    }
+    property.verificationStatus = "verified";
+    property.isActive = true;
+    if (property.documents && property.documents.length > 0) {
+      property.documents = property.documents.map((doc) => ({
+        ...doc.toObject ? doc.toObject() : doc,
+        isVerified: true
+      }));
+    }
+    await property.save();
+    return {
+      _id: property._id,
+      name: property.name,
+      verificationStatus: property.verificationStatus,
+      isActive: property.isActive
+    };
+  } catch (error) {
+    logger_default.error("Service Error: approveAdditionalProperty", error);
+    throw error;
+  }
+};
+var rejectAdditionalProperty = async (serviceType, propertyId, reason, adminId) => {
+  try {
+    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+      throw new Error("Invalid property ID");
+    }
+    const Model29 = SERVICE_MODELS4[serviceType];
+    if (!Model29) throw new Error("Invalid service type");
+    const property = await Model29.findById(propertyId);
+    if (!property) throw new Error("Property not found");
+    property.verificationStatus = "rejected";
+    property.isActive = false;
+    await property.save();
+    return {
+      _id: property._id,
+      name: property.name,
+      verificationStatus: property.verificationStatus,
+      isActive: property.isActive
+    };
+  } catch (error) {
+    logger_default.error("Service Error: rejectAdditionalProperty", error);
+    throw error;
+  }
+};
+var VendorPropertyService = class {
+  getVendorProperties = getVendorProperties;
+  addVendorProperty = addVendorProperty;
+  switchActiveProperty = switchActiveProperty;
+  getActiveProperty = getActiveProperty;
+  getPendingAdditionalProperties = getPendingAdditionalProperties;
+  approveAdditionalProperty = approveAdditionalProperty;
+  rejectAdditionalProperty = rejectAdditionalProperty;
+};
+var vendorPropertyService = new VendorPropertyService();
+
+// src/modules/vendorProperty/property.controller.ts
+var VendorPropertyController = class {
+  /**
+   * GET /vendor/properties — List all properties for current vendor
+   */
+  async getVendorProperties(req, res, next) {
+    try {
+      const userId = req.user._id;
+      const data = await getVendorProperties(userId);
+      res.status(200).json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: getVendorProperties", error);
+      next(error);
+    }
+  }
+  /**
+   * POST /vendor/properties/add — Add a new property
+   */
+  async addVendorProperty(req, res, next) {
+    try {
+      const userId = req.user._id;
+      const data = await addVendorProperty(userId, req.body);
+      res.status(201).json({
+        success: true,
+        message: data.message,
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: addVendorProperty", error);
+      next(error);
+    }
+  }
+  /**
+   * POST /vendor/properties/switch — Switch active property
+   */
+  async switchActiveProperty(req, res, next) {
+    try {
+      const userId = req.user._id;
+      const { propertyId } = req.body;
+      if (!propertyId) {
+        res.status(400).json({
+          success: false,
+          message: "propertyId is required"
+        });
+        return;
+      }
+      const data = await switchActiveProperty(
+        userId,
+        propertyId
+      );
+      res.status(200).json({
+        success: true,
+        message: "Active property switched successfully",
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: switchActiveProperty", error);
+      next(error);
+    }
+  }
+  /**
+   * GET /vendor/properties/active — Get active property details
+   */
+  async getActiveProperty(req, res, next) {
+    try {
+      const userId = req.user._id;
+      const data = await getActiveProperty(userId);
+      res.status(200).json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: getActiveProperty", error);
+      next(error);
+    }
+  }
+  /**
+   * Admin: GET /admin/vendor-properties/pending — Get pending additional properties
+   */
+  async getPendingAdditionalProperties(req, res, next) {
+    try {
+      const data = await getPendingAdditionalProperties(
+        req.query
+      );
+      res.status(200).json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      logger_default.error(
+        "Controller Error: getPendingAdditionalProperties",
+        error
+      );
+      next(error);
+    }
+  }
+  /**
+   * Admin: POST /admin/vendor-properties/:id/approve
+   */
+  async approveAdditionalProperty(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { serviceType } = req.body;
+      if (!serviceType) {
+        res.status(400).json({
+          success: false,
+          message: "serviceType is required"
+        });
+        return;
+      }
+      const data = await approveAdditionalProperty(
+        serviceType,
+        id,
+        req.user._id
+      );
+      res.status(200).json({
+        success: true,
+        message: "Property approved successfully",
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: approveAdditionalProperty", error);
+      next(error);
+    }
+  }
+  /**
+   * Admin: POST /admin/vendor-properties/:id/reject
+   */
+  async rejectAdditionalProperty(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { serviceType, reason } = req.body;
+      if (!serviceType) {
+        res.status(400).json({
+          success: false,
+          message: "serviceType is required"
+        });
+        return;
+      }
+      const data = await rejectAdditionalProperty(
+        serviceType,
+        id,
+        reason || "No reason provided",
+        req.user._id
+      );
+      res.status(200).json({
+        success: true,
+        message: "Property rejected",
+        data
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: rejectAdditionalProperty", error);
+      next(error);
+    }
+  }
+};
+var vendorPropertyController = new VendorPropertyController();
+
+// src/modules/vendorProperty/property.routes.ts
+var router30 = Router30();
+var controller4 = new VendorPropertyController();
+router30.get(
+  "/",
+  protect,
+  authorize("vendor"),
+  controller4.getVendorProperties
+);
+router30.get(
+  "/active",
+  protect,
+  authorize("vendor"),
+  controller4.getActiveProperty
+);
+router30.post(
+  "/add",
+  protect,
+  authorize("vendor"),
+  controller4.addVendorProperty
+);
+router30.post(
+  "/switch",
+  protect,
+  authorize("vendor"),
+  controller4.switchActiveProperty
+);
+var property_routes_default = router30;
+
+// src/modules/admin/property/property.routes.ts
+import { Router as Router31 } from "express";
+
+// src/modules/admin/property/property.service.ts
+import mongoose47 from "mongoose";
 import crypto6 from "crypto";
 init_tourService_model();
 
 // src/modules/admin/property/deletedProperty.model.ts
-import mongoose44, { Schema as Schema28 } from "mongoose";
+import mongoose46, { Schema as Schema28 } from "mongoose";
 var deletedPropertySchema = new Schema28(
   {
     originalVendorId: {
@@ -17115,7 +18570,7 @@ var deletedPropertySchema = new Schema28(
   }
 );
 deletedPropertySchema.index({ deletedAt: -1 });
-var DeletedProperty = mongoose44.model("DeletedProperty", deletedPropertySchema);
+var DeletedProperty = mongoose46.model("DeletedProperty", deletedPropertySchema);
 var deletedProperty_model_default = DeletedProperty;
 
 // src/modules/admin/property/property.service.ts
@@ -17359,9 +18814,9 @@ var getAllProperties = async (query) => {
     throw error;
   }
 };
-var getPropertyDetail = async (vendorId) => {
+var getPropertyDetail = async (vendorId, propertyId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17373,34 +18828,23 @@ var getPropertyDetail = async (vendorId) => {
       vendorId
     }).select("+accountNumber +ifscCode +upiId");
     let business = null;
-    switch (vendor.serviceType) {
-      case "hotel":
-        business = await hotel_model_default.findOne({
-          vendorId
-        });
-        break;
-      case "cab":
-        business = await cab_model_default.findOne({
-          vendorId
-        });
-        break;
-      case "bike":
-        business = await bike_model_default.findOne({
-          vendorId
-        });
-        break;
-      case "tour":
-        business = await tour_model_default.findOne({
-          vendorId
-        });
-        break;
-      case "adventure":
-        business = await adventure_model_default.findOne({
-          vendorId
-        });
-        break;
-      default:
-        business = null;
+    let allProperties = [];
+    const ServiceModel = vendor.serviceType ? serviceModelMap[vendor.serviceType] : null;
+    if (ServiceModel) {
+      allProperties = await ServiceModel.find({ vendorId }).sort({ createdAt: -1 }).lean();
+      if (propertyId && mongoose47.Types.ObjectId.isValid(propertyId)) {
+        business = allProperties.find(
+          (p) => p._id.toString() === propertyId.toString()
+        ) || null;
+      }
+      if (!business && vendor.activePropertyId) {
+        business = allProperties.find(
+          (p) => p._id.toString() === vendor.activePropertyId?.toString()
+        ) || null;
+      }
+      if (!business && allProperties.length > 0) {
+        business = allProperties[0];
+      }
     }
     let promotion = null;
     if (business?._id) {
@@ -17421,6 +18865,19 @@ var getPropertyDetail = async (vendorId) => {
     }
     return {
       businessId: business?._id || null,
+      properties: allProperties.map((p) => ({
+        _id: p._id,
+        name: p.name,
+        description: p.description || "",
+        address: p.address,
+        city: p.city || p.address?.city || p.location?.city || "",
+        image: p.images?.[0]?.url || (typeof p.images?.[0] === "string" ? p.images[0] : null) || null,
+        images: p.images || [],
+        verificationStatus: p.verificationStatus || "verified",
+        isActive: p.isActive ?? false,
+        rating: typeof p.rating === "number" ? p.rating : p.rating?.average || 0,
+        createdAt: p.createdAt
+      })),
       vendor: {
         _id: vendor._id,
         propertyId: vendor.propertyId || null,
@@ -17469,6 +18926,9 @@ var getPropertyDetail = async (vendorId) => {
         amenities: business.amenities || [],
         accessibility: business.accessibility || {},
         verificationStatus: business.verificationStatus,
+        isActive: business.isActive ?? false,
+        location: business.location,
+        createdAt: business.createdAt,
         rank: business.rank,
         isFeatured: business.isFeatured
       } : null,
@@ -17480,7 +18940,7 @@ var getPropertyDetail = async (vendorId) => {
 };
 var approveVendor = async (vendorId, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17542,6 +19002,9 @@ var approveVendor = async (vendorId, adminId) => {
         }));
       }
       await business.save();
+      if (!vendor.activePropertyId) {
+        vendor.activePropertyId = business._id;
+      }
     }
     if (!vendor.propertyId) {
       let uniqueId;
@@ -17573,7 +19036,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
     if (!validRanks.includes(rank)) {
       throw new Error("Invalid rank value");
     }
-    if (!mongoose45.Types.ObjectId.isValid(businessId)) {
+    if (!mongoose47.Types.ObjectId.isValid(businessId)) {
       throw new Error("Invalid business ID");
     }
     const BusinessModel = serviceModelMap[serviceType];
@@ -17599,7 +19062,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
 };
 var markIssue = async (vendorId, step, reason, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -17636,7 +19099,7 @@ var markIssue = async (vendorId, step, reason, adminId) => {
 };
 var verifySection = async (vendorId, step, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -17701,7 +19164,7 @@ var verifySection = async (vendorId, step, adminId) => {
 };
 var rejectVendor = async (vendorId, body, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17740,9 +19203,9 @@ var rejectVendor = async (vendorId, body, adminId) => {
     throw error;
   }
 };
-var getPropertyListings = async (vendorId) => {
+var getPropertyListings = async (vendorId, propertyId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17760,7 +19223,16 @@ var getPropertyListings = async (vendorId) => {
         count: 0
       };
     }
-    const business = await BusinessModel.findOne({ vendorId }).lean();
+    let business = null;
+    if (propertyId && mongoose47.Types.ObjectId.isValid(propertyId)) {
+      business = await BusinessModel.findOne({ _id: propertyId, vendorId }).lean();
+    }
+    if (!business && vendor.activePropertyId) {
+      business = await BusinessModel.findOne({ _id: vendor.activePropertyId, vendorId }).lean();
+    }
+    if (!business) {
+      business = await BusinessModel.findOne({ vendorId }).lean();
+    }
     if (!business) {
       return {
         serviceType,
@@ -17832,7 +19304,7 @@ var getPropertyListings = async (vendorId) => {
 };
 var blockVendor = async (vendorId, adminId, reason = "") => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17916,7 +19388,7 @@ var blockVendor = async (vendorId, adminId, reason = "") => {
 };
 var unblockVendor = async (vendorId, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -17996,7 +19468,7 @@ var unblockVendor = async (vendorId, adminId) => {
 };
 var deleteProperty = async (vendorId, adminId = null, reason = "") => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -18134,7 +19606,7 @@ var cleanAllDeletedProperties = async () => {
 };
 var deleteDeletedPropertyRecord = async (id) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(id)) {
+    if (!mongoose47.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid record ID");
     }
     await deletedProperty_model_default.findByIdAndDelete(id);
@@ -18226,7 +19698,11 @@ var PropertyController = class {
   async getPropertyDetail(req, res, next) {
     try {
       const { vendorId } = req.params;
-      const data = await property_service_default.getPropertyDetail(vendorId);
+      const { propertyId } = req.query;
+      const data = await property_service_default.getPropertyDetail(
+        vendorId,
+        propertyId
+      );
       res.status(200).json({
         success: true,
         data
@@ -18332,7 +19808,11 @@ var PropertyController = class {
   async getPropertyListings(req, res, next) {
     try {
       const { vendorId } = req.params;
-      const data = await property_service_default.getPropertyListings(vendorId);
+      const { propertyId } = req.query;
+      const data = await property_service_default.getPropertyListings(
+        vendorId,
+        propertyId
+      );
       res.status(200).json({
         success: true,
         data
@@ -18449,99 +19929,99 @@ var PropertyController = class {
 };
 
 // src/modules/admin/property/property.routes.ts
-var router30 = Router30();
+var router31 = Router31();
 var propertyController = new PropertyController();
-router30.get(
+router31.get(
   "/",
   protect,
   authorize("admin"),
   propertyController.getAllProperties
 );
-router30.patch(
+router31.patch(
   "/:id/rank",
   protect,
   authorize("admin"),
   propertyController.updateBusinessRank
 );
-router30.get(
+router31.get(
   "/:vendorId/listings",
   protect,
   authorize("admin"),
   propertyController.getPropertyListings
 );
-router30.get(
+router31.get(
   "/deleted",
   protect,
   authorize("admin"),
   propertyController.getDeletedProperties
 );
-router30.delete(
+router31.delete(
   "/deleted/clean-all",
   protect,
   authorize("admin"),
   propertyController.cleanAllDeletedProperties
 );
-router30.delete(
+router31.delete(
   "/deleted/:id",
   protect,
   authorize("admin"),
   propertyController.deleteDeletedPropertyRecord
 );
-router30.get(
+router31.get(
   "/:vendorId",
   protect,
   authorize("admin"),
   propertyController.getPropertyDetail
 );
-router30.patch(
+router31.patch(
   "/:vendorId/mark-issue",
   protect,
   authorize("admin"),
   propertyController.markIssue
 );
-router30.patch(
+router31.patch(
   "/:vendorId/verify",
   protect,
   authorize("admin"),
   propertyController.verifySection
 );
-router30.patch(
+router31.patch(
   "/:vendorId/reject",
   protect,
   authorize("admin"),
   propertyController.rejectVendor
 );
-router30.patch(
+router31.patch(
   "/:vendorId/approve",
   protect,
   authorize("admin"),
   propertyController.approveVendor
 );
-router30.patch(
+router31.patch(
   "/:vendorId/block",
   protect,
   authorize("admin"),
   propertyController.blockVendor
 );
-router30.patch(
+router31.patch(
   "/:vendorId/unblock",
   protect,
   authorize("admin"),
   propertyController.unblockVendor
 );
-router30.delete(
+router31.delete(
   "/:vendorId",
   protect,
   authorize("admin"),
   propertyController.deleteProperty
 );
-var property_routes_default = router30;
+var property_routes_default2 = router31;
 
 // src/modules/admin/user/user.routes.ts
-import { Router as Router31 } from "express";
+import { Router as Router32 } from "express";
 
 // src/modules/admin/user/user.service.ts
-import mongoose46 from "mongoose";
+import mongoose48 from "mongoose";
 var getAllUsers = async (query) => {
   try {
     const {
@@ -18698,7 +20178,7 @@ var getUserBookings2 = async (userId, query) => {
     const hotelPipeline = [
       {
         $match: {
-          userId: new mongoose46.Types.ObjectId(userId)
+          userId: new mongoose48.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -18745,7 +20225,7 @@ var getUserBookings2 = async (userId, query) => {
     const genericPipeline = [
       {
         $match: {
-          userId: new mongoose46.Types.ObjectId(userId)
+          userId: new mongoose48.Types.ObjectId(userId)
         }
       },
       {
@@ -18803,8 +20283,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new mongoose46.Types.ObjectId(bookingId),
-          userId: new mongoose46.Types.ObjectId(userId)
+          _id: new mongoose48.Types.ObjectId(bookingId),
+          userId: new mongoose48.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -18948,8 +20428,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new mongoose46.Types.ObjectId(bookingId),
-          userId: new mongoose46.Types.ObjectId(userId)
+          _id: new mongoose48.Types.ObjectId(bookingId),
+          userId: new mongoose48.Types.ObjectId(userId)
         }
       },
       // VENDOR
@@ -19082,7 +20562,7 @@ var updateUserStatus = async (userId, body) => {
     if (typeof isActive !== "boolean") {
       throw new Error("isActive must be true or false");
     }
-    if (!mongoose46.Types.ObjectId.isValid(userId)) {
+    if (!mongoose48.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const existingUser = await auth_model_default.findOne({
@@ -19214,34 +20694,34 @@ var UserController2 = class {
 };
 
 // src/modules/admin/user/user.routes.ts
-var router31 = Router31();
+var router32 = Router32();
 var userController2 = new UserController2();
-router31.get("/", protect, authorize("admin"), userController2.getAllUsers);
-router31.get(
+router32.get("/", protect, authorize("admin"), userController2.getAllUsers);
+router32.get(
   "/:userId/bookings",
   protect,
   authorize("admin"),
   userController2.getUserBookings
 );
-router31.get(
+router32.get(
   "/:userId/bookings/:bookingId",
   protect,
   authorize("admin"),
   userController2.getBookingDetail
 );
-router31.patch(
+router32.patch(
   "/:userId/status",
   protect,
   authorize("admin"),
   userController2.updateUserStatus
 );
-var user_routes_default2 = router31;
+var user_routes_default2 = router32;
 
 // src/modules/admin/booking/booking.routes.ts
-import { Router as Router32 } from "express";
+import { Router as Router33 } from "express";
 
 // src/modules/admin/booking/booking.service.ts
-import mongoose47 from "mongoose";
+import mongoose49 from "mongoose";
 var getBookingStats = async () => {
   try {
     const todayStart = /* @__PURE__ */ new Date();
@@ -19343,7 +20823,10 @@ var getAllBookings = async (query) => {
         filters: { startDate, endDate, status, paymentStatus, serviceType }
       };
     }
-    let hotelPipeline = [{ $match: hotelMatch }, { $sort: { createdAt: -1 } }];
+    let hotelPipeline = [
+      { $match: hotelMatch },
+      { $sort: { createdAt: -1 } }
+    ];
     if (status === "upcoming") {
       hotelPipeline.push({
         $match: { checkIn: { $gt: now }, status: { $ne: "cancelled" } }
@@ -19556,10 +21039,10 @@ var getAllBookings = async (query) => {
 };
 var getBookingDetail3 = async (bookingId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose49.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking ID");
     }
-    const objectId = new mongoose47.Types.ObjectId(bookingId);
+    const objectId = new mongoose49.Types.ObjectId(bookingId);
     const hotelBooking = await booking_model_default.aggregate([
       { $match: { _id: objectId } },
       {
@@ -19880,25 +21363,25 @@ var BookingController2 = class {
 };
 
 // src/modules/admin/booking/booking.routes.ts
-var router32 = Router32();
+var router33 = Router33();
 var bookingController5 = new BookingController2();
-router32.get(
+router33.get(
   "/stats",
   protect,
   authorize("admin"),
   bookingController5.getBookingStats
 );
-router32.get("/", protect, authorize("admin"), bookingController5.getAllBookings);
-router32.get(
+router33.get("/", protect, authorize("admin"), bookingController5.getAllBookings);
+router33.get(
   "/:bookingId",
   protect,
   authorize("admin"),
   bookingController5.getBookingDetail
 );
-var booking_routes_default4 = router32;
+var booking_routes_default4 = router33;
 
 // src/modules/admin/review/review.routes.ts
-import { Router as Router33 } from "express";
+import { Router as Router34 } from "express";
 
 // src/modules/admin/review/review.service.ts
 var getReviewStats = async () => {
@@ -20217,40 +21700,40 @@ var ReviewController2 = class {
 };
 
 // src/modules/admin/review/review.routes.ts
-var router33 = Router33();
+var router34 = Router34();
 var reviewController = new ReviewController2();
-router33.get(
+router34.get(
   "/stats",
   protect,
   authorize("admin"),
   reviewController.getReviewStats
 );
-router33.get("/", protect, authorize("admin"), reviewController.getAllReviews);
-router33.get(
+router34.get("/", protect, authorize("admin"), reviewController.getAllReviews);
+router34.get(
   "/:reviewId",
   protect,
   authorize("admin"),
   reviewController.getReviewDetail
 );
-router33.delete(
+router34.delete(
   "/:reviewId",
   protect,
   authorize("admin"),
   reviewController.deleteReview
 );
-router33.patch(
+router34.patch(
   "/:reviewId/flag",
   protect,
   authorize("admin"),
   reviewController.flagReview
 );
-var review_routes_default2 = router33;
+var review_routes_default2 = router34;
 
 // src/modules/admin/payment/payment.routes.ts
-import { Router as Router34 } from "express";
+import { Router as Router35 } from "express";
 
 // src/modules/admin/payment/payment.service.ts
-import mongoose48 from "mongoose";
+import mongoose50 from "mongoose";
 init_availability_model();
 var getAllPayments = async (query) => {
   try {
@@ -20573,7 +22056,7 @@ var getPaymentDetail = async (paymentId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new mongoose48.Types.ObjectId(paymentId)
+          _id: new mongoose50.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -20710,7 +22193,7 @@ var getPaymentDetail = async (paymentId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new mongoose48.Types.ObjectId(paymentId)
+          _id: new mongoose50.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -21569,7 +23052,7 @@ var getRefundRequests = async (query) => {
   }
 };
 var handleRefund = async (paymentId, action) => {
-  const session = await mongoose48.startSession();
+  const session = await mongoose50.startSession();
   session.startTransaction();
   try {
     if (!["approve", "reject"].includes(action)) {
@@ -21842,43 +23325,43 @@ var PaymentController2 = class {
 };
 
 // src/modules/admin/payment/payment.routes.ts
-var router34 = Router34();
+var router35 = Router35();
 var paymentController2 = new PaymentController2();
-router34.get(
+router35.get(
   "/stats",
   protect,
   authorize("admin"),
   paymentController2.getPaymentStats
 );
-router34.get(
+router35.get(
   "/analytics",
   protect,
   authorize("admin"),
   paymentController2.getPaymentAnalytics
 );
-router34.get("/", protect, authorize("admin"), paymentController2.getAllPayments);
-router34.get(
+router35.get("/", protect, authorize("admin"), paymentController2.getAllPayments);
+router35.get(
   "/refunds",
   protect,
   authorize("admin"),
   paymentController2.getRefundRequests
 );
-router34.patch(
+router35.patch(
   "/:paymentId/refund",
   protect,
   authorize("admin"),
   paymentController2.handleRefund
 );
-router34.get(
+router35.get(
   "/:paymentId",
   protect,
   authorize("admin"),
   paymentController2.getPaymentDetail
 );
-var payment_routes_default2 = router34;
+var payment_routes_default2 = router35;
 
 // src/modules/admin/support/support.routes.ts
-import { Router as Router35 } from "express";
+import { Router as Router36 } from "express";
 
 // src/modules/admin/support/support.service.ts
 var getAllTickets = async (query) => {
@@ -22163,37 +23646,37 @@ var SupportController2 = class {
 };
 
 // src/modules/admin/support/support.routes.ts
-var router35 = Router35();
+var router36 = Router36();
 var supportController2 = new SupportController2();
-router35.get(
+router36.get(
   "/stats",
   protect,
   authorize("admin"),
   supportController2.getSupportStats
 );
-router35.get("/", protect, authorize("admin"), supportController2.getAllTickets);
-router35.get(
+router36.get("/", protect, authorize("admin"), supportController2.getAllTickets);
+router36.get(
   "/:ticketId",
   protect,
   authorize("admin"),
   supportController2.getTicketDetail
 );
-router35.post(
+router36.post(
   "/:ticketId/reply",
   protect,
   authorize("admin"),
   supportController2.replyToTicket
 );
-router35.patch(
+router36.patch(
   "/:ticketId/close",
   protect,
   authorize("admin"),
   supportController2.closeTicket
 );
-var support_routes_default2 = router35;
+var support_routes_default2 = router36;
 
 // src/modules/admin/dashboard/dashboard.routes.ts
-import { Router as Router36 } from "express";
+import { Router as Router37 } from "express";
 
 // src/modules/admin/dashboard/dashboard.service.ts
 var getDashboard = async ({
@@ -22279,8 +23762,9 @@ var getDashboard = async ({
     const hotelRevenue = hotelRevenueAgg[0]?.totalRevenue || 0;
     const genericRevenue = genericRevenueAgg[0]?.totalRevenue || 0;
     const totalRevenue = hotelRevenue + genericRevenue;
-    const startDate = /* @__PURE__ */ new Date();
-    startDate.setDate(startDate.getDate() - (bookingRange - 1));
+    const today = /* @__PURE__ */ new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - (bookingRange + 1));
     startDate.setHours(0, 0, 0, 0);
     const [hotelDailyRaw, genericDailyRaw] = await Promise.all([
       booking_model_default.aggregate([
@@ -22296,7 +23780,8 @@ var getDashboard = async ({
             _id: {
               $dateToString: {
                 format: "%Y-%m-%d",
-                date: "$createdAt"
+                date: "$createdAt",
+                timezone: "+05:30"
               }
             },
             count: {
@@ -22323,7 +23808,8 @@ var getDashboard = async ({
             _id: {
               $dateToString: {
                 format: "%Y-%m-%d",
-                date: "$createdAt"
+                date: "$createdAt",
+                timezone: "+05:30"
               }
             },
             count: {
@@ -22339,12 +23825,17 @@ var getDashboard = async ({
       ])
     ]);
     const dailyBookings = [];
-    for (let i = 0; i < bookingRange; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const formatted = date.toISOString().split("T")[0];
-      const hotelFound = hotelDailyRaw.find((d) => d._id === formatted);
-      const genericFound = genericDailyRaw.find((d) => d._id === formatted);
+    for (let i = bookingRange - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const formatted = `${year}-${month}-${day}`;
+      const hotelFound = hotelDailyRaw.find((item) => item._id === formatted);
+      const genericFound = genericDailyRaw.find(
+        (item) => item._id === formatted
+      );
       dailyBookings.push({
         date: formatted,
         count: (hotelFound?.count || 0) + (genericFound?.count || 0)
@@ -22532,7 +24023,10 @@ var getRecentBookings2 = async () => {
             $literal: "hotel"
           },
           bookingDate: "$createdAt",
+          totalAmount: "$totalAmount",
           amount: "$totalAmount",
+          checkIn: { $ifNull: ["$checkIn", "$createdAt"] },
+          checkOut: { $ifNull: ["$checkOut", "$createdAt"] },
           status: 1,
           createdAt: 1
         }
@@ -22572,13 +24066,18 @@ var getRecentBookings2 = async () => {
           propertyName: "$serviceSnapshot.title",
           serviceType: 1,
           bookingDate: "$bookingDate",
+          totalAmount: "$pricing.totalAmount",
           amount: "$pricing.totalAmount",
+          checkIn: { $ifNull: ["$bookingDate", "$createdAt"] },
+          checkOut: { $ifNull: ["$bookingDate", "$createdAt"] },
           status: 1,
           createdAt: 1
         }
       }
     ]);
-    const combinedBookings = [...hotelBookings, ...genericBookings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
+    const combinedBookings = [...hotelBookings, ...genericBookings].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    ).slice(0, 10);
     return combinedBookings;
   } catch (error) {
     throw error;
@@ -22639,19 +24138,19 @@ var DashboardController = class {
 };
 
 // src/modules/admin/dashboard/dashboard.routes.ts
-var router36 = Router36();
+var router37 = Router37();
 var dashboardController2 = new DashboardController();
-router36.get("/", protect, authorize("admin"), dashboardController2.getDashboard);
-router36.get(
+router37.get("/", protect, authorize("admin"), dashboardController2.getDashboard);
+router37.get(
   "/recent-bookings",
   protect,
   authorize("admin"),
   dashboardController2.getRecentBookings
 );
-var dashboard_routes_default2 = router36;
+var dashboard_routes_default2 = router37;
 
 // src/modules/admin/tax/tax.routes.ts
-import { Router as Router37 } from "express";
+import { Router as Router38 } from "express";
 
 // src/modules/admin/tax/tax.service.ts
 var setTax = async (userId, taxPercentage) => {
@@ -22714,17 +24213,17 @@ var TaxController = class {
 };
 
 // src/modules/admin/tax/tax.routes.ts
-var router37 = Router37();
+var router38 = Router38();
 var taxController = new TaxController();
-router37.post("/set-tax", protect, authorize("admin"), taxController.setTax);
-router37.get("/active", taxController.getActiveTax);
-var tax_routes_default = router37;
+router38.post("/set-tax", protect, authorize("admin"), taxController.setTax);
+router38.get("/active", taxController.getActiveTax);
+var tax_routes_default = router38;
 
 // src/modules/admin/account-deactivate/account.routes.ts
-import { Router as Router38 } from "express";
+import { Router as Router39 } from "express";
 
 // src/modules/admin/account-deactivate/account.service.ts
-import mongoose49 from "mongoose";
+import mongoose51 from "mongoose";
 var getDeleteRequests = async (query) => {
   try {
     const { page = 1, limit = 10, search } = query;
@@ -22834,10 +24333,10 @@ var getDeleteRequests = async (query) => {
   }
 };
 var approveDeleteRequest = async (userId) => {
-  const session = await mongoose49.startSession();
+  const session = await mongoose51.startSession();
   try {
     session.startTransaction();
-    if (!mongoose49.Types.ObjectId.isValid(userId)) {
+    if (!mongoose51.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -22909,7 +24408,7 @@ var approveDeleteRequest = async (userId) => {
 };
 var rejectDeleteRequest = async (userId) => {
   try {
-    if (!mongoose49.Types.ObjectId.isValid(userId)) {
+    if (!mongoose51.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -23005,33 +24504,33 @@ var AccountController = class {
 };
 
 // src/modules/admin/account-deactivate/account.routes.ts
-var router38 = Router38();
+var router39 = Router39();
 var accountController = new AccountController();
-router38.get(
+router39.get(
   "/delete-requests",
   protect,
   authorize("admin"),
   accountController.getDeleteRequests
 );
-router38.patch(
+router39.patch(
   "/:userId/approve-delete",
   protect,
   authorize("admin"),
   accountController.approveDeleteRequest
 );
-router38.patch(
+router39.patch(
   "/:userId/reject-delete",
   protect,
   authorize("admin"),
   accountController.rejectDeleteRequest
 );
-var account_routes_default = router38;
+var account_routes_default = router39;
 
 // src/modules/admin/promotion/promotion.routes.ts
-import { Router as Router39 } from "express";
+import { Router as Router40 } from "express";
 
 // src/modules/admin/promotion/promotion.service.ts
-var SERVICE_MODELS4 = {
+var SERVICE_MODELS5 = {
   hotel: hotel_model_default,
   cab: cab_model_default,
   bike: bike_model_default,
@@ -23091,7 +24590,7 @@ var approvePromotion = async (promotionId, adminUserId, rank, startDate, endDate
     if (startDate) promotion.startDate = new Date(startDate);
     if (endDate) promotion.endDate = new Date(endDate);
     await promotion.save();
-    const ServiceModel = SERVICE_MODELS4[promotion.serviceType];
+    const ServiceModel = SERVICE_MODELS5[promotion.serviceType];
     if (ServiceModel) {
       await ServiceModel.findByIdAndUpdate(promotion.serviceId, { rank });
     }
@@ -23141,7 +24640,7 @@ var assignPropertyPromotion = async ({
         approvedAt: /* @__PURE__ */ new Date()
       });
     }
-    const ServiceModel = SERVICE_MODELS4[serviceType];
+    const ServiceModel = SERVICE_MODELS5[serviceType];
     if (ServiceModel && serviceId) {
       await ServiceModel.findByIdAndUpdate(serviceId, { rank });
     }
@@ -23163,7 +24662,7 @@ var updatePromotionRank = async (promotionId, rank) => {
     promotion.rankAssigned = rank;
     promotion.status = "approved";
     await promotion.save();
-    const ServiceModel = SERVICE_MODELS4[promotion.serviceType];
+    const ServiceModel = SERVICE_MODELS5[promotion.serviceType];
     if (ServiceModel && promotion.serviceId) {
       await ServiceModel.findByIdAndUpdate(promotion.serviceId, { rank });
     }
@@ -23201,7 +24700,7 @@ var removePromotion = async (promotionId) => {
     promotion.status = "rejected";
     promotion.rankAssigned = null;
     await promotion.save();
-    const ServiceModel = SERVICE_MODELS4[oldServiceType];
+    const ServiceModel = SERVICE_MODELS5[oldServiceType];
     if (ServiceModel && oldServiceId) {
       await ServiceModel.findByIdAndUpdate(oldServiceId, { rank: "C" });
     }
@@ -23369,51 +24868,75 @@ var PromotionController = class {
 };
 
 // src/modules/admin/promotion/promotion.routes.ts
-var router39 = Router39();
+var router40 = Router40();
 var promotionController = new PromotionController();
-router39.get(
+router40.get(
   "/",
   protect,
   authorize("admin"),
   promotionController.getAllPromotionRequests
 );
-router39.post(
+router40.post(
   "/assign",
   protect,
   authorize("admin"),
   promotionController.assignPropertyPromotion
 );
-router39.patch(
+router40.patch(
   "/:id/approve",
   protect,
   authorize("admin"),
   promotionController.approvePromotion
 );
-router39.patch(
+router40.patch(
   "/:id/rank",
   protect,
   authorize("admin"),
   promotionController.updatePromotionRank
 );
-router39.patch(
+router40.patch(
   "/:id/duration",
   protect,
   authorize("admin"),
   promotionController.updatePromotionDuration
 );
-router39.patch(
+router40.patch(
   "/:id/remove",
   protect,
   authorize("admin"),
   promotionController.removePromotion
 );
-router39.delete(
+router40.delete(
   "/:id",
   protect,
   authorize("admin"),
   promotionController.removePromotion
 );
-var promotion_routes_default = router39;
+var promotion_routes_default = router40;
+
+// src/modules/admin/vendorProperty/vendorProperty.routes.ts
+import { Router as Router41 } from "express";
+var router41 = Router41();
+var controller5 = new VendorPropertyController();
+router41.get(
+  "/pending",
+  protect,
+  authorize("admin"),
+  controller5.getPendingAdditionalProperties
+);
+router41.post(
+  "/:id/approve",
+  protect,
+  authorize("admin"),
+  controller5.approveAdditionalProperty
+);
+router41.post(
+  "/:id/reject",
+  protect,
+  authorize("admin"),
+  controller5.rejectAdditionalProperty
+);
+var vendorProperty_routes_default = router41;
 
 // src/shared/middlewares/errorHandler.ts
 var errorHandler = (err, req, res, next) => {
@@ -23524,8 +25047,9 @@ app.use("/api/v1/tour-services", tourService_routes_default);
 app.use("/api/v1/service-bookings", booking_routes_default2);
 app.use("/api/v1/multi-service-vendor", vendor_routes_default2);
 app.use("/api/v1/vendor-accounts", accountGroup_routes_default);
+app.use("/api/v1/vendor-properties", property_routes_default);
 app.use("/api/v1/admin/dashboard", dashboard_routes_default2);
-app.use("/api/v1/admin/property", property_routes_default);
+app.use("/api/v1/admin/property", property_routes_default2);
 app.use("/api/v1/admin/users", user_routes_default2);
 app.use("/api/v1/admin/bookings", booking_routes_default4);
 app.use("/api/v1/admin/reviews", review_routes_default2);
@@ -23534,6 +25058,7 @@ app.use("/api/v1/admin/supports", support_routes_default2);
 app.use("/api/v1/admin/tax", tax_routes_default);
 app.use("/api/v1/admin/account-deactivate", account_routes_default);
 app.use("/api/v1/admin/promotions", promotion_routes_default);
+app.use("/api/v1/admin/vendor-properties", vendorProperty_routes_default);
 app.use(errorHandler);
 var app_default = app;
 

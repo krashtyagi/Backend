@@ -10,6 +10,15 @@ import Favorite from "../favorites/favorite.model.js";
 import Review from "../reviews/review.model.js";
 import logger from "../../shared/utils/logger.js";
 
+const optimizeCloudinary = (url: string, transform = "f_auto,q_auto") => {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || (!url.includes("/image/upload/") && !url.includes("/upload/"))) {
+    return url;
+  }
+  const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
+  if (url.includes(`${marker}${transform}/`)) return url;
+  return url.replace(marker, `${marker}${transform}/`);
+};
+
 // helper function to attach isFavorite flag to hotels
 const attachFavoriteFlag = async (hotels: any[], userId: any) => {
   if (!userId || hotels.length === 0) {
@@ -848,7 +857,9 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
           : [];
 
       const rawImg = hotel.images?.[0]?.url;
-      const image = rawImg || "/hotels/room1.png";
+      const image = rawImg ? optimizeCloudinary(rawImg, "f_auto,q_auto,w_600,c_limit") : "/hotels/room1.png";
+      const rawImagesList = (hotel.images?.map((i: any) => i.url).filter(Boolean) || [image]).slice(0, 10);
+      const images = rawImagesList.map((u: string) => optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit"));
 
       const startingPrice = priceMap[hotel._id.toString()] || 0;
 
@@ -861,8 +872,7 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
         numReviews,
         amenities,
         image,
-        images:
-          hotel.images?.map((i: any) => i.url).filter(Boolean) || [image],
+        images,
         rank: hotel?.rank || "C",
         isFeatured: hotel.isFeatured || false,
         startingPrice,
@@ -903,14 +913,73 @@ export const getHotelDetails = async (hotelId: any, userId: any = null) => {
     isFavorite = !!favorite;
   }
 
+  // Compute real-time availability for today so users see correct room counts
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
+
+  const roomTypeIds = roomTypes.map((r) => r._id);
+
+  const [todayAvailability, activeBookingsToday] = await Promise.all([
+    Availability.find({
+      roomTypeId: { $in: roomTypeIds },
+      date: {
+        $gte: new Date(todayStart.getTime() - 24 * 3600 * 1000),
+        $lte: new Date(todayEnd.getTime() + 24 * 3600 * 1000),
+      },
+    }).lean(),
+    Booking.find({
+      hotelId,
+      roomTypeId: { $in: roomTypeIds },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: todayEnd },
+      checkOut: { $gt: todayStart },
+    }).select("roomTypeId roomsBooked").lean(),
+  ]);
+
+  const availabilityMap: Record<string, any> = {};
+  for (const doc of todayAvailability) {
+    availabilityMap[doc.roomTypeId.toString()] = doc;
+  }
+
+  const activeBookingsCountMap: Record<string, number> = {};
+  for (const b of activeBookingsToday) {
+    const rId = b.roomTypeId.toString();
+    activeBookingsCountMap[rId] = (activeBookingsCountMap[rId] || 0) + (b.roomsBooked || 1);
+  }
+
+  const optimizedHotelImages = (hotel.images || []).map((img: any) => ({
+    ...img,
+    url: optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit"),
+  }));
+
   return {
     ...hotel,
+    images: optimizedHotelImages,
     isFavorite,
-    roomTypes: roomTypes.map((room: any) => ({
-      ...room,
-      displayPrice:
-        (room.discountPrice && room.discountPrice > 0) ? room.discountPrice : room.basePrice,
-    })),
+    roomTypes: roomTypes.map((room: any) => {
+      const avail = availabilityMap[room._id.toString()];
+      const activeCount = activeBookingsCountMap[room._id.toString()] || 0;
+      const booked = activeCount;
+      const blocked = avail?.blockedRooms || 0;
+      const availableRooms = Math.max(room.totalRooms - booked - blocked, 0);
+
+      const optimizedRoomImages = (room.images || []).map((rImg: any) => {
+        const u = typeof rImg === "string" ? rImg : rImg?.url;
+        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+        return typeof rImg === "string" ? opt : { ...rImg, url: opt };
+      });
+
+      return {
+        ...room,
+        images: optimizedRoomImages,
+        displayPrice:
+          (room.discountPrice && room.discountPrice > 0) ? room.discountPrice : room.basePrice,
+        availableRooms,
+      };
+    }),
   };
 };
 
@@ -1051,11 +1120,35 @@ export const getHotelAvailability = async (
 ) => {
   if (!checkIn || !checkOut) throw new Error("Check-in and check-out required");
 
-  const startDate = new Date(checkIn);
-  const endDate = new Date(checkOut);
+  let startYear: number, startMonth: number, startDay: number;
+  let endYear: number, endMonth: number, endDay: number;
 
-  startDate.setUTCHours(0, 0, 0, 0);
-  endDate.setUTCHours(0, 0, 0, 0);
+  if (typeof checkIn === "string" && /^\d{4}-\d{2}-\d{2}/.test(checkIn)) {
+    const parts = checkIn.slice(0, 10).split("-").map(Number);
+    startYear = parts[0];
+    startMonth = parts[1] - 1;
+    startDay = parts[2];
+  } else {
+    const d = new Date(checkIn);
+    startYear = d.getFullYear();
+    startMonth = d.getMonth();
+    startDay = d.getDate();
+  }
+
+  if (typeof checkOut === "string" && /^\d{4}-\d{2}-\d{2}/.test(checkOut)) {
+    const parts = checkOut.slice(0, 10).split("-").map(Number);
+    endYear = parts[0];
+    endMonth = parts[1] - 1;
+    endDay = parts[2];
+  } else {
+    const d = new Date(checkOut);
+    endYear = d.getFullYear();
+    endMonth = d.getMonth();
+    endDay = d.getDate();
+  }
+
+  const startDate = new Date(Date.UTC(startYear, startMonth, startDay));
+  const endDate = new Date(Date.UTC(endYear, endMonth, endDay));
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     throw new Error("Invalid date format");
@@ -1063,7 +1156,7 @@ export const getHotelAvailability = async (
 
   if (startDate >= endDate) throw new Error("Invalid date range");
 
-  const nights = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+  const nights = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
   const hotel = await Hotel.findOne({
     _id: hotelId,
@@ -1086,21 +1179,33 @@ export const getHotelAvailability = async (
 
   const roomTypeIds = roomTypes.map((r) => r._id);
 
-  const availabilityDocs = await Availability.find({
-    roomTypeId: { $in: roomTypeIds },
-    date: { $gte: startDate, $lt: endDate },
-  }).lean();
+  // Wide window query for Availability & Bookings to prevent any UTC vs local timezone mismatches
+  const queryStartDate = new Date(startDate.getTime() - 24 * 3600 * 1000);
+  const queryEndDate = new Date(endDate.getTime() + 24 * 3600 * 1000);
+
+  const [availabilityDocs, activeBookings] = await Promise.all([
+    Availability.find({
+      roomTypeId: { $in: roomTypeIds },
+      date: { $gte: queryStartDate, $lte: queryEndDate },
+    }).lean(),
+    Booking.find({
+      hotelId,
+      roomTypeId: { $in: roomTypeIds },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: queryEndDate },
+      checkOut: { $gt: queryStartDate },
+    }).select("roomTypeId checkIn checkOut roomsBooked status").lean(),
+  ]);
 
   const availabilityMap = new Map();
 
   for (const doc of availabilityDocs) {
-    const utcDate = new Date(doc.date);
-    utcDate.setUTCHours(0, 0, 0, 0);
+    const d = new Date(doc.date);
+    const utcStr = d.toISOString().slice(0, 10);
+    const localStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-    const dateStr = utcDate.toISOString().slice(0, 10);
-    const mapKey = `${doc.roomTypeId.toString()}_${dateStr}`;
-
-    availabilityMap.set(mapKey, doc);
+    availabilityMap.set(`${doc.roomTypeId.toString()}_${utcStr}`, doc);
+    availabilityMap.set(`${doc.roomTypeId.toString()}_${localStr}`, doc);
   }
 
   const results = [];
@@ -1117,25 +1222,41 @@ export const getHotelAvailability = async (
 
     let minAvailable = room.totalRooms;
     let totalPrice = 0;
-    let isAvailable = true;
 
     for (let i = 0; i < nights; i++) {
-      const currentDate = new Date(startDate.getTime() + i * 86400000);
+      const currentNightDate = new Date(startDate.getTime() + i * 86400000);
+      const nightDateStr = currentNightDate.toISOString().slice(0, 10);
+      const nextNightDate = new Date(currentNightDate.getTime() + 86400000);
 
-      const dateStr = currentDate.toISOString().slice(0, 10);
-      const key = `${room._id.toString()}_${dateStr}`;
+      // Count active bookings for this room type on this specific night
+      let activeBookedCount = 0;
+      for (const b of activeBookings) {
+        if (b.roomTypeId.toString() !== room._id.toString()) continue;
 
+        const bIn = new Date(b.checkIn);
+        const bOut = new Date(b.checkOut);
+
+        const inUtcStr = bIn.toISOString().slice(0, 10);
+        const outUtcStr = bOut.toISOString().slice(0, 10);
+        const inLocalStr = `${bIn.getFullYear()}-${String(bIn.getMonth() + 1).padStart(2, "0")}-${String(bIn.getDate()).padStart(2, "0")}`;
+        const outLocalStr = `${bOut.getFullYear()}-${String(bOut.getMonth() + 1).padStart(2, "0")}-${String(bOut.getDate()).padStart(2, "0")}`;
+
+        const overlapsUtc = inUtcStr <= nightDateStr && outUtcStr > nightDateStr;
+        const overlapsLocal = inLocalStr <= nightDateStr && outLocalStr > nightDateStr;
+        const overlapsTime = bIn.getTime() < nextNightDate.getTime() && bOut.getTime() > currentNightDate.getTime();
+
+        if (overlapsUtc || overlapsLocal || overlapsTime) {
+          activeBookedCount += (b.roomsBooked || 1);
+        }
+      }
+
+      const key = `${room._id.toString()}_${nightDateStr}`;
       const dayDoc = availabilityMap.get(key);
 
-      const booked = dayDoc?.bookedRooms || 0;
+      const booked = activeBookedCount;
       const blocked = dayDoc?.blockedRooms || 0;
 
-      const available = room.totalRooms - booked - blocked;
-
-      if (available < 1) {
-        isAvailable = false;
-        break;
-      }
+      const available = Math.max(room.totalRooms - booked - blocked, 0);
 
       minAvailable = Math.min(minAvailable, available);
 
@@ -1146,9 +1267,7 @@ export const getHotelAvailability = async (
       totalPrice += price;
     }
 
-    if (!isAvailable) continue;
-
-    //TAX CALCULATION
+    // TAX CALCULATION
     const totalTax = Number(((totalPrice * taxPercentage) / 100).toFixed(2));
     const totalPriceWithTax = Number((totalPrice + totalTax).toFixed(2));
 
@@ -1156,9 +1275,7 @@ export const getHotelAvailability = async (
       ...room,
       availableRooms: minAvailable,
       nights,
-
       totalPrice,
-
       taxPercentage,
       totalTax,
       totalPriceWithTax,
@@ -1724,20 +1841,24 @@ export const getRankedHotels = async (rank: any, page: any = 1, limit: any = 10)
     }
 
     const hotels = await Hotel.find(filter)
-      .select("name city address images advertisementImage rating numReviews isFeatured")
+      .select("name city address images advertisementImage rating numReviews isFeatured description")
       .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
       .skip(skip)
       .limit(limitNum)
       .lean();
 
-    const items = hotels.map((hotel: any) => ({
-      _id: hotel._id,
-      name: hotel.name,
-      city: hotel.address?.city || hotel.city,
-      rating: hotel.rating,
-      numReviews: hotel.numReviews,
-      image: hotel.advertisementImage?.url || hotel.images?.[0]?.url || null,
-    }));
+    const items = hotels.map((hotel: any) => {
+      const rawUrl = hotel.advertisementImage?.url || hotel.images?.[0]?.url || null;
+      return {
+        _id: hotel._id,
+        name: hotel.name,
+        city: hotel.address?.city || hotel.city,
+        rating: hotel.rating,
+        numReviews: hotel.numReviews,
+        description: hotel.description,
+        image: rawUrl ? optimizeCloudinary(rawUrl, "f_auto,q_auto,w_1400,c_limit") : null,
+      };
+    });
 
     return {
       items,

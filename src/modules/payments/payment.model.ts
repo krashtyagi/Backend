@@ -2,7 +2,7 @@ import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
 export interface IPayment extends Document {
   bookingId: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId | null;
   razorpayOrderId: string;
   razorpayPaymentId?: string;
   razorpaySignature?: string;
@@ -33,7 +33,6 @@ const paymentSchema = new Schema<IPayment>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
       index: true,
     },
 

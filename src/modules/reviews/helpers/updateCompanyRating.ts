@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Review from "../review.model.js";
 import Hotel from "../../hotels/hotel.model.js";
 import Adventure from "../../adventure/category/adventure.model.js";
@@ -7,11 +8,18 @@ import TourCompany from "../../tour/company/tour.model.js";
 
 export const updateCompanyRating = async (companyType: string, companyId: any) => {
   try {
+    const companyObjectId = mongoose.Types.ObjectId.isValid(companyId)
+      ? new mongoose.Types.ObjectId(companyId)
+      : companyId;
+
     const stats = await Review.aggregate([
       {
         $match: {
           companyType,
-          companyId,
+          $or: [
+            { companyId: companyObjectId },
+            { companyId: String(companyId) },
+          ],
         },
       },
 

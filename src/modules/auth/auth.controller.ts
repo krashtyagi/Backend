@@ -8,6 +8,7 @@ import TourCompany from "../tour/company/tour.model.js";
 import Adventure from "../adventure/category/adventure.model.js";
 import logger from "../../shared/utils/logger.js";
 import { generateTokens } from "../../shared/utils/jwt.js";
+import { reconcileGuestBookings } from "../../shared/utils/reconcileGuestBookings.js";
 
 export class AuthController {
   // Helper function to set refresh token cookie
@@ -46,6 +47,13 @@ export class AuthController {
       const userId = (
         (req as any).user?._id || (req as any).user?.id
       )?.toString();
+      const userEmail = (req as any).user?.email;
+
+      // Reconcile any guest bookings made with this user's email
+      if (userId && userEmail) {
+        await reconcileGuestBookings(userId, userEmail);
+      }
+
       const { accessToken, refreshToken } = generateTokens(userId);
       this.setTokenCookie(res, refreshToken);
       res.redirect(

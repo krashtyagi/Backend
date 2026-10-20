@@ -9,7 +9,7 @@ export class MultiServiceBookingController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as any).user?._id || null;
 
       const result = await bookingService.createBooking(req.body, userId);
 

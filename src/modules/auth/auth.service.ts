@@ -7,6 +7,7 @@ import {
   sendOTPEmail,
   sendWhatsAppOTP,
 } from "../../shared/utils/sendEmail.js";
+import { reconcileGuestBookings } from "../../shared/utils/reconcileGuestBookings.js";
 
 // Helper to generate 6-digit OTP and its hash
 const generateOTP = async () => {
@@ -146,10 +147,14 @@ export const whatsappLogin = async (phone: any, password: any) => {
       throw new Error("Account not verified. Please verify OTP first.");
     }
 
+    // Reconcile any guest bookings made with this user's email/phone
+    await reconcileGuestBookings(user._id.toString(), user.email);
+
     return {
       user,
       message: "Login successful",
     };
+
   } catch (error) {
     throw error;
   }
@@ -327,6 +332,9 @@ export const login = async (email: any, password: any) => {
       throw new Error("Account not verified. Please verify your OTP.");
     }
 
+    // Reconcile any guest bookings made with this user's email
+    await reconcileGuestBookings(user._id.toString(), user.email);
+
     return { user, message: "Login successful" };
   } catch (error) {
     throw error;
@@ -399,6 +407,10 @@ export const verifyOTP = async (email: any, inputOTP: any) => {
     user.signupExpires = undefined;
 
     await user.save();
+
+    // Reconcile any guest bookings made with this user's email
+    await reconcileGuestBookings(user._id.toString(), user.email);
+
 
     let vendor = null;
 
@@ -617,6 +629,10 @@ export const emailVerifySignupOTP = async ({ email, otp }: any) => {
 
   await user.save();
 
+  // Reconcile any guest bookings made with this user's email
+  await reconcileGuestBookings(user._id.toString(), user.email);
+
+
   const accessToken = generateToken(user._id);
 
   return {
@@ -677,7 +693,11 @@ export const emailLogin = async ({ email, password }: any) => {
     throw new Error("Invalid credentials");
   }
 
+  // Reconcile any guest bookings made with this user's email
+  await reconcileGuestBookings(user._id.toString(), user.email);
+
   const accessToken = generateToken(user._id);
+
 
   return {
     message: "Login successful",

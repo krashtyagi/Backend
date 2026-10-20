@@ -346,10 +346,25 @@ export class VendorController {
         return;
       }
 
+      const forceEarlyCheckout = req.body?.forceEarlyCheckout === true;
+
       const result = await bookingService.checkOutBooking(
         req.params.id,
         vendor._id,
+        forceEarlyCheckout,
       );
+
+      // If it's an early checkout warning (not yet executed), return 200 with warning flag
+      if (result.earlyCheckoutWarning) {
+        res.status(200).json({
+          success: true,
+          earlyCheckoutWarning: true,
+          message: result.message,
+          originalCheckOut: result.originalCheckOut,
+          bookingId: result.bookingId,
+        });
+        return;
+      }
 
       res.status(200).json({ success: true, data: result });
     } catch (err) {

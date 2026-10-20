@@ -11,9 +11,10 @@ export class BookingController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      const userId = (req as any).user?._id || null;
       const booking = await bookingService.createBooking(
         req.body,
-        (req as any).user._id,
+        userId,
       );
 
       res.status(201).json({
@@ -56,10 +57,20 @@ export class BookingController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const booking = await Booking.findOne({
-        _id: req.params.bookingId,
-        userId: (req as any).user._id,
-      })
+      const user = (req as any).user;
+      const filter: any = { _id: req.params.bookingId };
+
+      if (user?._id) {
+        filter.$or = [
+          { userId: user._id },
+          { "primaryGuest.email": (user.email || "").toLowerCase() },
+          { paymentStatus: "paid" },
+        ];
+      } else {
+        filter.paymentStatus = "paid";
+      }
+
+      const booking = await Booking.findOne(filter)
         .populate({
           path: "roomTypeId",
           select: "name basePrice discountPrice roomSizeSqm beds amenities",

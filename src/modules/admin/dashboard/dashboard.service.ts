@@ -136,10 +136,9 @@ export const getDashboard = async ({
     const totalRevenue = hotelRevenue + genericRevenue;
 
     // DAILY BOOKINGS CHART
-    const startDate = new Date();
-
-    startDate.setDate(startDate.getDate() - (bookingRange - 1));
-
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - (bookingRange + 1));
     startDate.setHours(0, 0, 0, 0);
 
     const [hotelDailyRaw, genericDailyRaw] = await Promise.all([
@@ -151,23 +150,20 @@ export const getDashboard = async ({
             },
           },
         },
-
         {
           $group: {
             _id: {
               $dateToString: {
                 format: "%Y-%m-%d",
-
                 date: "$createdAt",
+                timezone: "+05:30",
               },
             },
-
             count: {
               $sum: 1,
             },
           },
         },
-
         {
           $sort: {
             _id: 1,
@@ -183,23 +179,20 @@ export const getDashboard = async ({
             },
           },
         },
-
         {
           $group: {
             _id: {
               $dateToString: {
                 format: "%Y-%m-%d",
-
                 date: "$createdAt",
+                timezone: "+05:30",
               },
             },
-
             count: {
               $sum: 1,
             },
           },
         },
-
         {
           $sort: {
             _id: 1,
@@ -210,20 +203,22 @@ export const getDashboard = async ({
 
     const dailyBookings: any[] = [];
 
-    for (let i = 0; i < bookingRange; i++) {
-      const date = new Date(startDate);
+    for (let i = bookingRange - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
 
-      date.setDate(date.getDate() + i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const formatted = `${year}-${month}-${day}`;
 
-      const formatted = date.toISOString().split("T")[0];
-
-      const hotelFound = hotelDailyRaw.find((d: any) => d._id === formatted);
-
-      const genericFound = genericDailyRaw.find((d: any) => d._id === formatted);
+      const hotelFound = hotelDailyRaw.find((item: any) => item._id === formatted);
+      const genericFound = genericDailyRaw.find(
+        (item: any) => item._id === formatted,
+      );
 
       dailyBookings.push({
         date: formatted,
-
         count: (hotelFound?.count || 0) + (genericFound?.count || 0),
       });
     }
@@ -473,11 +468,11 @@ export const getRecentBookings = async () => {
           },
 
           bookingDate: "$createdAt",
-
+          totalAmount: "$totalAmount",
           amount: "$totalAmount",
-
+          checkIn: { $ifNull: ["$checkIn", "$createdAt"] },
+          checkOut: { $ifNull: ["$checkOut", "$createdAt"] },
           status: 1,
-
           createdAt: 1,
         },
       },
@@ -488,25 +483,18 @@ export const getRecentBookings = async () => {
       {
         $lookup: {
           from: "users",
-
           localField: "userId",
-
           foreignField: "_id",
-
           as: "user",
         },
       },
-
       {
         $unwind: "$user",
       },
-
       {
         $project: {
           _id: 1,
-
           bookingReference: 1,
-
           userName: {
             $trim: {
               input: {
@@ -514,9 +502,7 @@ export const getRecentBookings = async () => {
                   {
                     $ifNull: ["$user.firstName", ""],
                   },
-
                   " ",
-
                   {
                     $ifNull: ["$user.lastName", ""],
                   },
@@ -524,17 +510,14 @@ export const getRecentBookings = async () => {
               },
             },
           },
-
           propertyName: "$serviceSnapshot.title",
-
           serviceType: 1,
-
           bookingDate: "$bookingDate",
-
+          totalAmount: "$pricing.totalAmount",
           amount: "$pricing.totalAmount",
-
+          checkIn: { $ifNull: ["$bookingDate", "$createdAt"] },
+          checkOut: { $ifNull: ["$bookingDate", "$createdAt"] },
           status: 1,
-
           createdAt: 1,
         },
       },
@@ -542,7 +525,10 @@ export const getRecentBookings = async () => {
 
     // COMBINE + SORT
     const combinedBookings = [...hotelBookings, ...genericBookings]
-      .sort((a, b) => (new Date(b.createdAt) as any) - (new Date(a.createdAt) as any))
+      .sort(
+        (a, b) =>
+          (new Date(b.createdAt) as any) - (new Date(a.createdAt) as any),
+      )
       .slice(0, 10);
 
     return combinedBookings;

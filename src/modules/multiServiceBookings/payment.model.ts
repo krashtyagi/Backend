@@ -8,7 +8,7 @@ export interface IGenericPaymentMetadata {
 
 export interface IGenericPayment extends Document {
   bookingId: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId | null;
   gateway: "razorpay";
   gatewayOrderId: string;
   gatewayPaymentId?: string;
@@ -38,7 +38,6 @@ const paymentSchema = new Schema<IGenericPayment>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
 
     gateway: {

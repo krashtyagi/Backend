@@ -38,6 +38,21 @@ export const createBooking = async (data: any, userId: any) => {
       throw new Error("serviceType, serviceId and bookingDate are required");
     }
 
+    // Require customer email and phone (critical for guest reconciliation + confirmation)
+    if (!primaryCustomer?.email?.trim()) {
+      throw new Error("Email is required to proceed with booking");
+    }
+    if (!primaryCustomer?.phoneNumber?.trim()) {
+      throw new Error("Phone number is required to proceed with booking");
+    }
+
+    const safePrimaryCustomer = {
+      firstName: (primaryCustomer?.firstName || "").trim(),
+      lastName: (primaryCustomer?.lastName || "").trim(),
+      email: (primaryCustomer?.email || "").trim().toLowerCase(),
+      phoneNumber: (primaryCustomer?.phoneNumber || "").trim(),
+    };
+
     // //SERVICE MAP
 
     let service: any;
@@ -207,7 +222,7 @@ export const createBooking = async (data: any, userId: any) => {
 
           duration,
 
-          primaryCustomer,
+          primaryCustomer: safePrimaryCustomer,
           participants,
 
           meta,

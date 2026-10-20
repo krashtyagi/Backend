@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../../modules/auth/auth.model.js";
+import Vendor from "../../modules/vendors/vendor.model.js";
 import logger from "../utils/logger.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -33,6 +34,13 @@ export const protect = async (req: any, res: any, next: NextFunction) => {
 
     req.user = currentUser;
     req.vendorId = decoded.vendorId || null;
+
+    if (!req.vendorId && (currentUser.role === "vendor" || currentUser.isVendor)) {
+      const vendor = await Vendor.findOne({ userId: currentUser._id }).select("_id");
+      if (vendor) {
+        req.vendorId = vendor._id;
+      }
+    }
 
     next();
   } catch (error: any) {

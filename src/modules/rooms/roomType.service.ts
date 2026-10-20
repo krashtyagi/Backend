@@ -4,6 +4,7 @@ import Hotel from "../hotels/hotel.model.js";
 import Availability from "../availability/availability.model.js";
 import RoomType from "./roomType.model.js";
 import Room from "./room.model.js";
+import { syncRoomsForRoomType } from "./room.service.js";
 import logger from "../../shared/utils/logger.js";
 import cloudinary from "../../shared/config/cloudinary.js";
 
@@ -66,6 +67,14 @@ export const updateRoomType = async (roomTypeId: any, hotelId: any, updateData: 
       updateData,
       { new: true, runValidators: true },
     );
+
+    if (updateData.totalRooms && Number(updateData.totalRooms) > 0) {
+      try {
+        await syncRoomsForRoomType(hotelId, roomTypeId, Number(updateData.totalRooms));
+      } catch (err) {
+        logger.error("Error syncing rooms after updateRoomType:", err);
+      }
+    }
 
     return updatedRoomType;
   } catch (error) {

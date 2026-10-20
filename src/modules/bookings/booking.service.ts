@@ -10,11 +10,16 @@ import Tax from "../admin/tax/tax.model.js";
 import razorpay from "../../shared/config/razorpay.js";
 
 import Room from "../rooms/room.model.js";
+import { syncAllRoomsForHotel } from "../rooms/room.service.js";
 
 import crypto from "crypto";
 import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import RoomType from "../rooms/roomType.model.js";
 
@@ -27,19 +32,30 @@ import User from "../auth/auth.model.js";
 
 //restore availability function
 async function restoreAvailability(booking: any, session: any) {
-  const currentDate = new Date(booking.checkIn);
+  const checkInDate = new Date(booking.checkIn);
+  const checkOutDate = new Date(booking.checkOut);
+  const queryStart = new Date(checkInDate.getTime() - 24 * 3600 * 1000);
+  const queryEnd = new Date(checkOutDate.getTime() + 24 * 3600 * 1000);
 
-  while (currentDate < booking.checkOut) {
-    await Availability.findOneAndUpdate(
-      {
-        roomTypeId: booking.roomTypeId,
-        date: new Date(currentDate),
-      },
-      { $inc: { availableRooms: booking.roomsBooked } },
-      { session },
-    );
+  const affectedAvails = await Availability.find({
+    roomTypeId: booking.roomTypeId,
+    date: { $gte: queryStart, $lte: queryEnd },
+  }).session(session);
 
-    currentDate.setDate(currentDate.getDate() + 1);
+  for (const av of affectedAvails) {
+    const avDate = new Date(av.date);
+    const nextDate = new Date(avDate.getTime() + 86400000);
+
+    const activeCount = await Booking.countDocuments({
+      roomTypeId: booking.roomTypeId,
+      _id: { $ne: booking._id },
+      status: { $in: ["confirmed", "checked_in", "staying"] },
+      checkIn: { $lt: nextDate },
+      checkOut: { $gt: avDate },
+    }).session(session);
+
+    av.bookedRooms = activeCount;
+    await av.save({ session });
   }
 }
 
@@ -108,7 +124,7 @@ export const createBooking = async (data: any, userId: any) => {
       ? additionalGuests
       : [];
 
-    const userDoc = await User.findById(userId).session(session);
+    const userDoc = userId ? await User.findById(userId).session(session) : null;
 
     const safePrimaryGuest = {
       firstName:
@@ -116,14 +132,25 @@ export const createBooking = async (data: any, userId: any) => {
       lastName:
         (primaryGuest?.lastName || "").trim() || userDoc?.lastName || "User",
       email:
-        (primaryGuest?.email || "").trim() ||
-        userDoc?.email ||
-        "guest@trivllo.com",
+        (
+          (primaryGuest?.email || "").trim() ||
+          userDoc?.email ||
+          ""
+        ).toLowerCase(),
       phoneNumber:
         (primaryGuest?.phoneNumber || "").trim() ||
         userDoc?.phoneNumber ||
-        "9999999999",
+        "",
     };
+
+    // Require email and phone (critical for guest reconciliation + confirmation emails)
+    if (!safePrimaryGuest.email) {
+      throw new Error("Email is required to proceed with booking");
+    }
+
+    if (!safePrimaryGuest.phoneNumber) {
+      throw new Error("Phone number is required to proceed with booking");
+    }
 
     const hotel = await Hotel.findById(hotelId).session(session);
     if (!hotel || !hotel.isActive) throw new Error("Hotel not available");
@@ -161,11 +188,19 @@ export const createBooking = async (data: any, userId: any) => {
     //VALIDATION + PRICE CALCULATION
     for (let i = 0; i < nights; i++) {
       const currentDate = new Date(startDate.getTime() + i * 86400000);
+      const nextDate = new Date(currentDate.getTime() + 86400000);
       const dateStr = currentDate.toISOString().split("T")[0];
 
       const dayDoc = availabilityMap[dateStr];
 
-      const booked = dayDoc?.bookedRooms || 0;
+      const activeBookedCount = await Booking.countDocuments({
+        roomTypeId,
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: currentDate },
+      }).session(session);
+
+      const booked = activeBookedCount;
       const blocked = dayDoc?.blockedRooms || 0;
 
       const available = roomType.totalRooms - booked - blocked;
@@ -225,12 +260,21 @@ export const createBooking = async (data: any, userId: any) => {
       { session },
     );
 
-    //RAZORPAY ORDER (WITH TAX)
-    const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(finalTotalAmount * 100),
-      currency: "INR",
-      receipt: bookingReference,
-    });
+    // RAZORPAY ORDER (WITH TAX)
+    let razorpayOrder: any;
+    try {
+      razorpayOrder = await razorpay.orders.create({
+        amount: Math.round(finalTotalAmount * 100),
+        currency: "INR",
+        receipt: bookingReference,
+      });
+    } catch (rzpErr: any) {
+      const msg =
+        rzpErr.error?.description ||
+        rzpErr.message ||
+        "Razorpay order creation failed";
+      throw new Error(`Payment Gateway Error: ${msg}. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend .env`);
+    }
 
     const [payment] = await Payment.create(
       [
@@ -303,15 +347,26 @@ export const createBooking = async (data: any, userId: any) => {
 
 export const getUserBookings = async (userId: any) => {
   try {
+    const userDoc = userId ? await User.findById(userId).select("email").lean() : null;
+    const userEmail = (userDoc?.email || "").toLowerCase();
+
+    const hotelFilter: any = userEmail
+      ? { $or: [{ userId }, { userId: null, "primaryGuest.email": userEmail }] }
+      : { userId };
+
+    const genericFilter: any = userEmail
+      ? { $or: [{ userId }, { userId: null, "primaryCustomer.email": userEmail }] }
+      : { userId };
+
     const [hotelBookings, genericBookings]: [any[], any[]] = await Promise.all([
-      Booking.find({ userId })
+      Booking.find(hotelFilter)
         .populate({
           path: "hotelId",
           select: "name images",
         })
         .lean(),
 
-      GenericBooking.find({ userId }).lean(),
+      GenericBooking.find(genericFilter).lean(),
     ]);
 
     // Group serviceIds by type
@@ -413,17 +468,30 @@ export const getUserBookings = async (userId: any) => {
           break;
       }
 
+      const startDate = booking.duration?.startDate || booking.bookingDate || booking.createdAt;
+      const endDate = booking.duration?.endDate || booking.bookingDate || startDate;
+
       return {
         _id: booking._id,
         bookingReference: booking.bookingReference,
+        bookingId: booking.bookingReference,
 
         bookingType: booking.serviceType,
 
+        hotelId: booking.serviceId || booking._id,
+        hotelName: service?.title || booking.serviceSnapshot?.title || "Service",
         title: service?.title || booking.serviceSnapshot?.title || "Service",
 
         thumbnail: service?.images?.[0]?.url || null,
 
-        bookingDate: booking.duration?.startDate || booking.bookingDate,
+        checkIn: startDate,
+        checkOut: endDate,
+        bookingDate: startDate,
+
+        guests: {
+          adults: booking.participants?.length || 1,
+          children: 0,
+        },
 
         status: booking.status,
         paymentStatus: booking.paymentStatus,
@@ -437,14 +505,24 @@ export const getUserBookings = async (userId: any) => {
     const formattedHotelBookings = hotelBookings.map((booking: any) => ({
       _id: booking._id,
       bookingReference: booking.bookingReference,
+      bookingId: booking.bookingReference,
 
       bookingType: "hotel",
 
+      hotelId: booking.hotelId?._id || booking.hotelId,
+      hotelName: booking.hotelId?.name || "Hotel",
       title: booking.hotelId?.name || "Hotel",
 
       thumbnail: booking.hotelId?.images?.[0]?.url || null,
 
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
       bookingDate: booking.checkIn,
+
+      guests: {
+        adults: booking.guests?.adults || 1,
+        children: booking.guests?.children || 0,
+      },
 
       status: booking.status,
       paymentStatus: booking.paymentStatus,
@@ -1811,12 +1889,21 @@ export const getVendorDashboard = async (
     1,
   );
 
+  // Auto-sync physical rooms so Room collection matches RoomType totalRooms
+  try {
+    for (const hId of hotelIds) {
+      await syncAllRoomsForHotel(hId);
+    }
+  } catch (syncErr) {
+    logger.warn("Room sync warning in getVendorDashboard:", syncErr);
+  }
+
   const [
     newBookings,
     todayCheckIns,
     todayCheckOuts,
     totalRevenueAgg,
-    totalRooms,
+    roomTypeTotalAgg,
     occupiedRooms,
     revenueAgg,
     reservationAgg,
@@ -1829,12 +1916,20 @@ export const getVendorDashboard = async (
 
     Booking.countDocuments({
       hotelId: { $in: hotelIds },
-      checkIn: { $gte: today, $lt: tomorrow },
+      $or: [
+        { actualCheckInAt: { $gte: today, $lt: tomorrow } },
+        { status: "checked_in", updatedAt: { $gte: today, $lt: tomorrow } },
+        { checkIn: { $gte: today, $lt: tomorrow } },
+      ],
     }),
 
     Booking.countDocuments({
       hotelId: { $in: hotelIds },
-      checkOut: { $gte: today, $lt: tomorrow },
+      $or: [
+        { actualCheckOutAt: { $gte: today, $lt: tomorrow } },
+        { status: "checked_out", updatedAt: { $gte: today, $lt: tomorrow } },
+        { checkOut: { $gte: today, $lt: tomorrow } },
+      ],
     }),
 
     Booking.aggregate([
@@ -1853,9 +1948,20 @@ export const getVendorDashboard = async (
       },
     ]),
 
-    Room.countDocuments({
-      hotelId: { $in: hotelIds },
-    }),
+    RoomType.aggregate([
+      {
+        $match: {
+          hotelId: { $in: hotelIds },
+          isActive: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalRooms" },
+        },
+      },
+    ]),
 
     Booking.countDocuments({
       hotelId: { $in: hotelIds },
@@ -1885,7 +1991,7 @@ export const getVendorDashboard = async (
       {
         $match: {
           hotelId: { $in: hotelIds },
-          createdAt: { $gte: lastDays },
+          createdAt: { $gte: new Date(today.getTime() - (reservationDays + 1) * 86400000) },
         },
       },
       {
@@ -1895,6 +2001,7 @@ export const getVendorDashboard = async (
               $dateToString: {
                 format: "%Y-%m-%d",
                 date: "$createdAt",
+                timezone: "+05:30",
               },
             },
           },
@@ -1914,21 +2021,23 @@ export const getVendorDashboard = async (
 
     Booking.find({
       hotelId: { $in: hotelIds },
-      checkIn: { $lte: today },
-      checkOut: { $gte: today },
-      status: { $in: ["confirmed", "checked_in", "staying"] },
     })
       .select(
-        "bookingReference primaryGuest roomTypeId roomNumber checkIn checkOut status",
+        "bookingReference primaryGuest roomTypeId roomNumber checkIn checkOut status createdAt",
       )
       .populate("roomTypeId", "name")
-      .sort({ checkIn: 1 })
+      .sort({ createdAt: -1 })
       .limit(10)
       .lean(),
   ]);
 
   const totalRevenue = totalRevenueAgg[0]?.total || 0;
-  const availableRooms = totalRooms - occupiedRooms;
+  const roomTypesTotal = roomTypeTotalAgg[0]?.total;
+  let totalRooms =
+    typeof roomTypesTotal === "number" && roomTypesTotal > 0
+      ? roomTypesTotal
+      : (await Room.countDocuments({ hotelId: { $in: hotelIds } }));
+  const availableRooms = Math.max(0, totalRooms - occupiedRooms);
 
   //Revenue Chart
   const revenueMap = new Map();
@@ -1958,11 +2067,15 @@ export const getVendorDashboard = async (
 
   const reservationChart = [];
 
-  for (let i = 0; i < reservationDays; i++) {
-    const d = new Date(lastDays);
-    d.setDate(lastDays.getDate() + i);
+  for (let i = reservationDays - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
 
-    const key = d.toISOString().split("T")[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const key = `${year}-${month}-${day}`;
+
     const found = reservationMap.get(key);
 
     reservationChart.push({
@@ -1975,8 +2088,8 @@ export const getVendorDashboard = async (
   //Recent Bookings formating
   const formattedRecent = recentBookings.map((b: any) => ({
     bookingReference: b.bookingReference,
-    guestName: `${b.primaryGuest.firstName} ${b.primaryGuest.lastName}`,
-    room: `${b.roomTypeId?.name || ""} ${b.roomNumber || ""}`,
+    guestName: b.primaryGuest ? `${b.primaryGuest.firstName || ""} ${b.primaryGuest.lastName || ""}`.trim() : "Guest",
+    room: `${b.roomTypeId?.name || "Room"} ${b.roomNumber || ""}`.trim(),
     checkIn: b.checkIn,
     checkOut: b.checkOut,
     status: b.status,
@@ -2011,14 +2124,22 @@ const validateOwnership = async (bookingId: any, vendorId: any) => {
   }
 
   const booking = await Booking.findById(bookingId);
-  if (!booking) throw new Error("Booking not found");
+  if (!booking) {
+    const error: any = new Error("Booking not found");
+    error.statusCode = 404;
+    throw error;
+  }
 
   const hotel = await Hotel.findOne({
     _id: booking.hotelId,
     vendorId,
   });
 
-  if (!hotel) throw new Error("Unauthorized access");
+  if (!hotel) {
+    const error: any = new Error("Unauthorized access");
+    error.statusCode = 403;
+    throw error;
+  }
 
   return booking;
 };
@@ -2026,15 +2147,39 @@ const validateOwnership = async (bookingId: any, vendorId: any) => {
 export const checkInBooking = async (bookingId: any, vendorId: any) => {
   const booking = await validateOwnership(bookingId, vendorId);
 
+  // If already checked in or staying, treat as idempotent success
+  if (booking.status === "checked_in" || booking.status === "staying") {
+    return booking;
+  }
+
+  if (booking.status === "checked_out") {
+    const error: any = new Error("Guest has already checked out from this booking");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (booking.status === "cancelled") {
+    const error: any = new Error("This booking has been cancelled");
+    error.statusCode = 400;
+    throw error;
+  }
+
   if (booking.status !== "confirmed") {
-    throw new Error("Only confirmed bookings can be checked in");
+    const error: any = new Error(`Cannot check in booking with status: ${booking.status}`);
+    error.statusCode = 400;
+    throw error;
   }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (booking.checkIn > today) {
-    throw new Error("Cannot check in before check-in date");
+  const checkInDate = new Date(booking.checkIn);
+  checkInDate.setHours(0, 0, 0, 0);
+
+  if (checkInDate > today) {
+    const error: any = new Error(`Cannot check in before check-in date (${checkInDate.toLocaleDateString("en-IN")})`);
+    error.statusCode = 400;
+    throw error;
   }
 
   booking.status = "checked_in";
@@ -2048,8 +2193,20 @@ export const checkInBooking = async (bookingId: any, vendorId: any) => {
 export const markBookingStaying = async (bookingId: any, vendorId: any) => {
   const booking = await validateOwnership(bookingId, vendorId);
 
+  if (booking.status === "staying") {
+    return booking;
+  }
+
+  if (booking.status === "checked_out") {
+    const error: any = new Error("Guest has already checked out");
+    error.statusCode = 400;
+    throw error;
+  }
+
   if (booking.status !== "checked_in") {
-    throw new Error("Guest must be checked in first");
+    const error: any = new Error("Guest must be checked in first before marking staying");
+    error.statusCode = 400;
+    throw error;
   }
 
   booking.status = "staying";
@@ -2058,19 +2215,107 @@ export const markBookingStaying = async (bookingId: any, vendorId: any) => {
   return booking;
 };
 
-export const checkOutBooking = async (bookingId: any, vendorId: any) => {
-  const booking = await validateOwnership(bookingId, vendorId);
+export const checkOutBooking = async (bookingId: any, vendorId: any, forceEarlyCheckout?: boolean) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!["checked_in", "staying"].includes(booking.status)) {
-    throw new Error("Booking not eligible for checkout");
+  try {
+    const booking = await validateOwnership(bookingId, vendorId);
+
+    if (booking.status === "checked_out") {
+      await session.abortTransaction();
+      session.endSession();
+      return {
+        earlyCheckoutWarning: false,
+        booking,
+        isEarlyCheckout: false,
+        message: "Guest has already checked out.",
+      };
+    }
+
+    if (!["checked_in", "staying"].includes(booking.status)) {
+      await session.abortTransaction();
+      session.endSession();
+      const error: any = new Error("Booking not eligible for checkout (guest must be checked in first)");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const originalCheckOut = new Date(booking.checkOut);
+    originalCheckOut.setHours(0, 0, 0, 0);
+
+    const isEarlyCheckout = now < originalCheckOut;
+
+    // If early checkout and not explicitly forced, return a warning
+    if (isEarlyCheckout && !forceEarlyCheckout) {
+      await session.abortTransaction();
+      session.endSession();
+      return {
+        earlyCheckoutWarning: true,
+        message: `Guest is booked until ${originalCheckOut.toDateString()}. Checking out early will free up the room for the remaining dates. Do you want to proceed?`,
+        originalCheckOut: booking.checkOut,
+        bookingId: booking._id,
+      };
+    }
+
+    booking.status = "checked_out";
+    booking.actualCheckOutAt = new Date();
+
+    await booking.save({ session });
+
+    // Immediately sync Availability documents for all dates of this booking so rooms are freed up
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    const queryStart = new Date(checkInDate.getTime() - 24 * 3600 * 1000);
+    const queryEnd = new Date(checkOutDate.getTime() + 24 * 3600 * 1000);
+
+    const affectedAvails = await Availability.find({
+      roomTypeId: booking.roomTypeId,
+      date: { $gte: queryStart, $lte: queryEnd },
+    }).session(session);
+
+    for (const av of affectedAvails) {
+      const avDate = new Date(av.date);
+      const nextDate = new Date(avDate.getTime() + 86400000);
+
+      const activeCount = await Booking.countDocuments({
+        roomTypeId: booking.roomTypeId,
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: avDate },
+      }).session(session);
+
+      av.bookedRooms = activeCount;
+      await av.save({ session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      earlyCheckoutWarning: false,
+      booking,
+      isEarlyCheckout,
+      message: isEarlyCheckout
+        ? `Guest checked out early. Rooms freed from ${now.toDateString()} to ${originalCheckOut.toDateString()}.`
+        : "Guest checked out successfully.",
+    };
+  } catch (err) {
+    try {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+    } catch (abortErr) {
+      logger.error("Error aborting checkout transaction:", abortErr);
+    } finally {
+      session.endSession();
+    }
+    logger.error("Service Error: checkOutBooking", err);
+    throw err;
   }
-
-  booking.status = "checked_out";
-  booking.actualCheckOutAt = new Date();
-
-  await booking.save();
-
-  return booking;
 };
 
 const booking_service = {

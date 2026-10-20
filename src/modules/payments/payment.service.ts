@@ -104,44 +104,46 @@ export const verifyPayment = async (data: any) => {
 
     // INVENTORY LOCK
     for (let i = 0; i < booking.nights; i++) {
-      const currentDate = new Date(startDate.getTime() + i * 86400000);
-      currentDate.setHours(0, 0, 0, 0);
+      const d = new Date(startDate.getTime() + i * 86400000);
+      const currentDate = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const nextDate = new Date(currentDate.getTime() + 86400000);
 
       const existingDoc = await Availability.findOne({
         roomTypeId: booking.roomTypeId,
         date: currentDate,
       }).session(session);
 
+      const activeBookedCount = await Booking.countDocuments({
+        roomTypeId: booking.roomTypeId,
+        _id: { $ne: booking._id },
+        status: { $in: ["confirmed", "checked_in", "staying"] },
+        checkIn: { $lt: nextDate },
+        checkOut: { $gt: currentDate },
+      }).session(session);
+
+      const blockedRooms = existingDoc?.blockedRooms || 0;
+      const bookedRooms = activeBookedCount;
+      const available = roomTypeData.totalRooms - bookedRooms - blockedRooms;
+
+      if (available < booking.roomsBooked) {
+        throw new Error(
+          `Rooms just sold out for ${d.toDateString()}`,
+        );
+      }
+
       if (existingDoc) {
-        const available =
-          roomTypeData.totalRooms -
-          existingDoc.bookedRooms -
-          existingDoc.blockedRooms;
-
-        if (available < booking.roomsBooked) {
-          throw new Error(
-            `Rooms just sold out for ${currentDate.toDateString()}`,
-          );
-        }
-
         await Availability.updateOne(
           { _id: existingDoc._id },
-          { $inc: { bookedRooms: booking.roomsBooked } },
+          { $set: { bookedRooms: bookedRooms + booking.roomsBooked } },
           { session },
         );
       } else {
-        if (booking.roomsBooked > roomTypeData.totalRooms) {
-          throw new Error(
-            `Rooms just sold out for ${currentDate.toDateString()}`,
-          );
-        }
-
         await Availability.create(
           [
             {
               roomTypeId: booking.roomTypeId,
               date: currentDate,
-              bookedRooms: booking.roomsBooked,
+              bookedRooms: bookedRooms + booking.roomsBooked,
               blockedRooms: 0,
             },
           ],

@@ -5,6 +5,14 @@ export interface IVendorReply {
   repliedAt?: Date;
 }
 
+export interface IReviewBreakdown {
+  facilities: number;
+  cleanliness: number;
+  services: number;
+  comfort: number;
+  location: number;
+}
+
 export interface IReview extends Document {
   userId: Types.ObjectId;
   bookingId: Types.ObjectId;
@@ -13,6 +21,7 @@ export interface IReview extends Document {
   companyType: "hotel" | "adventure" | "tour" | "cab" | "bike";
   vendorId: Types.ObjectId;
   rating: number;
+  breakdown?: IReviewBreakdown;
   comment?: string;
   vendorReply?: IVendorReply;
   isFlagged: boolean;
@@ -68,6 +77,14 @@ const reviewSchema = new Schema<IReview>(
       type: String,
       trim: true,
       maxlength: 1000,
+    },
+
+    breakdown: {
+      facilities: { type: Number, min: 1, max: 5 },
+      cleanliness: { type: Number, min: 1, max: 5 },
+      services: { type: Number, min: 1, max: 5 },
+      comfort: { type: Number, min: 1, max: 5 },
+      location: { type: Number, min: 1, max: 5 },
     },
 
     vendorReply: {

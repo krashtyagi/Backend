@@ -121,7 +121,10 @@ export const getAllBookings = async (query: any) => {
       };
     }
 
-    let hotelPipeline: any[] = [{ $match: hotelMatch }, { $sort: { createdAt: -1 } }];
+    let hotelPipeline: any[] = [
+      { $match: hotelMatch },
+      { $sort: { createdAt: -1 } },
+    ];
 
     // Date-based status filters for hotel
     if (status === "upcoming") {
