@@ -752,7 +752,7 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
     }
 
     const hotels = await Hotel.find(filter)
-      .select("name city address images rating numReviews isFeatured rank amenities")
+      .select("name city address.city address.country images rating numReviews isFeatured rank amenities")
       .sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 })
       .lean();
 
@@ -858,8 +858,6 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
 
       const rawImg = hotel.images?.[0]?.url;
       const image = rawImg ? optimizeCloudinary(rawImg, "f_auto,q_auto,w_600,c_limit") : "/hotels/room1.png";
-      const rawImagesList = (hotel.images?.map((i: any) => i.url).filter(Boolean) || [image]).slice(0, 10);
-      const images = rawImagesList.map((u: string) => optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit"));
 
       const startingPrice = priceMap[hotel._id.toString()] || 0;
 
@@ -867,14 +865,11 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
         _id: hotel._id,
         name: hotel.name,
         city: hotel.address?.city || hotel.city,
-        address: hotel.address,
+        country: hotel.address?.country || "India",
         rating,
         numReviews,
         amenities,
         image,
-        images,
-        rank: hotel?.rank || "C",
-        isFeatured: hotel.isFeatured || false,
         startingPrice,
       };
     });
@@ -950,14 +945,22 @@ export const getHotelDetails = async (hotelId: any, userId: any = null) => {
     activeBookingsCountMap[rId] = (activeBookingsCountMap[rId] || 0) + (b.roomsBooked || 1);
   }
 
-  const optimizedHotelImages = (hotel.images || []).map((img: any) => ({
-    ...img,
-    url: optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit"),
-  }));
+  // Flatten hotel images to just optimized URL strings
+  const optimizedHotelImages = (hotel.images || [])
+    .map((img: any) => optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit"))
+    .filter(Boolean);
 
   return {
-    ...hotel,
+    _id: hotel._id,
+    name: hotel.name,
+    description: (hotel as any).description,
+    address: hotel.address,
+    city: hotel.city,
+    location: hotel.location,
     images: optimizedHotelImages,
+    amenities: hotel.amenities,
+    rating: hotel.rating,
+    numReviews: hotel.numReviews,
     isFavorite,
     roomTypes: roomTypes.map((room: any) => {
       const avail = availabilityMap[room._id.toString()];
@@ -966,15 +969,27 @@ export const getHotelDetails = async (hotelId: any, userId: any = null) => {
       const blocked = avail?.blockedRooms || 0;
       const availableRooms = Math.max(room.totalRooms - booked - blocked, 0);
 
-      const optimizedRoomImages = (room.images || []).map((rImg: any) => {
-        const u = typeof rImg === "string" ? rImg : rImg?.url;
-        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
-        return typeof rImg === "string" ? opt : { ...rImg, url: opt };
-      });
+      // Flatten room images to just optimized URL strings
+      const optimizedRoomImages = (room.images || [])
+        .map((rImg: any) => {
+          const u = typeof rImg === "string" ? rImg : rImg?.url;
+          return optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+        })
+        .filter(Boolean);
 
       return {
-        ...room,
+        _id: room._id,
+        name: room.name,
+        description: room.description,
+        basePrice: room.basePrice,
+        discountPrice: room.discountPrice,
+        capacity: room.capacity,
+        beds: room.beds,
+        roomSizeSqm: room.roomSizeSqm,
+        viewType: room.viewType,
+        amenities: room.amenities,
         images: optimizedRoomImages,
+        totalRooms: room.totalRooms,
         displayPrice:
           (room.discountPrice && room.discountPrice > 0) ? room.discountPrice : room.basePrice,
         availableRooms,
@@ -1272,7 +1287,25 @@ export const getHotelAvailability = async (
     const totalPriceWithTax = Number((totalPrice + totalTax).toFixed(2));
 
     results.push({
-      ...room,
+      _id: room._id,
+      name: room.name,
+      description: room.description,
+      basePrice: room.basePrice,
+      discountPrice: room.discountPrice,
+      capacity: room.capacity,
+      beds: room.beds,
+      roomSizeSqm: room.roomSizeSqm,
+      viewType: room.viewType,
+      amenities: room.amenities,
+      images: (room.images || [])
+        .map((rImg: any) => {
+          const u = typeof rImg === "string" ? rImg : rImg?.url;
+          return optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+        })
+        .filter(Boolean),
+      totalRooms: room.totalRooms,
+      displayPrice:
+        (room.discountPrice && room.discountPrice > 0) ? room.discountPrice : room.basePrice,
       availableRooms: minAvailable,
       nights,
       totalPrice,

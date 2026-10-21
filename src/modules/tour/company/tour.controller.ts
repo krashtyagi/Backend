@@ -42,7 +42,8 @@ export class TourController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const result = await tourService.getAllTourCompanies(req.query);
+      const userId = (req as any).user?._id;
+      const result = await tourService.getAllTourCompanies(req.query, userId);
 
       res.status(200).json({
         success: true,

@@ -1,5 +1,15 @@
 import TourCompany from "./tour.model.js";
 import logger from "../../../shared/utils/logger.js";
+import Favorite from "../../favorites/favorite.model.js";
+
+const optimizeCloudinary = (url: string, transform = "f_auto,q_auto") => {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || (!url.includes("/image/upload/") && !url.includes("/upload/"))) {
+    return url;
+  }
+  const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
+  if (url.includes(`${marker}${transform}/`)) return url;
+  return url.replace(marker, `${marker}${transform}/`);
+};
 
 export const createTourCompany = async (data: any, vendor: any) => {
   try {
@@ -199,7 +209,7 @@ export const createTourCompany = async (data: any, vendor: any) => {
   }
 };
 
-export const getAllTourCompanies = async (query: any = {}) => {
+export const getAllTourCompanies = async (query: any = {}, userId: any = null) => {
   try {
     const TourService = (await import("../service/tourService.model.js")).default;
     const { city, search, featured, rank, page = 1, limit = 50 }: any = query;
@@ -271,9 +281,15 @@ export const getAllTourCompanies = async (query: any = {}) => {
 
     const total = await TourCompany.countDocuments(filter);
     const companies = await TourCompany.find(filter)
-      .populate({
-        path: "vendorId",
-        select: "businessName businessEmail logo currentStep status",
+      .select({
+        name: 1,
+        location: 1,
+        address: 1,
+        features: 1,
+        rating: 1,
+        isFeatured: 1,
+        createdAt: 1,
+        images: { $slice: 1 },
       })
       .sort({ isFeatured: -1, createdAt: -1 })
       .skip(skip)
@@ -282,7 +298,7 @@ export const getAllTourCompanies = async (query: any = {}) => {
 
     // STEP 3: Attach lowest tour service starting price and total ACTIVE tour count for each company
     const companyIds = companies.map((c) => c._id);
-    let minPrices = [];
+    let minPrices: any[] = [];
     if (companyIds.length > 0) {
       minPrices = await TourService.aggregate([
         { $match: { tour: { $in: companyIds }, isActive: true } },
@@ -311,35 +327,90 @@ export const getAllTourCompanies = async (query: any = {}) => {
       countMap[p._id.toString()] = p.tourCount;
     });
 
+    // STEP 4: Aggregate real review counts and ratings for each company
+    const Review = (await import("../../reviews/review.model.js")).default;
+    let reviewStats: any[] = [];
+    if (companyIds.length > 0) {
+      reviewStats = await Review.aggregate([
+        {
+          $match: {
+            companyType: "tour",
+            companyId: { $in: companyIds },
+          },
+        },
+        {
+          $group: {
+            _id: "$companyId",
+            averageRating: { $avg: "$rating" },
+            reviewCount: { $sum: 1 },
+          },
+        },
+      ]);
+    }
+
+    const reviewMap: Record<string, { average: number; count: number }> = {};
+    reviewStats.forEach((r: any) => {
+      reviewMap[r._id.toString()] = {
+        average: Number((r.averageRating || 0).toFixed(1)),
+        count: r.reviewCount || 0,
+      };
+    });
+
+    let favoriteSet = new Set<string>();
+    if (userId && companyIds.length > 0) {
+      try {
+        const favorites = await Favorite.find({
+          user: userId,
+          itemType: "tour",
+          itemId: { $in: companyIds },
+        })
+          .select("itemId")
+          .lean();
+        favoriteSet = new Set(favorites.map((f: any) => f.itemId.toString()));
+      } catch (err) {
+        logger.error("Error fetching favorites in getAllTourCompanies", err);
+      }
+    }
+
     const formattedCompanies = companies.map((company: any) => {
       const companyIdStr = company._id.toString();
-      const resolvedLogo =
-        company.logo?.url ||
-        company.vendorId?.logo?.url ||
+      const rawFirstImage =
         company.images?.[0]?.url ||
+        (typeof company.images?.[0] === "string" ? company.images[0] : null) ||
         `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
 
-      const rating =
-        company.rating?.average && company.rating.average > 0
-          ? company.rating.average
-          : 4.8;
-      const numReviews =
-        company.rating?.count && company.rating.count > 0
-          ? company.rating.count
-          : 142;
+      const optThumbnail = optimizeCloudinary(rawFirstImage, "f_auto,q_auto,w_800,c_limit");
+
+      const realReview = reviewMap[companyIdStr];
+      const avgRating = realReview
+        ? realReview.average
+        : (company.rating?.average ? Number(company.rating.average.toFixed(1)) : 0);
+      const countReviews = realReview
+        ? realReview.count
+        : (company.rating?.count || 0);
+
+      const featuresList = (company.features && company.features.length > 0)
+        ? company.features.slice(0, 3)
+        : ["guided_tours", "meals_included", "custom_packages"];
+
+      const cityStr = company.location?.city || company.address?.city || "India";
 
       return {
-        ...company,
-        logo: resolvedLogo,
-        image: company.images?.[0]?.url || resolvedLogo,
-        rating,
-        numReviews,
-        amenities: company.features?.length
-          ? company.features.slice(0, 3)
-          : ["Guided Tour", "Safety Gear", "Expert Guides"],
+        _id: company._id,
+        name: company.name,
+        city: cityStr,
         startingPrice: priceMap[companyIdStr] || 999,
+        rating: {
+          average: avgRating,
+          count: countReviews,
+        },
+        numReviews: countReviews,
+        features: featuresList,
+        amenities: featuresList,
+        thumbnail: optThumbnail,
+        image: optThumbnail,
         totalTours: countMap[companyIdStr] || 0,
-        city: company.location?.city || "India",
+        isFavorite: favoriteSet.has(companyIdStr),
       };
     });
 
@@ -490,8 +561,8 @@ export class TourCompanyService {
     return createTourCompany(data, vendor);
   }
 
-  async getAllTourCompanies(query: any = {}) {
-    return getAllTourCompanies(query);
+  async getAllTourCompanies(query: any = {}, userId: any = null) {
+    return getAllTourCompanies(query, userId);
   }
 
   async getTourCompanyById(id: any) {

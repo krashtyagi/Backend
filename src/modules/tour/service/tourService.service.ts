@@ -4,9 +4,9 @@ import TourCompany from "../company/tour.model.js";
 import Tax from "../../admin/tax/tax.model.js";
 import Favorite from "../../favorites/favorite.model.js";
 
-const optimizeCloudinary = (url: string, transform = "f_auto,q_auto") => {
+const optimizeCloudinary = (url: any, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || (!url.includes("/image/upload/") && !url.includes("/upload/"))) {
-    return url;
+    return url || "";
   }
   const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
   if (url.includes(`${marker}${transform}/`)) return url;
@@ -328,7 +328,7 @@ export const getCompanyDetails = async (id: any, userId: any = null) => {
       const optimizedServiceImages = (service.images || []).map((img: any) => {
         const u = typeof img === "string" ? img : img?.url;
         const opt = optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
+        return { url: opt };
       });
 
       return {
@@ -336,7 +336,7 @@ export const getCompanyDetails = async (id: any, userId: any = null) => {
         serviceType: "tour",
 
         title: service.title,
-        duration: `${service.duration.days}D/${service.duration.nights}N`,
+        duration: `${service.duration?.days || 0}D/${service.duration?.nights || 0}N`,
 
         price: effectivePrice,
         totalPrice: effectivePrice,
@@ -344,7 +344,7 @@ export const getCompanyDetails = async (id: any, userId: any = null) => {
         totalPriceWithTax,
         taxPercentage,
 
-        thumbnail: optimizedServiceImages[0] || null,
+        thumbnail: optimizedServiceImages[0] || { url: "/tours/tour.png" },
         thumbnails: optimizedServiceImages,
 
         features: service.features || [],
@@ -353,10 +353,10 @@ export const getCompanyDetails = async (id: any, userId: any = null) => {
 
     const isFavorite = await checkIsFavorite(company._id, userId, "tour");
 
-    const optimizedCompanyImages = (company.images || []).map((img: any) => {
+    const optimizedCompanyImages = (company.images || []).slice(0, 8).map((img: any) => {
       const u = typeof img === "string" ? img : img?.url;
       const opt = optimizeCloudinary(u, "f_auto,q_auto,w_1200,c_limit");
-      return typeof img === "string" ? opt : { ...img, url: opt };
+      return { url: opt };
     });
 
     const formattedCompany = {
@@ -415,7 +415,7 @@ export const getTourServiceDetails = async (id: any, userId: any = null) => {
     const taxDoc = await Tax.findOne({ isActive: true }).lean();
     const taxPercentage = taxDoc?.taxPercentage || 0;
 
-    //PRICE CALCULATION
+    // PRICE CALCULATION
     const effectivePrice =
       (service.discountPrice && service.discountPrice > 0) ? service.discountPrice : (service.basePrice || 0);
 
@@ -427,6 +427,12 @@ export const getTourServiceDetails = async (id: any, userId: any = null) => {
 
     const isFavorite = await checkIsFavorite(company?._id, userId, "tour");
 
+    const optimizedServiceImages = (service.images || []).map((img: any) => {
+      const u = typeof img === "string" ? img : img?.url;
+      const opt = optimizeCloudinary(u, "f_auto,q_auto,w_1200,c_limit");
+      return { url: opt };
+    });
+
     const formattedService = {
       serviceId: service._id,
       serviceType: "tour",
@@ -434,9 +440,9 @@ export const getTourServiceDetails = async (id: any, userId: any = null) => {
 
       title: service.title,
       description: service.description,
-      destinations: service.destinations,
+      destinations: service.destinations || [],
 
-      duration: `${service.duration.days}D/${service.duration.nights}N`,
+      duration: service.duration ? `${service.duration.days || 0}D/${service.duration.nights || 0}N` : "",
 
       price: effectivePrice,
       totalPrice: effectivePrice,
@@ -444,21 +450,30 @@ export const getTourServiceDetails = async (id: any, userId: any = null) => {
       totalPriceWithTax,
       taxPercentage,
 
-      images: (service.images || []).map((img: any) => {
-        const u = typeof img === "string" ? img : img?.url;
-        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_1200,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
-      }),
+      images: optimizedServiceImages,
       features: service.features || [],
       tourType: service.tourType || [],
       amenities: service.amenities || [],
 
-      maxPeople: service.maxPeople,
+      maxPeople: service.maxPeople || 10,
 
       meta: service.meta || {},
 
-      itinerary: service.itinerary || [],
+      itinerary: (service.itinerary || []).map((item: any) => ({
+        day: item.day,
+        title: item.title,
+        description: item.description,
+        highlights: item.highlights || [],
+      })),
     };
+
+    const rawCompanyImage = (company?.images || [])[0];
+    const companyFirstUrl = rawCompanyImage
+      ? optimizeCloudinary(
+          typeof rawCompanyImage === "string" ? rawCompanyImage : rawCompanyImage?.url,
+          "f_auto,q_auto,w_800,c_limit"
+        )
+      : null;
 
     const formattedCompany = {
       companyId: company?._id,
@@ -467,11 +482,7 @@ export const getTourServiceDetails = async (id: any, userId: any = null) => {
       name: company?.name,
       city: company?.location?.city,
       rating: company?.rating?.average || 0,
-      images: (company?.images || []).map((img: any) => {
-        const u = typeof img === "string" ? img : img?.url;
-        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_1200,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
-      }),
+      images: companyFirstUrl ? [{ url: companyFirstUrl }] : [],
       description: company?.description,
     };
 
