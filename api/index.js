@@ -607,33 +607,22 @@ var logger = winston.createLogger({
 var logger_default = logger;
 
 // src/shared/config/db.ts
-var cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+var isConnected = false;
 var connectDB = async () => {
-  if (cached.conn) {
-    return cached.conn;
-  }
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5e3,
-      socketTimeoutMS: 45e3
-    };
-    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => {
-      logger_default.info(`MongoDB Connected: ${m.connection.host}`);
-      return m;
-    });
+  if (isConnected) {
+    return;
   }
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      bufferCommands: false
+    });
+    isConnected = conn.connections[0].readyState === 1;
+    logger_default.info(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    const err = error;
+    logger_default.error(`Error: ${err.message}`);
+    throw err;
   }
-  return cached.conn;
 };
 var db_default = connectDB;
 
@@ -5988,14 +5977,6 @@ var HotelController = class {
     try {
       const userId = req.user?._id || null;
       const hotels = await hotel_service_default.getHomeHotels(req.query, userId);
-      if (!userId) {
-        res.setHeader(
-          "Cache-Control",
-          "public, s-maxage=300, stale-while-revalidate=600"
-        );
-      } else {
-        res.setHeader("Cache-Control", "private, no-cache");
-      }
       res.status(200).json({
         success: true,
         count: hotels.length,
@@ -6013,10 +5994,6 @@ var HotelController = class {
     try {
       const { q } = req.query;
       const suggestions = await hotel_service_default.getSuggestions(q);
-      res.setHeader(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600"
-      );
       res.status(200).json({
         success: true,
         count: suggestions.length,
@@ -6049,16 +6026,10 @@ var HotelController = class {
   async getRankedHotels(req, res, next) {
     try {
       const { rank, page, limit } = req.query;
-      const safePage = Math.max(Number(page) || 1, 1);
-      const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
       const result = await hotel_service_default.getRankedHotels(
         rank,
-        safePage,
-        safeLimit
-      );
-      res.setHeader(
-        "Cache-Control",
-        "public, s-maxage=300, stale-while-revalidate=600"
+        page ? Number(page) : 1,
+        limit ? Number(limit) : 10
       );
       res.status(200).json({
         success: true,
@@ -25222,8 +25193,12 @@ app.use(errorHandler);
 var app_default = app;
 
 // src/serverless.ts
+var isDbConnected = false;
 async function handler(req, res) {
-  await db_default();
+  if (!isDbConnected) {
+    await db_default();
+    isDbConnected = true;
+  }
   return app_default(req, res);
 }
 export {
