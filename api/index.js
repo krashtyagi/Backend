@@ -59,6 +59,98 @@ var init_availability_model = __esm({
   }
 });
 
+// src/modules/reviews/review.model.ts
+var review_model_exports = {};
+__export(review_model_exports, {
+  Review: () => Review,
+  default: () => review_model_default
+});
+import mongoose17, { Schema as Schema16 } from "mongoose";
+var reviewSchema, Review, review_model_default;
+var init_review_model = __esm({
+  "src/modules/reviews/review.model.ts"() {
+    "use strict";
+    reviewSchema = new Schema16(
+      {
+        userId: {
+          type: Schema16.Types.ObjectId,
+          ref: "User",
+          required: true
+        },
+        bookingId: {
+          type: Schema16.Types.ObjectId,
+          required: true,
+          unique: true
+        },
+        companyId: {
+          type: Schema16.Types.ObjectId,
+          required: true
+        },
+        companyName: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        companyType: {
+          type: String,
+          enum: ["hotel", "adventure", "tour", "cab", "bike"],
+          required: true
+        },
+        vendorId: {
+          type: Schema16.Types.ObjectId,
+          ref: "Vendor",
+          required: true
+        },
+        rating: {
+          type: Number,
+          required: true,
+          min: 1,
+          max: 5
+        },
+        comment: {
+          type: String,
+          trim: true,
+          maxlength: 1e3
+        },
+        breakdown: {
+          facilities: { type: Number, min: 1, max: 5 },
+          cleanliness: { type: Number, min: 1, max: 5 },
+          services: { type: Number, min: 1, max: 5 },
+          comfort: { type: Number, min: 1, max: 5 },
+          location: { type: Number, min: 1, max: 5 }
+        },
+        vendorReply: {
+          message: {
+            type: String,
+            trim: true,
+            maxlength: 1e3
+          },
+          repliedAt: Date
+        },
+        isFlagged: {
+          type: Boolean,
+          default: false
+        },
+        flagReason: {
+          type: String,
+          default: "",
+          trim: true
+        }
+      },
+      {
+        timestamps: true
+      }
+    );
+    reviewSchema.index({ bookingId: 1 }, { unique: true });
+    reviewSchema.index({
+      companyType: 1,
+      companyId: 1
+    });
+    Review = mongoose17.model("Review", reviewSchema);
+    review_model_default = Review;
+  }
+});
+
 // src/modules/cab/service/cabService.model.ts
 var cabService_model_exports = {};
 __export(cabService_model_exports, {
@@ -515,22 +607,33 @@ var logger = winston.createLogger({
 var logger_default = logger;
 
 // src/shared/config/db.ts
-var isConnected = false;
+var cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 var connectDB = async () => {
-  if (isConnected) {
-    return;
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5e3,
+      socketTimeoutMS: 45e3
+    };
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => {
+      logger_default.info(`MongoDB Connected: ${m.connection.host}`);
+      return m;
+    });
   }
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      bufferCommands: false
-    });
-    isConnected = conn.connections[0].readyState === 1;
-    logger_default.info(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    const err = error;
-    logger_default.error(`Error: ${err.message}`);
-    throw err;
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
   }
+  return cached.conn;
 };
 var db_default = connectDB;
 
@@ -4366,88 +4469,8 @@ favoriteSchema.index({ user: 1, itemId: 1, itemType: 1 }, { unique: true });
 var Favorite = mongoose16.model("Favorite", favoriteSchema);
 var favorite_model_default = Favorite;
 
-// src/modules/reviews/review.model.ts
-import mongoose17, { Schema as Schema16 } from "mongoose";
-var reviewSchema = new Schema16(
-  {
-    userId: {
-      type: Schema16.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-    bookingId: {
-      type: Schema16.Types.ObjectId,
-      required: true,
-      unique: true
-    },
-    companyId: {
-      type: Schema16.Types.ObjectId,
-      required: true
-    },
-    companyName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    companyType: {
-      type: String,
-      enum: ["hotel", "adventure", "tour", "cab", "bike"],
-      required: true
-    },
-    vendorId: {
-      type: Schema16.Types.ObjectId,
-      ref: "Vendor",
-      required: true
-    },
-    rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5
-    },
-    comment: {
-      type: String,
-      trim: true,
-      maxlength: 1e3
-    },
-    breakdown: {
-      facilities: { type: Number, min: 1, max: 5 },
-      cleanliness: { type: Number, min: 1, max: 5 },
-      services: { type: Number, min: 1, max: 5 },
-      comfort: { type: Number, min: 1, max: 5 },
-      location: { type: Number, min: 1, max: 5 }
-    },
-    vendorReply: {
-      message: {
-        type: String,
-        trim: true,
-        maxlength: 1e3
-      },
-      repliedAt: Date
-    },
-    isFlagged: {
-      type: Boolean,
-      default: false
-    },
-    flagReason: {
-      type: String,
-      default: "",
-      trim: true
-    }
-  },
-  {
-    timestamps: true
-  }
-);
-reviewSchema.index({ bookingId: 1 }, { unique: true });
-reviewSchema.index({
-  companyType: 1,
-  companyId: 1
-});
-var Review = mongoose17.model("Review", reviewSchema);
-var review_model_default = Review;
-
 // src/modules/hotels/hotel.service.ts
+init_review_model();
 var optimizeCloudinary = (url, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
     return url;
@@ -4966,7 +4989,7 @@ var getHomeHotels = async (query = {}, userId = null) => {
         { city: cityRegex }
       ];
     }
-    const hotels = await hotel_model_default.find(filter).select("name city address images rating numReviews isFeatured rank amenities").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
+    const hotels = await hotel_model_default.find(filter).select("name city address.city address.country images rating numReviews isFeatured rank amenities").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
     const hotelIds = hotels.map((h) => h._id);
     const priceAgg = await roomType_model_default.aggregate([
       {
@@ -5040,21 +5063,16 @@ var getHomeHotels = async (query = {}, userId = null) => {
       const amenities = Array.isArray(hotel.amenities) && hotel.amenities.length > 0 ? hotel.amenities.slice(0, 3).map(formatAmenityName) : [];
       const rawImg = hotel.images?.[0]?.url;
       const image = rawImg ? optimizeCloudinary(rawImg, "f_auto,q_auto,w_600,c_limit") : "/hotels/room1.png";
-      const rawImagesList = (hotel.images?.map((i) => i.url).filter(Boolean) || [image]).slice(0, 10);
-      const images = rawImagesList.map((u) => optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit"));
       const startingPrice = priceMap[hotel._id.toString()] || 0;
       return {
         _id: hotel._id,
         name: hotel.name,
         city: hotel.address?.city || hotel.city,
-        address: hotel.address,
+        country: hotel.address?.country || "India",
         rating,
         numReviews,
         amenities,
         image,
-        images,
-        rank: hotel?.rank || "C",
-        isFeatured: hotel.isFeatured || false,
         startingPrice
       };
     });
@@ -5115,13 +5133,18 @@ var getHotelDetails = async (hotelId, userId = null) => {
     const rId = b.roomTypeId.toString();
     activeBookingsCountMap[rId] = (activeBookingsCountMap[rId] || 0) + (b.roomsBooked || 1);
   }
-  const optimizedHotelImages = (hotel.images || []).map((img) => ({
-    ...img,
-    url: optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit")
-  }));
+  const optimizedHotelImages = (hotel.images || []).map((img) => optimizeCloudinary(img?.url, "f_auto,q_auto,w_1200,c_limit")).filter(Boolean);
   return {
-    ...hotel,
+    _id: hotel._id,
+    name: hotel.name,
+    description: hotel.description,
+    address: hotel.address,
+    city: hotel.city,
+    location: hotel.location,
     images: optimizedHotelImages,
+    amenities: hotel.amenities,
+    rating: hotel.rating,
+    numReviews: hotel.numReviews,
     isFavorite,
     roomTypes: roomTypes.map((room) => {
       const avail = availabilityMap[room._id.toString()];
@@ -5131,12 +5154,21 @@ var getHotelDetails = async (hotelId, userId = null) => {
       const availableRooms = Math.max(room.totalRooms - booked - blocked, 0);
       const optimizedRoomImages = (room.images || []).map((rImg) => {
         const u = typeof rImg === "string" ? rImg : rImg?.url;
-        const opt = optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
-        return typeof rImg === "string" ? opt : { ...rImg, url: opt };
-      });
+        return optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+      }).filter(Boolean);
       return {
-        ...room,
+        _id: room._id,
+        name: room.name,
+        description: room.description,
+        basePrice: room.basePrice,
+        discountPrice: room.discountPrice,
+        capacity: room.capacity,
+        beds: room.beds,
+        roomSizeSqm: room.roomSizeSqm,
+        viewType: room.viewType,
+        amenities: room.amenities,
         images: optimizedRoomImages,
+        totalRooms: room.totalRooms,
         displayPrice: room.discountPrice && room.discountPrice > 0 ? room.discountPrice : room.basePrice,
         availableRooms
       };
@@ -5255,7 +5287,22 @@ var getHotelAvailability = async (hotelId, checkIn, checkOut, adults, children) 
     const totalTax = Number((totalPrice * taxPercentage / 100).toFixed(2));
     const totalPriceWithTax = Number((totalPrice + totalTax).toFixed(2));
     results.push({
-      ...room,
+      _id: room._id,
+      name: room.name,
+      description: room.description,
+      basePrice: room.basePrice,
+      discountPrice: room.discountPrice,
+      capacity: room.capacity,
+      beds: room.beds,
+      roomSizeSqm: room.roomSizeSqm,
+      viewType: room.viewType,
+      amenities: room.amenities,
+      images: (room.images || []).map((rImg) => {
+        const u = typeof rImg === "string" ? rImg : rImg?.url;
+        return optimizeCloudinary(u, "f_auto,q_auto,w_800,c_limit");
+      }).filter(Boolean),
+      totalRooms: room.totalRooms,
+      displayPrice: room.discountPrice && room.discountPrice > 0 ? room.discountPrice : room.basePrice,
       availableRooms: minAvailable,
       nights,
       totalPrice,
@@ -5941,6 +5988,14 @@ var HotelController = class {
     try {
       const userId = req.user?._id || null;
       const hotels = await hotel_service_default.getHomeHotels(req.query, userId);
+      if (!userId) {
+        res.setHeader(
+          "Cache-Control",
+          "public, s-maxage=300, stale-while-revalidate=600"
+        );
+      } else {
+        res.setHeader("Cache-Control", "private, no-cache");
+      }
       res.status(200).json({
         success: true,
         count: hotels.length,
@@ -5958,6 +6013,10 @@ var HotelController = class {
     try {
       const { q } = req.query;
       const suggestions = await hotel_service_default.getSuggestions(q);
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600"
+      );
       res.status(200).json({
         success: true,
         count: suggestions.length,
@@ -5990,10 +6049,16 @@ var HotelController = class {
   async getRankedHotels(req, res, next) {
     try {
       const { rank, page, limit } = req.query;
+      const safePage = Math.max(Number(page) || 1, 1);
+      const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
       const result = await hotel_service_default.getRankedHotels(
         rank,
-        page ? Number(page) : 1,
-        limit ? Number(limit) : 10
+        safePage,
+        safeLimit
+      );
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600"
       );
       res.status(200).json({
         success: true,
@@ -10885,6 +10950,7 @@ var payment_routes_default = router10;
 import { Router as Router11 } from "express";
 
 // src/modules/reviews/review.service.ts
+init_review_model();
 import mongoose35 from "mongoose";
 init_service_model();
 init_bikeService_model();
@@ -10892,6 +10958,7 @@ init_cabService_model();
 init_tourService_model();
 
 // src/modules/reviews/helpers/updateCompanyRating.ts
+init_review_model();
 import mongoose34 from "mongoose";
 var updateCompanyRating = async (companyType, companyId) => {
   try {
@@ -15060,6 +15127,14 @@ var bikeService_routes_default = router21;
 import { Router as Router22 } from "express";
 
 // src/modules/tour/company/tour.service.ts
+var optimizeCloudinary2 = (url, transform = "f_auto,q_auto") => {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
+    return url;
+  }
+  const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
+  if (url.includes(`${marker}${transform}/`)) return url;
+  return url.replace(marker, `${marker}${transform}/`);
+};
 var createTourCompany = async (data, vendor) => {
   try {
     if (vendor.isSubmitted && vendor.status !== "rejected") {
@@ -15208,7 +15283,7 @@ var createTourCompany = async (data, vendor) => {
     throw error;
   }
 };
-var getAllTourCompanies = async (query = {}) => {
+var getAllTourCompanies = async (query = {}, userId = null) => {
   try {
     const TourService2 = (await Promise.resolve().then(() => (init_tourService_model(), tourService_model_exports))).default;
     const { city, search, featured, rank, page = 1, limit = 50 } = query;
@@ -15267,9 +15342,15 @@ var getAllTourCompanies = async (query = {}) => {
     const limitNum = Math.max(1, Number(limit) || 50);
     const skip = (pageNum - 1) * limitNum;
     const total = await tour_model_default.countDocuments(filter);
-    const companies = await tour_model_default.find(filter).populate({
-      path: "vendorId",
-      select: "businessName businessEmail logo currentStep status"
+    const companies = await tour_model_default.find(filter).select({
+      name: 1,
+      location: 1,
+      address: 1,
+      features: 1,
+      rating: 1,
+      isFeatured: 1,
+      createdAt: 1,
+      images: { $slice: 1 }
     }).sort({ isFeatured: -1, createdAt: -1 }).skip(skip).limit(limitNum).lean();
     const companyIds = companies.map((c) => c._id);
     let minPrices = [];
@@ -15299,21 +15380,70 @@ var getAllTourCompanies = async (query = {}) => {
       priceMap[p._id.toString()] = p.minPrice;
       countMap[p._id.toString()] = p.tourCount;
     });
+    const Review2 = (await Promise.resolve().then(() => (init_review_model(), review_model_exports))).default;
+    let reviewStats = [];
+    if (companyIds.length > 0) {
+      reviewStats = await Review2.aggregate([
+        {
+          $match: {
+            companyType: "tour",
+            companyId: { $in: companyIds }
+          }
+        },
+        {
+          $group: {
+            _id: "$companyId",
+            averageRating: { $avg: "$rating" },
+            reviewCount: { $sum: 1 }
+          }
+        }
+      ]);
+    }
+    const reviewMap = {};
+    reviewStats.forEach((r) => {
+      reviewMap[r._id.toString()] = {
+        average: Number((r.averageRating || 0).toFixed(1)),
+        count: r.reviewCount || 0
+      };
+    });
+    let favoriteSet = /* @__PURE__ */ new Set();
+    if (userId && companyIds.length > 0) {
+      try {
+        const favorites = await favorite_model_default.find({
+          user: userId,
+          itemType: "tour",
+          itemId: { $in: companyIds }
+        }).select("itemId").lean();
+        favoriteSet = new Set(favorites.map((f) => f.itemId.toString()));
+      } catch (err) {
+        logger_default.error("Error fetching favorites in getAllTourCompanies", err);
+      }
+    }
     const formattedCompanies = companies.map((company) => {
       const companyIdStr = company._id.toString();
-      const resolvedLogo = company.logo?.url || company.vendorId?.logo?.url || company.images?.[0]?.url || `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
-      const rating = company.rating?.average && company.rating.average > 0 ? company.rating.average : 4.8;
-      const numReviews = company.rating?.count && company.rating.count > 0 ? company.rating.count : 142;
+      const rawFirstImage = company.images?.[0]?.url || (typeof company.images?.[0] === "string" ? company.images[0] : null) || `https://api.dicebear.com/10.x/initials/svg?seed=${encodeURIComponent(company.name)}`;
+      const optThumbnail = optimizeCloudinary2(rawFirstImage, "f_auto,q_auto,w_800,c_limit");
+      const realReview = reviewMap[companyIdStr];
+      const avgRating = realReview ? realReview.average : company.rating?.average ? Number(company.rating.average.toFixed(1)) : 0;
+      const countReviews = realReview ? realReview.count : company.rating?.count || 0;
+      const featuresList = company.features && company.features.length > 0 ? company.features.slice(0, 3) : ["guided_tours", "meals_included", "custom_packages"];
+      const cityStr = company.location?.city || company.address?.city || "India";
       return {
-        ...company,
-        logo: resolvedLogo,
-        image: company.images?.[0]?.url || resolvedLogo,
-        rating,
-        numReviews,
-        amenities: company.features?.length ? company.features.slice(0, 3) : ["Guided Tour", "Safety Gear", "Expert Guides"],
+        _id: company._id,
+        name: company.name,
+        city: cityStr,
         startingPrice: priceMap[companyIdStr] || 999,
+        rating: {
+          average: avgRating,
+          count: countReviews
+        },
+        numReviews: countReviews,
+        features: featuresList,
+        amenities: featuresList,
+        thumbnail: optThumbnail,
+        image: optThumbnail,
         totalTours: countMap[companyIdStr] || 0,
-        city: company.location?.city || "India"
+        isFavorite: favoriteSet.has(companyIdStr)
       };
     });
     return {
@@ -15424,8 +15554,8 @@ var TourCompanyService = class {
   async createTourCompany(data, vendor) {
     return createTourCompany(data, vendor);
   }
-  async getAllTourCompanies(query = {}) {
-    return getAllTourCompanies(query);
+  async getAllTourCompanies(query = {}, userId = null) {
+    return getAllTourCompanies(query, userId);
   }
   async getTourCompanyById(id) {
     return getTourCompanyById(id);
@@ -15466,7 +15596,8 @@ var TourController = class {
   }
   async getTourCompanies(req, res, next) {
     try {
-      const result = await tour_service_default.getAllTourCompanies(req.query);
+      const userId = req.user?._id;
+      const result = await tour_service_default.getAllTourCompanies(req.query, userId);
       res.status(200).json({
         success: true,
         count: result.companies.length,
@@ -15523,12 +15654,12 @@ var TourController = class {
 // src/modules/tour/company/tour.routes.ts
 var router22 = Router22();
 var tourController = new TourController();
-router22.get("/", tourController.getTourCompanies);
-router22.get("/companies", tourController.getTourCompanies);
+router22.get("/", optionalProtect, tourController.getTourCompanies);
+router22.get("/companies", optionalProtect, tourController.getTourCompanies);
 router22.get("/grouped-by-city", tourController.getTourCompaniesGroupedByCity);
-router22.get("/companies/:id", tourController.getTourCompanyById);
-router22.get("/ranked", tourController.getRankedTourCompanies);
-router22.get("/:id", tourController.getTourCompanyById);
+router22.get("/companies/:id", optionalProtect, tourController.getTourCompanyById);
+router22.get("/ranked", optionalProtect, tourController.getRankedTourCompanies);
+router22.get("/:id", optionalProtect, tourController.getTourCompanyById);
 router22.post(
   "/vendor/tours",
   protect,
@@ -15543,9 +15674,9 @@ import { Router as Router23 } from "express";
 // src/modules/tour/service/tourService.service.ts
 init_tourService_model();
 import mongoose41 from "mongoose";
-var optimizeCloudinary2 = (url, transform = "f_auto,q_auto") => {
+var optimizeCloudinary3 = (url, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
-    return url;
+    return url || "";
   }
   const marker = url.includes("/image/upload/") ? "/image/upload/" : "/upload/";
   if (url.includes(`${marker}${transform}/`)) return url;
@@ -15805,29 +15936,29 @@ var getCompanyDetails = async (id, userId = null) => {
       const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
       const optimizedServiceImages = (service.images || []).map((img) => {
         const u = typeof img === "string" ? img : img?.url;
-        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_800,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
+        const opt = optimizeCloudinary3(u, "f_auto,q_auto,w_800,c_limit");
+        return { url: opt };
       });
       return {
         serviceId: service._id,
         serviceType: "tour",
         title: service.title,
-        duration: `${service.duration.days}D/${service.duration.nights}N`,
+        duration: `${service.duration?.days || 0}D/${service.duration?.nights || 0}N`,
         price: effectivePrice,
         totalPrice: effectivePrice,
         totalTax,
         totalPriceWithTax,
         taxPercentage,
-        thumbnail: optimizedServiceImages[0] || null,
+        thumbnail: optimizedServiceImages[0] || { url: "/tours/tour.png" },
         thumbnails: optimizedServiceImages,
         features: service.features || []
       };
     });
     const isFavorite = await checkIsFavorite5(company._id, userId, "tour");
-    const optimizedCompanyImages = (company.images || []).map((img) => {
+    const optimizedCompanyImages = (company.images || []).slice(0, 8).map((img) => {
       const u = typeof img === "string" ? img : img?.url;
-      const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
-      return typeof img === "string" ? opt : { ...img, url: opt };
+      const opt = optimizeCloudinary3(u, "f_auto,q_auto,w_1200,c_limit");
+      return { url: opt };
     });
     const formattedCompany = {
       companyId: company._id,
@@ -15879,31 +16010,42 @@ var getTourServiceDetails = async (id, userId = null) => {
     );
     const totalPriceWithTax = Number((effectivePrice + totalTax).toFixed(2));
     const isFavorite = await checkIsFavorite5(company?._id, userId, "tour");
+    const optimizedServiceImages = (service.images || []).map((img) => {
+      const u = typeof img === "string" ? img : img?.url;
+      const opt = optimizeCloudinary3(u, "f_auto,q_auto,w_1200,c_limit");
+      return { url: opt };
+    });
     const formattedService = {
       serviceId: service._id,
       serviceType: "tour",
       isFavorite,
       title: service.title,
       description: service.description,
-      destinations: service.destinations,
-      duration: `${service.duration.days}D/${service.duration.nights}N`,
+      destinations: service.destinations || [],
+      duration: service.duration ? `${service.duration.days || 0}D/${service.duration.nights || 0}N` : "",
       price: effectivePrice,
       totalPrice: effectivePrice,
       totalTax,
       totalPriceWithTax,
       taxPercentage,
-      images: (service.images || []).map((img) => {
-        const u = typeof img === "string" ? img : img?.url;
-        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
-      }),
+      images: optimizedServiceImages,
       features: service.features || [],
       tourType: service.tourType || [],
       amenities: service.amenities || [],
-      maxPeople: service.maxPeople,
+      maxPeople: service.maxPeople || 10,
       meta: service.meta || {},
-      itinerary: service.itinerary || []
+      itinerary: (service.itinerary || []).map((item) => ({
+        day: item.day,
+        title: item.title,
+        description: item.description,
+        highlights: item.highlights || []
+      }))
     };
+    const rawCompanyImage = (company?.images || [])[0];
+    const companyFirstUrl = rawCompanyImage ? optimizeCloudinary3(
+      typeof rawCompanyImage === "string" ? rawCompanyImage : rawCompanyImage?.url,
+      "f_auto,q_auto,w_800,c_limit"
+    ) : null;
     const formattedCompany = {
       companyId: company?._id,
       serviceType: "tour",
@@ -15911,11 +16053,7 @@ var getTourServiceDetails = async (id, userId = null) => {
       name: company?.name,
       city: company?.location?.city,
       rating: company?.rating?.average || 0,
-      images: (company?.images || []).map((img) => {
-        const u = typeof img === "string" ? img : img?.url;
-        const opt = optimizeCloudinary2(u, "f_auto,q_auto,w_1200,c_limit");
-        return typeof img === "string" ? opt : { ...img, url: opt };
-      }),
+      images: companyFirstUrl ? [{ url: companyFirstUrl }] : [],
       description: company?.description
     };
     return {
@@ -21384,6 +21522,7 @@ var booking_routes_default4 = router33;
 import { Router as Router34 } from "express";
 
 // src/modules/admin/review/review.service.ts
+init_review_model();
 var getReviewStats = async () => {
   try {
     const result = await review_model_default.aggregate([
@@ -24968,17 +25107,23 @@ var allowedOrigins = [
   process.env.VENDOR_URL,
   process.env.ADMIN_URL
 ].filter(Boolean);
+function isOriginAllowed(origin) {
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin === "https://trivllo.com" || origin.endsWith(".trivllo.com") || origin.includes("helix-fawn.vercel.app") || /^https:\/\/.*trivll?o.*\.vercel\.app$/.test(origin)) {
+    return true;
+  }
+  return false;
+}
 app.use(
   cors({
     origin: function(origin, callback) {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("trivllo.com") || origin.includes("localhost") || origin.includes("127.0.0.1")) {
-        callback(null, true);
-      } else if (process.env.NODE_ENV !== "production") {
-        callback(null, true);
-      } else {
-        callback(null, false);
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
       }
+      const corsError = new Error(`CORS blocked: Origin ${origin} is not allowed`);
+      corsError.statusCode = 403;
+      return callback(corsError);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -25003,6 +25148,20 @@ app.use(
     crossOriginEmbedderPolicy: false
   })
 );
+app.use("/api", (req, res, next) => {
+  if (req.originalUrl.includes("/auth/google") || req.originalUrl.includes("/auth/facebook") || req.originalUrl.includes("/auth/apple")) {
+    return next();
+  }
+  const fetchDest = req.headers["sec-fetch-dest"];
+  const fetchMode = req.headers["sec-fetch-mode"];
+  if (fetchDest === "document" || fetchMode === "navigate") {
+    return res.status(403).json({
+      success: false,
+      message: "Direct browser access to API endpoints is restricted."
+    });
+  }
+  next();
+});
 var limiter = rateLimit2({
   windowMs: 15 * 60 * 1e3,
   max: 2e3,
@@ -25063,12 +25222,8 @@ app.use(errorHandler);
 var app_default = app;
 
 // src/serverless.ts
-var isDbConnected = false;
 async function handler(req, res) {
-  if (!isDbConnected) {
-    await db_default();
-    isDbConnected = true;
-  }
+  await db_default();
   return app_default(req, res);
 }
 export {

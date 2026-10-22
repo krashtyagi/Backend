@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { Application, Request, Response } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -64,6 +64,22 @@ const allowedOrigins: string[] = [
   process.env.ADMIN_URL,
 ].filter(Boolean) as string[];
 
+function isOriginAllowed(origin: string): boolean {
+  if (allowedOrigins.includes(origin)) return true;
+
+  // Allow production & preview domains for trivllo / helix
+  if (
+    origin === "https://trivllo.com" ||
+    origin.endsWith(".trivllo.com") ||
+    origin.includes("helix-fawn.vercel.app") ||
+    /^https:\/\/.*trivll?o.*\.vercel\.app$/.test(origin)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 // ── CORS must be registered BEFORE helmet so preflight (OPTIONS) requests
 //    are handled before helmet can set restrictive headers ──
 app.use(
@@ -72,23 +88,16 @@ app.use(
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) {
-      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      // Non-browser or server-to-server requests without Origin header
       if (!origin) return callback(null, true);
 
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app") ||
-        origin.includes("trivllo.com") ||
-        origin.includes("localhost") ||
-        origin.includes("127.0.0.1")
-      ) {
-        callback(null, true);
-      } else if (process.env.NODE_ENV !== "production") {
-        // Allow all origins in non-production environments
-        callback(null, true);
-      } else {
-        callback(null, false);
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
       }
+
+      const corsError: any = new Error(`CORS blocked: Origin ${origin} is not allowed`);
+      corsError.statusCode = 403;
+      return callback(corsError);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -114,6 +123,31 @@ app.use(
     crossOriginEmbedderPolicy: false,
   }),
 );
+
+// ── Block direct browser address-bar navigation to /api endpoints ──
+app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  // Allow OAuth redirects through browser navigation
+  if (
+    req.originalUrl.includes("/auth/google") ||
+    req.originalUrl.includes("/auth/facebook") ||
+    req.originalUrl.includes("/auth/apple")
+  ) {
+    return next();
+  }
+
+  const fetchDest = req.headers["sec-fetch-dest"];
+  const fetchMode = req.headers["sec-fetch-mode"];
+
+  // When a user types the URL in browser or opens it directly in a new tab
+  if (fetchDest === "document" || fetchMode === "navigate") {
+    return res.status(403).json({
+      success: false,
+      message: "Direct browser access to API endpoints is restricted.",
+    });
+  }
+
+  next();
+});
 
 // Rate limiting..
 const limiter = rateLimit({

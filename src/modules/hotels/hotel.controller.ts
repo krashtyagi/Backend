@@ -225,6 +225,16 @@ export class HotelController {
 
       const hotels = await hotelService.getHomeHotels(req.query as any, userId);
 
+      // Edge CDN caching for anonymous visitors to protect backend & database from traffic spikes
+      if (!userId) {
+        res.setHeader(
+          "Cache-Control",
+          "public, s-maxage=300, stale-while-revalidate=600",
+        );
+      } else {
+        res.setHeader("Cache-Control", "private, no-cache");
+      }
+
       res.status(200).json({
         success: true,
         count: hotels.length,
@@ -248,6 +258,11 @@ export class HotelController {
       const { q } = req.query;
 
       const suggestions = await hotelService.getSuggestions(q as string);
+
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
 
       res.status(200).json({
         success: true,
@@ -292,10 +307,19 @@ export class HotelController {
   ): Promise<void> {
     try {
       const { rank, page, limit } = req.query;
+
+      const safePage = Math.max(Number(page) || 1, 1);
+      const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
       const result = await hotelService.getRankedHotels(
         rank as string,
-        page ? Number(page) : 1,
-        limit ? Number(limit) : 10,
+        safePage,
+        safeLimit,
+      );
+
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
       );
 
       res.status(200).json({
