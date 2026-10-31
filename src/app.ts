@@ -49,6 +49,7 @@ import adminTaxRoutes from "./modules/admin/tax/tax.routes.js";
 import adminAccountDeactivateRoutes from "./modules/admin/account-deactivate/account.routes.js";
 import adminPromotionRoutes from "./modules/admin/promotion/promotion.routes.js";
 import adminVendorPropertyRoutes from "./modules/admin/vendorProperty/vendorProperty.routes.js";
+import popularSectionRoutes from "./modules/popularSections/popularSection.routes.js";
 import { errorHandler } from "./shared/middlewares/errorHandler.js";
 import "./shared/config/passport.js";
 
@@ -227,6 +228,8 @@ app.use("/api/v1/admin/tax", adminTaxRoutes);
 app.use("/api/v1/admin/account-deactivate", adminAccountDeactivateRoutes);
 app.use("/api/v1/admin/promotions", adminPromotionRoutes);
 app.use("/api/v1/admin/vendor-properties", adminVendorPropertyRoutes);
+app.use("/api/v1/popular-sections", popularSectionRoutes);
+app.use("/api/v1/admin/popular-sections", popularSectionRoutes);
 
 app.use(errorHandler);
 

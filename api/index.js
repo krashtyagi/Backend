@@ -157,15 +157,15 @@ __export(cabService_model_exports, {
   CabService: () => CabService,
   default: () => cabService_model_default
 });
-import mongoose25, { Schema as Schema19 } from "mongoose";
+import mongoose26, { Schema as Schema20 } from "mongoose";
 var cabServiceSchema, CabService, cabService_model_default;
 var init_cabService_model = __esm({
   "src/modules/cab/service/cabService.model.ts"() {
     "use strict";
-    cabServiceSchema = new Schema19(
+    cabServiceSchema = new Schema20(
       {
         cab: {
-          type: Schema19.Types.ObjectId,
+          type: Schema20.Types.ObjectId,
           ref: "CabCompany",
           required: true
         },
@@ -248,7 +248,7 @@ var init_cabService_model = __esm({
     });
     cabServiceSchema.index({ cab: 1, isActive: 1 });
     cabServiceSchema.index({ title: "text", description: "text" });
-    CabService = mongoose25.model("CabService", cabServiceSchema);
+    CabService = mongoose26.model("CabService", cabServiceSchema);
     cabService_model_default = CabService;
   }
 });
@@ -259,15 +259,15 @@ __export(bikeService_model_exports, {
   BikeService: () => BikeService,
   default: () => bikeService_model_default
 });
-import mongoose26, { Schema as Schema20 } from "mongoose";
+import mongoose27, { Schema as Schema21 } from "mongoose";
 var bikeServiceSchema, BikeService, bikeService_model_default;
 var init_bikeService_model = __esm({
   "src/modules/bike/service/bikeService.model.ts"() {
     "use strict";
-    bikeServiceSchema = new Schema20(
+    bikeServiceSchema = new Schema21(
       {
         bike: {
-          type: Schema20.Types.ObjectId,
+          type: Schema21.Types.ObjectId,
           ref: "BikeCompany",
           required: true
         },
@@ -331,7 +331,7 @@ var init_bikeService_model = __esm({
     );
     bikeServiceSchema.index({ bike: 1, isActive: 1 });
     bikeServiceSchema.index({ bikeType: 1, pricePerDay: 1 });
-    BikeService = mongoose26.model("BikeService", bikeServiceSchema);
+    BikeService = mongoose27.model("BikeService", bikeServiceSchema);
     bikeService_model_default = BikeService;
   }
 });
@@ -342,12 +342,12 @@ __export(service_model_exports, {
   Service: () => Service,
   default: () => service_model_default
 });
-import mongoose27, { Schema as Schema21 } from "mongoose";
+import mongoose28, { Schema as Schema22 } from "mongoose";
 var itinerarySchema, serviceSchema, Service, service_model_default;
 var init_service_model = __esm({
   "src/modules/adventure/service/service.model.ts"() {
     "use strict";
-    itinerarySchema = new Schema21(
+    itinerarySchema = new Schema22(
       {
         day: {
           type: Number,
@@ -364,10 +364,10 @@ var init_service_model = __esm({
       },
       { _id: false }
     );
-    serviceSchema = new Schema21(
+    serviceSchema = new Schema22(
       {
         adventure: {
-          type: Schema21.Types.ObjectId,
+          type: Schema22.Types.ObjectId,
           ref: "Adventure",
           required: true,
           index: true
@@ -433,7 +433,7 @@ var init_service_model = __esm({
     serviceSchema.index({ adventure: 1, type: 1 });
     serviceSchema.index({ adventure: 1, basePrice: 1 });
     serviceSchema.index({ adventure: 1, discountPrice: 1 });
-    Service = mongoose27.model("Service", serviceSchema);
+    Service = mongoose28.model("Service", serviceSchema);
     service_model_default = Service;
   }
 });
@@ -444,12 +444,12 @@ __export(tourService_model_exports, {
   TourService: () => TourService,
   default: () => tourService_model_default
 });
-import mongoose28, { Schema as Schema22 } from "mongoose";
+import mongoose29, { Schema as Schema23 } from "mongoose";
 var itinerarySchema2, tourServiceSchema, TourService, tourService_model_default;
 var init_tourService_model = __esm({
   "src/modules/tour/service/tourService.model.ts"() {
     "use strict";
-    itinerarySchema2 = new Schema22(
+    itinerarySchema2 = new Schema23(
       {
         day: {
           type: Number,
@@ -472,10 +472,10 @@ var init_tourService_model = __esm({
       },
       { _id: false }
     );
-    tourServiceSchema = new Schema22(
+    tourServiceSchema = new Schema23(
       {
         tour: {
-          type: Schema22.Types.ObjectId,
+          type: Schema23.Types.ObjectId,
           ref: "TourCompany",
           required: true,
           index: true
@@ -567,7 +567,7 @@ var init_tourService_model = __esm({
     tourServiceSchema.index({ title: "text", description: "text" });
     tourServiceSchema.index({ basePrice: 1 });
     tourServiceSchema.index({ isActive: 1 });
-    TourService = mongoose28.model("TourService", tourServiceSchema);
+    TourService = mongoose29.model("TourService", tourServiceSchema);
     tourService_model_default = TourService;
   }
 });
@@ -4460,6 +4460,409 @@ var favorite_model_default = Favorite;
 
 // src/modules/hotels/hotel.service.ts
 init_review_model();
+
+// src/modules/popularSections/popularSection.model.ts
+import mongoose18, { Schema as Schema17 } from "mongoose";
+var popularSectionSchema = new Schema17(
+  {
+    tagline: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    city: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    category: {
+      type: String,
+      enum: ["hotel", "tour", "cab", "bike", "adventure"],
+      default: "hotel",
+      index: true
+    },
+    aliases: {
+      type: [String],
+      default: []
+    },
+    order: {
+      type: Number,
+      default: 0,
+      index: true
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true
+    },
+    limit: {
+      type: Number,
+      default: 12
+    }
+  },
+  { timestamps: true }
+);
+popularSectionSchema.index({ category: 1, isActive: 1, order: 1 });
+var PopularSection = mongoose18.models.PopularSection || mongoose18.model("PopularSection", popularSectionSchema);
+var popularSection_model_default = PopularSection;
+
+// src/modules/popularSections/popularSection.service.ts
+var DEFAULT_HOTEL_SECTIONS = [
+  {
+    tagline: "Popular Stays in Manali",
+    city: "Manali",
+    aliases: ["Siyal", "Simsa", "Old Manali", "Solang", "Vashisht", "Aleo"],
+    order: 0,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Popular Stays in Shimla",
+    city: "Shimla",
+    aliases: ["Sanjauli", "Kufri", "Mashobra", "Chotta Shimla", "Bhattakufer", "Dhalli"],
+    order: 1,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Popular Stays in Srinagar",
+    city: "Srinagar",
+    aliases: ["Dal Lake", "Lal Chowk", "Dalgate", "Nishat", "Shalimar"],
+    order: 2,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Luxury in Indore",
+    city: "Indore",
+    aliases: [],
+    order: 3,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Popular Homes In South Goa",
+    city: "Goa",
+    aliases: ["South Goa", "North Goa", "Calangute", "Candolim", "Baga", "Anjuna", "Panaji", "Vasco"],
+    order: 4,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Best in Delhi",
+    city: "Delhi",
+    aliases: ["New Delhi", "Delhi NCR", "South Delhi", "Dwarka"],
+    order: 5,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Popular Stays In Bengaluru",
+    city: "Bengaluru",
+    aliases: ["Bangalore", "Whitefield", "Koramangala", "Indiranagar", "Electronic City"],
+    order: 6,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Popular Homes In Rishikesh",
+    city: "Rishikesh",
+    aliases: ["Tapovan", "Laxman Jhula", "Ram Jhula", "Shivpuri"],
+    order: 7,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Luxury in Mumbai",
+    city: "Mumbai",
+    aliases: ["Navi Mumbai", "Thane", "Andheri", "Bandra", "Juhu", "Colaba"],
+    order: 8,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Stays in Gwalior",
+    city: "Gwalior",
+    aliases: [],
+    order: 9,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Villas & Resorts in Udaipur",
+    city: "Udaipur",
+    aliases: [],
+    order: 10,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Stays in Jaipur",
+    city: "Jaipur",
+    aliases: [],
+    order: 11,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Luxury Rentals in Lonavala",
+    city: "Lonavala",
+    aliases: ["Khandala"],
+    order: 12,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Heritage Homes in Mysore",
+    city: "Mysore",
+    aliases: [],
+    order: 13,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Coastal Villas in Kochi",
+    city: "Kochi",
+    aliases: [],
+    order: 14,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Hospitality Hub of Hyderabad",
+    city: "Hyderabad",
+    aliases: [],
+    order: 15,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Beachfront Stays in Pondicherry",
+    city: "Pondicherry",
+    aliases: [],
+    order: 16,
+    category: "hotel",
+    limit: 12
+  },
+  {
+    tagline: "Villas in Alibaug",
+    city: "Alibaug",
+    aliases: [],
+    order: 17,
+    category: "hotel",
+    limit: 12
+  }
+];
+var DEFAULT_TOUR_SECTIONS = [
+  {
+    tagline: "Top Tour Companies in Rishikesh",
+    city: "Rishikesh",
+    aliases: ["Tapovan", "Laxman Jhula", "Shivpuri", "Neelkanth"],
+    order: 0,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Himalayan Trekking & Expeditions",
+    city: "Manali",
+    aliases: ["Solang", "Rohtang", "Kasol", "Spiti", "Old Manali"],
+    order: 1,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Scenic Tours & Nature Trails in Shimla",
+    city: "Shimla",
+    aliases: ["Sanjauli", "Kufri", "Chail", "Mashobra", "Narkanda"],
+    order: 2,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Kashmir Paradise Tours",
+    city: "Srinagar",
+    aliases: ["Gulmarg", "Pahalgam", "Sonamarg", "Dal Lake"],
+    order: 3,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Water Sports & Heritage Tours in Goa",
+    city: "Goa",
+    aliases: ["Calangute", "Panaji", "Baga", "Dudhsagar", "North Goa", "South Goa"],
+    order: 4,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Royal Heritage Walks in Jaipur",
+    city: "Jaipur",
+    aliases: ["Amer", "Nahargarh", "Hawa Mahal", "Old City"],
+    order: 5,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Palaces & Lakes of Udaipur",
+    city: "Udaipur",
+    aliases: ["City Palace", "Pichola", "Fateh Sagar"],
+    order: 6,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Wildlife Safaris in Jim Corbett",
+    city: "Corbett",
+    aliases: ["Ramnagar", "Dhikala", "Bijrani", "Jim Corbett"],
+    order: 7,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Kerala Backwaters & Tea Trails",
+    city: "Munnar",
+    aliases: ["Alleppey", "Kochi", "Wayanad", "Varkala"],
+    order: 8,
+    category: "tour",
+    limit: 12
+  },
+  {
+    tagline: "Spiritual Ghats & Ganges Boat Tours",
+    city: "Varanasi",
+    aliases: ["Dashashwamedh", "Assi Ghat", "Kashi"],
+    order: 9,
+    category: "tour",
+    limit: 12
+  }
+];
+var PopularSectionService = class {
+  /**
+   * Seed default sections if empty
+   */
+  async seedDefaultSectionsIfEmpty(category = "hotel") {
+    const count = await popularSection_model_default.countDocuments({ category });
+    if (count === 0) {
+      const templateList = category === "tour" ? DEFAULT_TOUR_SECTIONS : DEFAULT_HOTEL_SECTIONS;
+      const itemsToInsert = templateList.map((sec, i) => ({
+        ...sec,
+        category,
+        isActive: true,
+        order: i
+      }));
+      await popularSection_model_default.insertMany(itemsToInsert);
+    }
+  }
+  /**
+   * Get active sections for client home carousel
+   */
+  async getActiveSections(category = "hotel") {
+    await this.seedDefaultSectionsIfEmpty(category);
+    return await popularSection_model_default.find({ category, isActive: true }).sort({ order: 1, createdAt: 1 }).lean();
+  }
+  /**
+   * Get all sections for Admin Management
+   */
+  async getAllSectionsForAdmin(category = "hotel") {
+    await this.seedDefaultSectionsIfEmpty(category);
+    return await popularSection_model_default.find({ category }).sort({ order: 1, createdAt: 1 }).lean();
+  }
+  /**
+   * Create a new destination section
+   */
+  async createSection(data) {
+    const category = data.category || "hotel";
+    let aliases = [];
+    if (Array.isArray(data.aliases)) {
+      aliases = data.aliases.map((a) => a.trim()).filter(Boolean);
+    } else if (typeof data.aliases === "string") {
+      aliases = data.aliases.split(/[,/]+/).map((a) => a.trim()).filter(Boolean);
+    }
+    let order = typeof data.order === "number" ? data.order : void 0;
+    if (order === void 0) {
+      const last = await popularSection_model_default.findOne({ category }).sort({ order: -1 }).select("order");
+      order = last && typeof last.order === "number" ? last.order + 1 : 0;
+    }
+    const section = new popularSection_model_default({
+      tagline: (data.tagline || "").trim(),
+      city: (data.city || "").trim(),
+      category,
+      aliases,
+      order,
+      isActive: data.isActive !== void 0 ? Boolean(data.isActive) : true,
+      limit: Number(data.limit) || 12
+    });
+    return await section.save();
+  }
+  /**
+   * Update an existing destination section
+   */
+  async updateSection(id, data) {
+    const updateData = {};
+    if (data.tagline !== void 0) updateData.tagline = data.tagline.trim();
+    if (data.city !== void 0) updateData.city = data.city.trim();
+    if (data.limit !== void 0) updateData.limit = Number(data.limit) || 12;
+    if (data.isActive !== void 0) updateData.isActive = Boolean(data.isActive);
+    if (data.order !== void 0) updateData.order = Number(data.order);
+    if (data.aliases !== void 0) {
+      if (Array.isArray(data.aliases)) {
+        updateData.aliases = data.aliases.map((a) => a.trim()).filter(Boolean);
+      } else if (typeof data.aliases === "string") {
+        updateData.aliases = data.aliases.split(/[,/]+/).map((a) => a.trim()).filter(Boolean);
+      }
+    }
+    const section = await popularSection_model_default.findByIdAndUpdate(id, updateData, { new: true });
+    if (!section) throw new Error("Destination section not found");
+    return section;
+  }
+  /**
+   * Toggle active state
+   */
+  async toggleActive(id) {
+    const section = await popularSection_model_default.findById(id);
+    if (!section) throw new Error("Destination section not found");
+    section.isActive = !section.isActive;
+    return await section.save();
+  }
+  /**
+   * Delete destination section
+   */
+  async deleteSection(id) {
+    const section = await popularSection_model_default.findByIdAndDelete(id);
+    if (!section) throw new Error("Destination section not found");
+    return section;
+  }
+  /**
+   * Reorder destination sections in bulk
+   */
+  async reorderSections(items) {
+    const bulkOps = items.map((item) => ({
+      updateOne: {
+        filter: { _id: item.id },
+        update: { $set: { order: item.order } }
+      }
+    }));
+    await popularSection_model_default.bulkWrite(bulkOps);
+    return true;
+  }
+  /**
+   * Reset default sections
+   */
+  async resetDefaultSections(category = "hotel") {
+    await popularSection_model_default.deleteMany({ category });
+    const templateList = category === "tour" ? DEFAULT_TOUR_SECTIONS : DEFAULT_HOTEL_SECTIONS;
+    const itemsToInsert = templateList.map((sec, i) => ({
+      ...sec,
+      category,
+      isActive: true,
+      order: i
+    }));
+    return await popularSection_model_default.insertMany(itemsToInsert);
+  }
+};
+var popularSectionService = new PopularSectionService();
+var popularSection_service_default = popularSectionService;
+
+// src/modules/hotels/hotel.service.ts
 var optimizeCloudinary = (url, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
     return url;
@@ -4952,6 +5355,129 @@ var getAllHotels = async (query = {}, userId = null) => {
     throw error;
   }
 };
+var LOCALITY_TO_CITY = {
+  // Shimla
+  sanjauli: "shimla",
+  kufri: "shimla",
+  mashobra: "shimla",
+  "chotta shimla": "shimla",
+  shoghi: "shimla",
+  "summer hill": "shimla",
+  dhalli: "shimla",
+  jakhoo: "shimla",
+  totu: "shimla",
+  boileauganj: "shimla",
+  kasumpti: "shimla",
+  bhattakufer: "shimla",
+  chakrayal: "shimla",
+  "new shimla": "shimla",
+  "lakkar bazar": "shimla",
+  // Manali
+  siyal: "manali",
+  simsa: "manali",
+  vashisht: "manali",
+  solang: "manali",
+  "solang valley": "manali",
+  naggar: "manali",
+  prini: "manali",
+  aleo: "manali",
+  "old manali": "manali",
+  // Goa
+  "south goa": "goa",
+  "north goa": "goa",
+  calangute: "goa",
+  candolim: "goa",
+  baga: "goa",
+  anjuna: "goa",
+  panaji: "goa",
+  panjim: "goa",
+  vasco: "goa",
+  morjim: "goa",
+  arambol: "goa",
+  colva: "goa",
+  benaulim: "goa",
+  vagator: "goa",
+  mapusa: "goa",
+  margao: "goa",
+  // Rishikesh
+  tapovan: "rishikesh",
+  shivpuri: "rishikesh",
+  "laxman jhula": "rishikesh",
+  "ram jhula": "rishikesh",
+  // Srinagar
+  "dal lake": "srinagar",
+  "lal chowk": "srinagar",
+  dalgate: "srinagar",
+  nishat: "srinagar",
+  shalimar: "srinagar",
+  rajbagh: "srinagar",
+  // Bengaluru
+  bangalore: "bengaluru",
+  whitefield: "bengaluru",
+  koramangala: "bengaluru",
+  indiranagar: "bengaluru",
+  "electronic city": "bengaluru",
+  // Mumbai
+  "navi mumbai": "mumbai",
+  thane: "mumbai",
+  andheri: "mumbai",
+  bandra: "mumbai",
+  juhu: "mumbai",
+  colaba: "mumbai",
+  // Delhi
+  "new delhi": "delhi",
+  "delhi ncr": "delhi",
+  "south delhi": "delhi",
+  dwarka: "delhi",
+  rohini: "delhi"
+};
+var escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+var matchesText = (haystack, needle) => {
+  const h = haystack.toLowerCase().trim();
+  const n = needle.toLowerCase().trim();
+  if (!h || !n) return false;
+  if (h === n) return true;
+  const regex = new RegExp(`(?:^|[\\s,/-])${escapeRegex(n)}(?:$|[\\s,/-])`, "i");
+  if (regex.test(h)) return true;
+  const revRegex = new RegExp(`(?:^|[\\s,/-])${escapeRegex(h)}(?:$|[\\s,/-])`, "i");
+  if (revRegex.test(n)) return true;
+  return false;
+};
+var matchesSection = (hotel, section) => {
+  const targetCity = (section.city || "").toLowerCase().trim();
+  const aliases = Array.isArray(section.aliases) ? section.aliases.map((a) => a.toLowerCase().trim()) : [];
+  const locationStrings = [
+    hotel.city,
+    hotel.address?.city,
+    hotel.address?.areaName,
+    hotel.address?.district,
+    hotel.address?.formattedAddress,
+    hotel.address?.streetAddress,
+    hotel.address?.landmark
+  ].filter((s) => typeof s === "string" && s.trim().length > 0);
+  for (const locStr of locationStrings) {
+    if (matchesText(locStr, targetCity)) return true;
+    for (const alias of aliases) {
+      if (matchesText(locStr, alias)) return true;
+    }
+    const tokens = locStr.toLowerCase().split(/[,/-]+/).map((t) => t.trim()).filter(Boolean);
+    for (const token of tokens) {
+      if (token === targetCity) return true;
+      if (LOCALITY_TO_CITY[token] === targetCity) return true;
+      if (aliases.includes(token)) return true;
+    }
+    for (const [locality, parentCity] of Object.entries(LOCALITY_TO_CITY)) {
+      if (parentCity === targetCity) {
+        const locRegex = new RegExp(
+          `(?:^|[\\s,/-])${escapeRegex(locality)}(?:$|[\\s,/-])`,
+          "i"
+        );
+        if (locRegex.test(locStr)) return true;
+      }
+    }
+  }
+  return false;
+};
 var getHomeHotels = async (query = {}, userId = null) => {
   try {
     const { city } = query;
@@ -5067,7 +5593,42 @@ var getHomeHotels = async (query = {}, userId = null) => {
       };
     });
     const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
-    return updatedHotels;
+    const activeSections = await popularSection_service_default.getActiveSections("hotel");
+    const sectionsWithItems = activeSections.map((section) => {
+      const matchingHotels = updatedHotels.filter(
+        (hotel) => matchesSection(hotel, section)
+      );
+      const limit = Number(section.limit) || 12;
+      const sliced = matchingHotels.slice(0, limit);
+      const items = sliced.map((h) => ({
+        id: h._id.toString(),
+        _id: h._id.toString(),
+        title: h.name,
+        location: `${h.city}, ${h.country || "India"}`,
+        image: h.image,
+        href: `/hotels/${h._id.toString()}`,
+        price: h.startingPrice ?? null,
+        rating: h.rating,
+        numReviews: h.numReviews,
+        amenities: h.amenities,
+        isFavorite: h.isFavorite
+      }));
+      return {
+        section: {
+          _id: section._id.toString(),
+          tagline: section.tagline,
+          city: section.city,
+          aliases: section.aliases || [],
+          order: section.order,
+          limit: section.limit
+        },
+        items
+      };
+    }).filter((s) => s.items.length > 0);
+    return {
+      hotels: updatedHotels,
+      sections: sectionsWithItems
+    };
   } catch (error) {
     throw error;
   }
@@ -5977,11 +6538,14 @@ var HotelController = class {
   async getHomeHotels(req, res, next) {
     try {
       const userId = req.user?._id || null;
-      const hotels = await hotel_service_default.getHomeHotels(req.query, userId);
+      const result = await hotel_service_default.getHomeHotels(req.query, userId);
+      const hotels = result.hotels || result;
+      const sections = result.sections || [];
       res.status(200).json({
         success: true,
-        count: hotels.length,
-        data: hotels
+        count: Array.isArray(hotels) ? hotels.length : 0,
+        data: hotels,
+        sections
       });
     } catch (error) {
       logger_default.error("Controller Error: getHomeHotels", error);
@@ -6071,16 +6635,16 @@ var hotel_routes_default = router3;
 import { Router as Router4 } from "express";
 
 // src/modules/rooms/room.model.ts
-import mongoose18, { Schema as Schema17 } from "mongoose";
-var roomSchema = new Schema17(
+import mongoose19, { Schema as Schema18 } from "mongoose";
+var roomSchema = new Schema18(
   {
     hotelId: {
-      type: Schema17.Types.ObjectId,
+      type: Schema18.Types.ObjectId,
       ref: "Hotel",
       required: true
     },
     roomTypeId: {
-      type: Schema17.Types.ObjectId,
+      type: Schema18.Types.ObjectId,
       ref: "RoomType",
       required: true
     },
@@ -6102,11 +6666,11 @@ var roomSchema = new Schema17(
   },
   { timestamps: true }
 );
-var Room = mongoose18.model("Room", roomSchema);
+var Room = mongoose19.model("Room", roomSchema);
 var room_model_default = Room;
 
 // src/modules/rooms/room.service.ts
-import mongoose19 from "mongoose";
+import mongoose20 from "mongoose";
 var createRoom = async (roomData) => {
   try {
     return await room_model_default.create(roomData);
@@ -6116,7 +6680,7 @@ var createRoom = async (roomData) => {
   }
 };
 var getRoomsByHotel = async (hotelId) => {
-  if (!mongoose19.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose20.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -6305,10 +6869,10 @@ var room_routes_default = router4;
 import { Router as Router5 } from "express";
 
 // src/modules/rooms/roomType.controller.ts
-import mongoose21 from "mongoose";
+import mongoose22 from "mongoose";
 
 // src/modules/rooms/roomType.service.ts
-import mongoose20 from "mongoose";
+import mongoose21 from "mongoose";
 init_availability_model();
 var createRoomType = async (data) => {
   try {
@@ -6319,7 +6883,7 @@ var createRoomType = async (data) => {
   }
 };
 var getRoomTypesByHotel = async (hotelId) => {
-  if (!mongoose20.Types.ObjectId.isValid(hotelId)) {
+  if (!mongoose21.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Invalid hotel id");
   }
   try {
@@ -6377,7 +6941,7 @@ var updateRoomType = async (roomTypeId, hotelId, updateData) => {
   }
 };
 var getVendorBookingDetail = async (bookingId, vendorId) => {
-  if (!mongoose20.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose21.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const hotels = await hotel_model_default.find({ vendorId }, "_id").lean();
@@ -6445,7 +7009,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
     limit = 10,
     search
   } = queryParams;
-  if (!hotelId || !mongoose20.Types.ObjectId.isValid(hotelId)) {
+  if (!hotelId || !mongoose21.Types.ObjectId.isValid(hotelId)) {
     throw new Error("Valid hotelId is required");
   }
   const hotel = await hotel_model_default.findOne({ _id: hotelId, vendorId }).lean();
@@ -6519,7 +7083,7 @@ var getVendorRoomTypes = async (vendorId, queryParams = {}) => {
   };
 };
 var getVendorRoomTypeDetail = async (roomTypeId, vendorId) => {
-  if (!mongoose20.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose21.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   const roomType = await roomType_model_default.findById(roomTypeId).select(
@@ -6644,7 +7208,7 @@ var RoomTypeController = class {
   }
   //roomtype create also rooms create
   async createRoomTypeWithAutoRooms(req, res, next) {
-    const session = await mongoose21.startSession();
+    const session = await mongoose22.startSession();
     session.startTransaction();
     try {
       const vendor = await vendor_model_default.findOne({ userId: req.user._id });
@@ -6763,7 +7327,7 @@ var roomType_routes_default = router5;
 import { Router as Router6 } from "express";
 
 // src/modules/availability/availability.service.ts
-import mongoose22 from "mongoose";
+import mongoose23 from "mongoose";
 init_availability_model();
 var upsertAvailability = async (data) => {
   try {
@@ -6788,7 +7352,7 @@ var upsertAvailability = async (data) => {
   }
 };
 var getAvailabilityForRange = async (roomTypeId, startDate, endDate) => {
-  if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
+  if (!mongoose23.Types.ObjectId.isValid(roomTypeId)) {
     throw new Error("Invalid roomType id");
   }
   try {
@@ -6828,7 +7392,7 @@ var decreaseAvailability = async (roomTypeId, date, qty = 1) => {
 };
 var getVendorRoomTypes2 = async (userId, hotelId) => {
   try {
-    if (!mongoose22.Types.ObjectId.isValid(hotelId)) {
+    if (!mongoose23.Types.ObjectId.isValid(hotelId)) {
       throw new Error("Invalid hotel ID");
     }
     const vendor = await vendor_model_default.findOne({ userId }).lean();
@@ -6855,7 +7419,7 @@ var getVendorRoomTypes2 = async (userId, hotelId) => {
 };
 var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
   try {
-    if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose23.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!month || !year) {
@@ -6920,7 +7484,7 @@ var getRoomTypeCalendar = async (userId, roomTypeId, month, year) => {
 };
 var updateRoomTypeCalendar = async (userId, roomTypeId, date, blockedRooms, priceOverride) => {
   try {
-    if (!mongoose22.Types.ObjectId.isValid(roomTypeId)) {
+    if (!mongoose23.Types.ObjectId.isValid(roomTypeId)) {
       throw new Error("Invalid room type ID");
     }
     if (!date) throw new Error("Date is required");
@@ -7253,7 +7817,7 @@ import { Router as Router7 } from "express";
 
 // src/modules/bookings/booking.service.ts
 init_availability_model();
-import mongoose23 from "mongoose";
+import mongoose24 from "mongoose";
 
 // trivllo.json
 var trivllo_default = {
@@ -7337,7 +7901,7 @@ async function processRefund(booking, session) {
   await payment.save({ session });
 }
 var createBooking = async (data, userId) => {
-  const session = await mongoose23.startSession();
+  const session = await mongoose24.startSession();
   session.startTransaction();
   try {
     const {
@@ -7934,7 +8498,7 @@ var getRefundPreview = async (bookingId, userId) => {
   }
 };
 var cancelBooking = async (bookingId, userId, reason) => {
-  const session = await mongoose23.startSession();
+  const session = await mongoose24.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findOne({
@@ -8002,7 +8566,7 @@ var cancelBooking = async (bookingId, userId, reason) => {
   }
 };
 var adminHandleRefund = async (bookingId, action) => {
-  const session = await mongoose23.startSession();
+  const session = await mongoose24.startSession();
   session.startTransaction();
   try {
     const booking = await booking_model_default.findById(bookingId).session(session);
@@ -8047,7 +8611,7 @@ var getVendorBookings = async (vendorId, queryParams, activeHotelId) => {
   const skip = (page - 1) * limit;
   let hotelIds = [];
   const targetHotelId = hotelId || activeHotelId;
-  if (targetHotelId && mongoose23.Types.ObjectId.isValid(targetHotelId)) {
+  if (targetHotelId && mongoose24.Types.ObjectId.isValid(targetHotelId)) {
     const activeHotel = await hotel_model_default.findOne({ _id: targetHotelId, vendorId }, "_id").lean();
     if (activeHotel) {
       hotelIds = [activeHotel._id];
@@ -8164,7 +8728,7 @@ var getVendorInvoices = async (vendorId, queryParams) => {
   };
 };
 var generateInvoicePdf = async (bookingId, vendorId, res) => {
-  if (!mongoose23.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose24.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId).populate({
@@ -8293,7 +8857,7 @@ var generateInvoicePdf = async (bookingId, vendorId, res) => {
 };
 var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6, activeHotelId) => {
   let hotelIds = [];
-  if (activeHotelId && mongoose23.Types.ObjectId.isValid(activeHotelId)) {
+  if (activeHotelId && mongoose24.Types.ObjectId.isValid(activeHotelId)) {
     const activeHotel = await hotel_model_default.findOne({ _id: activeHotelId, vendorId }, "_id").lean();
     if (activeHotel) {
       hotelIds = [activeHotel._id];
@@ -8503,7 +9067,7 @@ var getVendorDashboard = async (vendorId, reservationDays = 7, revenueMonths = 6
   };
 };
 var validateOwnership = async (bookingId, vendorId) => {
-  if (!mongoose23.Types.ObjectId.isValid(bookingId)) {
+  if (!mongoose24.Types.ObjectId.isValid(bookingId)) {
     throw new Error("Invalid booking id");
   }
   const booking = await booking_model_default.findById(bookingId);
@@ -8577,7 +9141,7 @@ var markBookingStaying = async (bookingId, vendorId) => {
   return booking;
 };
 var checkOutBooking = async (bookingId, vendorId, forceEarlyCheckout) => {
-  const session = await mongoose23.startSession();
+  const session = await mongoose24.startSession();
   session.startTransaction();
   try {
     const booking = await validateOwnership(bookingId, vendorId);
@@ -8677,7 +9241,7 @@ var booking_service = {
 var booking_service_default = booking_service;
 
 // src/modules/vendorBank/bank.model.ts
-import mongoose24, { Schema as Schema18 } from "mongoose";
+import mongoose25, { Schema as Schema19 } from "mongoose";
 
 // src/shared/utils/encryption.ts
 import crypto3 from "crypto";
@@ -8698,10 +9262,10 @@ var decrypt = (text) => {
 };
 
 // src/modules/vendorBank/bank.model.ts
-var vendorBankSchema = new Schema18(
+var vendorBankSchema = new Schema19(
   {
     vendorId: {
-      type: Schema18.Types.ObjectId,
+      type: Schema19.Types.ObjectId,
       ref: "Vendor",
       required: true,
       unique: false
@@ -8800,7 +9364,7 @@ vendorBankSchema.post("find", function(docs) {
     }
   });
 });
-var VendorBank = mongoose24.model("VendorBank", vendorBankSchema);
+var VendorBank = mongoose25.model("VendorBank", vendorBankSchema);
 var bank_model_default = VendorBank;
 
 // src/modules/vendors/vendor.service.ts
@@ -8810,11 +9374,11 @@ init_service_model();
 init_tourService_model();
 
 // src/modules/admin/promotion/promotion.model.ts
-import mongoose29, { Schema as Schema23 } from "mongoose";
-var promotionSchema = new Schema23(
+import mongoose30, { Schema as Schema24 } from "mongoose";
+var promotionSchema = new Schema24(
   {
     vendorId: {
-      type: Schema23.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       ref: "Vendor",
       required: [true, "Promotion must be linked to a Vendor"],
       index: true
@@ -8826,7 +9390,7 @@ var promotionSchema = new Schema23(
       index: true
     },
     serviceId: {
-      type: Schema23.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       required: true,
       index: true
     },
@@ -8857,7 +9421,7 @@ var promotionSchema = new Schema23(
       type: Date
     },
     approvedBy: {
-      type: Schema23.Types.ObjectId,
+      type: Schema24.Types.ObjectId,
       ref: "User"
     },
     rejectedAt: {
@@ -8874,7 +9438,7 @@ var promotionSchema = new Schema23(
 );
 promotionSchema.index({ vendorId: 1, status: 1 });
 promotionSchema.index({ serviceId: 1, status: 1 });
-var Promotion = mongoose29.model("Promotion", promotionSchema);
+var Promotion = mongoose30.model("Promotion", promotionSchema);
 var promotion_model_default = Promotion;
 
 // src/modules/vendors/vendor.service.ts
@@ -10306,11 +10870,11 @@ var BookingController = class {
 };
 
 // src/modules/task/task.model.ts
-import mongoose30, { Schema as Schema24 } from "mongoose";
-var taskSchema = new Schema24(
+import mongoose31, { Schema as Schema25 } from "mongoose";
+var taskSchema = new Schema25(
   {
     vendorId: {
-      type: Schema24.Types.ObjectId,
+      type: Schema25.Types.ObjectId,
       ref: "Vendor",
       required: true,
       index: true
@@ -10342,11 +10906,11 @@ var taskSchema = new Schema24(
   { timestamps: true }
 );
 taskSchema.index({ vendorId: 1, status: 1 });
-var Task = mongoose30.model("Task", taskSchema);
+var Task = mongoose31.model("Task", taskSchema);
 var task_model_default = Task;
 
 // src/modules/task/task.service.ts
-import mongoose31 from "mongoose";
+import mongoose32 from "mongoose";
 var getTasks = async (vendorId, query = {}) => {
   const { page = 1, limit = 10, status } = query;
   const filter = { vendorId };
@@ -10365,7 +10929,7 @@ var createTask = async (vendorId, data) => {
   return await task_model_default.create({ ...data, vendorId });
 };
 var updateTask = async (taskId, vendorId, data) => {
-  if (!mongoose31.Types.ObjectId.isValid(taskId)) {
+  if (!mongoose32.Types.ObjectId.isValid(taskId)) {
     throw new Error("Invalid task id");
   }
   const task = await task_model_default.findOneAndUpdate({ _id: taskId, vendorId }, data, {
@@ -10615,11 +11179,11 @@ var vendor_routes_default = router7;
 import { Router as Router8 } from "express";
 
 // src/modules/policies/policy.model.ts
-import mongoose32, { Schema as Schema25 } from "mongoose";
-var policySchema = new Schema25(
+import mongoose33, { Schema as Schema26 } from "mongoose";
+var policySchema = new Schema26(
   {
     hotelId: {
-      type: Schema25.Types.ObjectId,
+      type: Schema26.Types.ObjectId,
       ref: "Hotel",
       required: true,
       unique: true
@@ -10637,7 +11201,7 @@ var policySchema = new Schema25(
   },
   { timestamps: true }
 );
-var HotelPolicy = mongoose32.model("HotelPolicy", policySchema);
+var HotelPolicy = mongoose33.model("HotelPolicy", policySchema);
 var policy_model_default = HotelPolicy;
 
 // src/modules/policies/policy.service.ts
@@ -10735,11 +11299,11 @@ var booking_routes_default = router9;
 import { Router as Router10 } from "express";
 
 // src/modules/payments/payment.service.ts
-import mongoose33 from "mongoose";
+import mongoose34 from "mongoose";
 import crypto4 from "crypto";
 init_availability_model();
 var verifyPayment = async (data) => {
-  const session = await mongoose33.startSession();
+  const session = await mongoose34.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -10923,7 +11487,7 @@ import { Router as Router11 } from "express";
 
 // src/modules/reviews/review.service.ts
 init_review_model();
-import mongoose35 from "mongoose";
+import mongoose36 from "mongoose";
 init_service_model();
 init_bikeService_model();
 init_cabService_model();
@@ -10931,10 +11495,10 @@ init_tourService_model();
 
 // src/modules/reviews/helpers/updateCompanyRating.ts
 init_review_model();
-import mongoose34 from "mongoose";
+import mongoose35 from "mongoose";
 var updateCompanyRating = async (companyType, companyId) => {
   try {
-    const companyObjectId = mongoose34.Types.ObjectId.isValid(companyId) ? new mongoose34.Types.ObjectId(companyId) : companyId;
+    const companyObjectId = mongoose35.Types.ObjectId.isValid(companyId) ? new mongoose35.Types.ObjectId(companyId) : companyId;
     const stats = await review_model_default.aggregate([
       {
         $match: {
@@ -11013,13 +11577,13 @@ var getCompanyReviews = async (companyType, companyId, query = {}) => {
     if (!allowedTypes.includes(companyType)) {
       throw new Error("Invalid company type");
     }
-    if (!mongoose35.Types.ObjectId.isValid(companyId)) {
+    if (!mongoose36.Types.ObjectId.isValid(companyId)) {
       throw new Error("Invalid company id");
     }
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
-    const companyObjectId = mongoose35.Types.ObjectId.isValid(companyId) ? new mongoose35.Types.ObjectId(companyId) : companyId;
+    const companyObjectId = mongoose36.Types.ObjectId.isValid(companyId) ? new mongoose36.Types.ObjectId(companyId) : companyId;
     const matchCompany = {
       companyType,
       $or: [
@@ -11305,7 +11869,7 @@ var getVendorReviews = async (vendorId, query = {}) => {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
-    const vendorObjectId = mongoose35.Types.ObjectId.isValid(vendorId) ? new mongoose35.Types.ObjectId(vendorId) : vendorId;
+    const vendorObjectId = mongoose36.Types.ObjectId.isValid(vendorId) ? new mongoose36.Types.ObjectId(vendorId) : vendorId;
     const matchVendor = {
       $or: [
         { vendorId: vendorObjectId },
@@ -11687,9 +12251,9 @@ var getFavoritesSummary = async (userId) => {
   }
   const coverImages = [];
   for (const fav of favorites) {
-    const Model29 = SERVICE_MODELS3[fav.itemType];
-    if (!Model29) continue;
-    const item = await Model29.findById(fav.itemId).select("images").lean();
+    const Model30 = SERVICE_MODELS3[fav.itemType];
+    if (!Model30) continue;
+    const item = await Model30.findById(fav.itemId).select("images").lean();
     if (!item) continue;
     const thumbnail = getThumbnail(item, fav.itemType);
     if (thumbnail) {
@@ -11712,9 +12276,9 @@ var getMyTripFavorites = async (userId, page = 1, limit = 10) => {
   }).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean();
   const results = [];
   for (const fav of favorites) {
-    const Model29 = SERVICE_MODELS3[fav.itemType];
-    if (!Model29) continue;
-    const item = await Model29.findOne({
+    const Model30 = SERVICE_MODELS3[fav.itemType];
+    if (!Model30) continue;
+    const item = await Model30.findOne({
       _id: fav.itemId,
       isActive: true
     }).lean();
@@ -11934,8 +12498,8 @@ var bank_routes_default = router14;
 import { Router as Router15 } from "express";
 
 // src/modules/support/support.model.ts
-import mongoose36, { Schema as Schema26 } from "mongoose";
-var messageSchema = new Schema26(
+import mongoose37, { Schema as Schema27 } from "mongoose";
+var messageSchema = new Schema27(
   {
     sender: {
       type: String,
@@ -11956,10 +12520,10 @@ var messageSchema = new Schema26(
   },
   { timestamps: true }
 );
-var supportSchema = new Schema26(
+var supportSchema = new Schema27(
   {
     userId: {
-      type: Schema26.Types.ObjectId,
+      type: Schema27.Types.ObjectId,
       ref: "User",
       required: true,
       index: true
@@ -12011,7 +12575,7 @@ var supportSchema = new Schema26(
   { timestamps: true }
 );
 supportSchema.index({ status: 1, createdAt: -1 });
-var Support = mongoose36.model("Support", supportSchema);
+var Support = mongoose37.model("Support", supportSchema);
 var support_model_default = Support;
 
 // src/modules/support/support.service.ts
@@ -12222,7 +12786,7 @@ var support_routes_default = router15;
 import { Router as Router16 } from "express";
 
 // src/modules/adventure/category/adventure.service.ts
-import mongoose37 from "mongoose";
+import mongoose38 from "mongoose";
 init_service_model();
 var attachFavoriteFlag2 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
@@ -12359,7 +12923,7 @@ var getAdventures = async (query = {}, userId = null) => {
 };
 var getAdventureDetails = async (id, userId = null) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -12562,7 +13126,7 @@ var getVendorAdventures = async (vendorId) => {
 };
 var getVendorAdventureDetails = async (id, vendorId) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -12614,7 +13178,7 @@ var getVendorAdventureDetails = async (id, vendorId) => {
 };
 var updateAdventure = async (id, data, vendorId) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -12663,7 +13227,7 @@ var updateAdventure = async (id, data, vendorId) => {
 };
 var deleteAdventure = async (id, vendorId) => {
   try {
-    if (!mongoose37.Types.ObjectId.isValid(id)) {
+    if (!mongoose38.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid adventure id");
     }
     const adventure = await adventure_model_default.findOne({
@@ -12888,7 +13452,7 @@ import { Router as Router17 } from "express";
 
 // src/modules/adventure/service/service.service.ts
 init_service_model();
-import mongoose38 from "mongoose";
+import mongoose39 from "mongoose";
 var checkIsFavorite2 = async (itemId, userId, itemType) => {
   if (!userId || !itemId) return false;
   const fav = await favorite_model_default.findOne({
@@ -12900,7 +13464,7 @@ var checkIsFavorite2 = async (itemId, userId, itemType) => {
 };
 var getServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findOne({
@@ -13014,7 +13578,7 @@ var getVendorServices = async (vendorId) => {
 };
 var getVendorServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(serviceId).populate({
@@ -13112,7 +13676,7 @@ var createService = async (data, vendorId) => {
 };
 var updateService = async (id, data, vendorId) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -13171,7 +13735,7 @@ var updateService = async (id, data, vendorId) => {
 };
 var deleteService = async (id, vendorId) => {
   try {
-    if (!mongoose38.Types.ObjectId.isValid(id)) {
+    if (!mongoose39.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await service_model_default.findById(id);
@@ -13505,7 +14069,7 @@ import { Router as Router19 } from "express";
 
 // src/modules/cab/service/cabService.service.ts
 init_cabService_model();
-import mongoose39 from "mongoose";
+import mongoose40 from "mongoose";
 var attachFavoriteFlag3 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -13626,7 +14190,7 @@ var getCabs = async (query, userId = null) => {
 };
 var getCabCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(id)) {
+    if (!mongoose40.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await cab_model_default.findOne({
@@ -13691,7 +14255,7 @@ var getCabCompanyDetails = async (id, userId = null) => {
 };
 var getCabServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(id)) {
+    if (!mongoose40.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findOne({
@@ -13770,7 +14334,7 @@ var createCabService = async (data, vendorId) => {
       features = [],
       images = []
     } = data;
-    if (!cabId || !mongoose39.Types.ObjectId.isValid(cabId)) {
+    if (!cabId || !mongoose40.Types.ObjectId.isValid(cabId)) {
       throw new Error("Valid cabId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -13874,7 +14438,7 @@ var getVendorCabServices = async (query = {}, vendorId) => {
 };
 var getVendorCabServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate("cab", "name vendorId").lean();
@@ -13920,7 +14484,7 @@ var getVendorCabServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorCabService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -13970,7 +14534,7 @@ var updateVendorCabService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorCabService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose39.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await cabService_model_default.findById(serviceId).populate(
@@ -14351,7 +14915,7 @@ import { Router as Router21 } from "express";
 
 // src/modules/bike/service/bikeService.service.ts
 init_bikeService_model();
-import mongoose40 from "mongoose";
+import mongoose41 from "mongoose";
 var attachFavoriteFlag4 = async (items, userId, itemType) => {
   if (!userId || items.length === 0) {
     items.forEach((item) => item.isFavorite = false);
@@ -14467,7 +15031,7 @@ var getBikes = async (query, userId = null) => {
 };
 var getBikeCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose40.Types.ObjectId.isValid(id)) {
+    if (!mongoose41.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await bike_model_default.findOne({
@@ -14538,7 +15102,7 @@ var getBikeCompanyDetails = async (id, userId = null) => {
 };
 var getBikeServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose40.Types.ObjectId.isValid(id)) {
+    if (!mongoose41.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findOne({
@@ -14602,7 +15166,7 @@ var getBikeServiceDetails = async (id, userId = null) => {
 var calculateBikePrice = async (body) => {
   try {
     const { serviceId, startDate, endDate } = body;
-    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     if (!startDate || !endDate) {
@@ -14665,7 +15229,7 @@ var createBikeService = async (data, vendorId) => {
       meta = {},
       images = []
     } = data;
-    if (!bikeId || !mongoose40.Types.ObjectId.isValid(bikeId)) {
+    if (!bikeId || !mongoose41.Types.ObjectId.isValid(bikeId)) {
       throw new Error("Valid bikeId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -14757,7 +15321,7 @@ var getVendorBikeServices = async (query = {}, vendorId) => {
 };
 var getVendorBikeServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate("bike", "name vendorId").lean();
@@ -14800,7 +15364,7 @@ var getVendorBikeServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorBikeService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -14847,7 +15411,7 @@ var updateVendorBikeService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorBikeService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose40.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await bikeService_model_default.findById(serviceId).populate(
@@ -15645,7 +16209,7 @@ import { Router as Router23 } from "express";
 
 // src/modules/tour/service/tourService.service.ts
 init_tourService_model();
-import mongoose41 from "mongoose";
+import mongoose42 from "mongoose";
 var optimizeCloudinary3 = (url, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/") && !url.includes("/upload/")) {
     return url || "";
@@ -15883,7 +16447,7 @@ var getTours = async (query, userId = null) => {
 };
 var getCompanyDetails = async (id, userId = null) => {
   try {
-    if (!mongoose41.Types.ObjectId.isValid(id)) {
+    if (!mongoose42.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid company id");
     }
     const company = await tour_model_default.findOne({
@@ -15956,7 +16520,7 @@ var getCompanyDetails = async (id, userId = null) => {
 };
 var getTourServiceDetails = async (id, userId = null) => {
   try {
-    if (!mongoose41.Types.ObjectId.isValid(id)) {
+    if (!mongoose42.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findOne({
@@ -16056,7 +16620,7 @@ var createTourService = async (data, vendorId) => {
       maxPeople = 10
     } = data;
     let targetTourId = tourId;
-    if (!targetTourId || !mongoose41.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose42.Types.ObjectId.isValid(targetTourId)) {
       const company = await tour_model_default.findOne({
         vendorId,
         isActive: true
@@ -16065,7 +16629,7 @@ var createTourService = async (data, vendorId) => {
         targetTourId = company._id;
       }
     }
-    if (!targetTourId || !mongoose41.Types.ObjectId.isValid(targetTourId)) {
+    if (!targetTourId || !mongoose42.Types.ObjectId.isValid(targetTourId)) {
       throw new Error("Valid tourId is required");
     }
     if (!title) throw new Error("Title is required");
@@ -16171,7 +16735,7 @@ var getVendorTourServices = async (query = {}, vendorId) => {
 };
 var getVendorTourServiceById = async (serviceId, vendorId) => {
   try {
-    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose42.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate("tour", "name vendorId").lean();
@@ -16213,7 +16777,7 @@ var getVendorTourServiceById = async (serviceId, vendorId) => {
 };
 var updateVendorTourService = async (serviceId, vendorId, data) => {
   try {
-    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose42.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -16273,7 +16837,7 @@ var updateVendorTourService = async (serviceId, vendorId, data) => {
 };
 var deleteVendorTourService = async (serviceId, vendorId) => {
   try {
-    if (!mongoose41.Types.ObjectId.isValid(serviceId)) {
+    if (!mongoose42.Types.ObjectId.isValid(serviceId)) {
       throw new Error("Invalid service id");
     }
     const service = await tourService_model_default.findById(serviceId).populate(
@@ -16529,14 +17093,14 @@ var tourService_routes_default = router23;
 import { Router as Router24 } from "express";
 
 // src/modules/multiServiceBookings/booking.service.ts
-import mongoose42 from "mongoose";
+import mongoose43 from "mongoose";
 import crypto5 from "crypto";
 init_service_model();
 init_cabService_model();
 init_bikeService_model();
 init_tourService_model();
 var createBooking2 = async (data, userId) => {
-  const session = await mongoose42.startSession();
+  const session = await mongoose43.startSession();
   session.startTransaction();
   try {
     const {
@@ -16742,7 +17306,7 @@ var createBooking2 = async (data, userId) => {
   }
 };
 var verifyPayment2 = async (data) => {
-  const session = await mongoose42.startSession();
+  const session = await mongoose43.startSession();
   session.startTransaction();
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
@@ -17211,7 +17775,7 @@ var dashboard_routes_default = router25;
 import { Router as Router26 } from "express";
 
 // src/modules/multiServiceVendor/booking/booking.service.ts
-import mongoose43 from "mongoose";
+import mongoose44 from "mongoose";
 var getVendorBookings3 = async (query = {}, vendor) => {
   try {
     const { status, search, page = 1, limit = 10 } = query;
@@ -17274,7 +17838,7 @@ var getVendorBookings3 = async (query = {}, vendor) => {
 };
 var getVendorBookingById = async (bookingId, vendor) => {
   try {
-    if (!mongoose43.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose44.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking id");
     }
     const booking = await booking_model_default2.findOne({
@@ -17670,13 +18234,13 @@ import bcrypt2 from "bcryptjs";
 import jwt4 from "jsonwebtoken";
 
 // src/modules/vendorAccountGroup/accountGroup.model.ts
-import mongoose44, { Schema as Schema27 } from "mongoose";
-var vendorAccountGroupSchema = new Schema27(
+import mongoose45, { Schema as Schema28 } from "mongoose";
+var vendorAccountGroupSchema = new Schema28(
   {
     accounts: [
       {
         vendorId: {
-          type: Schema27.Types.ObjectId,
+          type: Schema28.Types.ObjectId,
           ref: "Vendor",
           required: true
         },
@@ -17691,7 +18255,7 @@ var vendorAccountGroupSchema = new Schema27(
       }
     ],
     primaryVendorId: {
-      type: Schema27.Types.ObjectId,
+      type: Schema28.Types.ObjectId,
       ref: "Vendor",
       required: true
     }
@@ -17703,7 +18267,7 @@ var vendorAccountGroupSchema = new Schema27(
 vendorAccountGroupSchema.index({
   "accounts.vendorId": 1
 });
-var VendorAccountGroup = mongoose44.model("VendorAccountGroup", vendorAccountGroupSchema);
+var VendorAccountGroup = mongoose45.model("VendorAccountGroup", vendorAccountGroupSchema);
 var accountGroup_model_default = VendorAccountGroup;
 
 // src/modules/vendorAccountGroup/accountGroup.service.ts
@@ -17979,7 +18543,7 @@ var accountGroup_routes_default = router29;
 import { Router as Router30 } from "express";
 
 // src/modules/vendorProperty/property.service.ts
-import mongoose45 from "mongoose";
+import mongoose46 from "mongoose";
 var SERVICE_MODELS4 = {
   hotel: hotel_model_default,
   cab: cab_model_default,
@@ -18207,7 +18771,7 @@ var addVendorProperty = async (userId, propertyData) => {
 };
 var switchActiveProperty = async (userId, propertyId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+    if (!mongoose46.Types.ObjectId.isValid(propertyId)) {
       throw new Error("Invalid property ID");
     }
     const vendor = await vendor_model_default.findOne({ userId });
@@ -18287,9 +18851,9 @@ var getPendingAdditionalProperties = async (query = {}) => {
     const typesToQuery = serviceType ? [serviceType] : ["hotel", "tour"];
     const allPending = [];
     for (const type of typesToQuery) {
-      const Model29 = SERVICE_MODELS4[type];
-      if (!Model29) continue;
-      const pendingProps = await Model29.find({
+      const Model30 = SERVICE_MODELS4[type];
+      if (!Model30) continue;
+      const pendingProps = await Model30.find({
         vendorId: { $in: vendorIdList },
         verificationStatus: "pending",
         isActive: false
@@ -18302,7 +18866,7 @@ var getPendingAdditionalProperties = async (query = {}) => {
         }
       }).sort({ createdAt: -1 }).lean();
       for (const prop of pendingProps) {
-        const verifiedCount = await Model29.countDocuments({
+        const verifiedCount = await Model30.countDocuments({
           vendorId: prop.vendorId?._id || prop.vendorId,
           verificationStatus: "verified",
           isActive: true
@@ -18345,12 +18909,12 @@ var getPendingAdditionalProperties = async (query = {}) => {
 };
 var approveAdditionalProperty = async (serviceType, propertyId, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+    if (!mongoose46.Types.ObjectId.isValid(propertyId)) {
       throw new Error("Invalid property ID");
     }
-    const Model29 = SERVICE_MODELS4[serviceType];
-    if (!Model29) throw new Error("Invalid service type");
-    const property = await Model29.findById(propertyId);
+    const Model30 = SERVICE_MODELS4[serviceType];
+    if (!Model30) throw new Error("Invalid service type");
+    const property = await Model30.findById(propertyId);
     if (!property) throw new Error("Property not found");
     if (property.verificationStatus === "verified" && property.isActive) {
       throw new Error("Property is already approved");
@@ -18381,12 +18945,12 @@ var approveAdditionalProperty = async (serviceType, propertyId, adminId) => {
 };
 var rejectAdditionalProperty = async (serviceType, propertyId, reason, adminId) => {
   try {
-    if (!mongoose45.Types.ObjectId.isValid(propertyId)) {
+    if (!mongoose46.Types.ObjectId.isValid(propertyId)) {
       throw new Error("Invalid property ID");
     }
-    const Model29 = SERVICE_MODELS4[serviceType];
-    if (!Model29) throw new Error("Invalid service type");
-    const property = await Model29.findById(propertyId);
+    const Model30 = SERVICE_MODELS4[serviceType];
+    if (!Model30) throw new Error("Invalid service type");
+    const property = await Model30.findById(propertyId);
     if (!property) throw new Error("Property not found");
     property.verificationStatus = "rejected";
     property.isActive = false;
@@ -18607,16 +19171,16 @@ var property_routes_default = router30;
 import { Router as Router31 } from "express";
 
 // src/modules/admin/property/property.service.ts
-import mongoose47 from "mongoose";
+import mongoose48 from "mongoose";
 import crypto6 from "crypto";
 init_tourService_model();
 
 // src/modules/admin/property/deletedProperty.model.ts
-import mongoose46, { Schema as Schema28 } from "mongoose";
-var deletedPropertySchema = new Schema28(
+import mongoose47, { Schema as Schema29 } from "mongoose";
+var deletedPropertySchema = new Schema29(
   {
     originalVendorId: {
-      type: Schema28.Types.ObjectId,
+      type: Schema29.Types.ObjectId,
       index: true
     },
     propertyId: {
@@ -18666,7 +19230,7 @@ var deletedPropertySchema = new Schema28(
       trim: true
     },
     deletedBy: {
-      type: Schema28.Types.ObjectId,
+      type: Schema29.Types.ObjectId,
       ref: "User"
     },
     deletedAt: {
@@ -18680,7 +19244,7 @@ var deletedPropertySchema = new Schema28(
   }
 );
 deletedPropertySchema.index({ deletedAt: -1 });
-var DeletedProperty = mongoose46.model("DeletedProperty", deletedPropertySchema);
+var DeletedProperty = mongoose47.model("DeletedProperty", deletedPropertySchema);
 var deletedProperty_model_default = DeletedProperty;
 
 // src/modules/admin/property/property.service.ts
@@ -18926,7 +19490,7 @@ var getAllProperties = async (query) => {
 };
 var getPropertyDetail = async (vendorId, propertyId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -18942,7 +19506,7 @@ var getPropertyDetail = async (vendorId, propertyId) => {
     const ServiceModel = vendor.serviceType ? serviceModelMap[vendor.serviceType] : null;
     if (ServiceModel) {
       allProperties = await ServiceModel.find({ vendorId }).sort({ createdAt: -1 }).lean();
-      if (propertyId && mongoose47.Types.ObjectId.isValid(propertyId)) {
+      if (propertyId && mongoose48.Types.ObjectId.isValid(propertyId)) {
         business = allProperties.find(
           (p) => p._id.toString() === propertyId.toString()
         ) || null;
@@ -19050,7 +19614,7 @@ var getPropertyDetail = async (vendorId, propertyId) => {
 };
 var approveVendor = async (vendorId, adminId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19146,7 +19710,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
     if (!validRanks.includes(rank)) {
       throw new Error("Invalid rank value");
     }
-    if (!mongoose47.Types.ObjectId.isValid(businessId)) {
+    if (!mongoose48.Types.ObjectId.isValid(businessId)) {
       throw new Error("Invalid business ID");
     }
     const BusinessModel = serviceModelMap[serviceType];
@@ -19172,7 +19736,7 @@ var updateBusinessRank = async (serviceType, businessId, rank) => {
 };
 var markIssue = async (vendorId, step, reason, adminId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -19209,7 +19773,7 @@ var markIssue = async (vendorId, step, reason, adminId) => {
 };
 var verifySection = async (vendorId, step, adminId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     if (![2, 3, 4].includes(step)) {
@@ -19274,7 +19838,7 @@ var verifySection = async (vendorId, step, adminId) => {
 };
 var rejectVendor = async (vendorId, body, adminId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19315,7 +19879,7 @@ var rejectVendor = async (vendorId, body, adminId) => {
 };
 var getPropertyListings = async (vendorId, propertyId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19334,7 +19898,7 @@ var getPropertyListings = async (vendorId, propertyId) => {
       };
     }
     let business = null;
-    if (propertyId && mongoose47.Types.ObjectId.isValid(propertyId)) {
+    if (propertyId && mongoose48.Types.ObjectId.isValid(propertyId)) {
       business = await BusinessModel.findOne({ _id: propertyId, vendorId }).lean();
     }
     if (!business && vendor.activePropertyId) {
@@ -19414,7 +19978,7 @@ var getPropertyListings = async (vendorId, propertyId) => {
 };
 var blockVendor = async (vendorId, adminId, reason = "") => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19498,7 +20062,7 @@ var blockVendor = async (vendorId, adminId, reason = "") => {
 };
 var unblockVendor = async (vendorId, adminId) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19578,7 +20142,7 @@ var unblockVendor = async (vendorId, adminId) => {
 };
 var deleteProperty = async (vendorId, adminId = null, reason = "") => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(vendorId)) {
+    if (!mongoose48.Types.ObjectId.isValid(vendorId)) {
       throw new Error("Invalid vendor ID");
     }
     const vendor = await vendor_model_default.findById(vendorId);
@@ -19716,7 +20280,7 @@ var cleanAllDeletedProperties = async () => {
 };
 var deleteDeletedPropertyRecord = async (id) => {
   try {
-    if (!mongoose47.Types.ObjectId.isValid(id)) {
+    if (!mongoose48.Types.ObjectId.isValid(id)) {
       throw new Error("Invalid record ID");
     }
     await deletedProperty_model_default.findByIdAndDelete(id);
@@ -20131,7 +20695,7 @@ var property_routes_default2 = router31;
 import { Router as Router32 } from "express";
 
 // src/modules/admin/user/user.service.ts
-import mongoose48 from "mongoose";
+import mongoose49 from "mongoose";
 var getAllUsers = async (query) => {
   try {
     const {
@@ -20288,7 +20852,7 @@ var getUserBookings2 = async (userId, query) => {
     const hotelPipeline = [
       {
         $match: {
-          userId: new mongoose48.Types.ObjectId(userId)
+          userId: new mongoose49.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -20335,7 +20899,7 @@ var getUserBookings2 = async (userId, query) => {
     const genericPipeline = [
       {
         $match: {
-          userId: new mongoose48.Types.ObjectId(userId)
+          userId: new mongoose49.Types.ObjectId(userId)
         }
       },
       {
@@ -20393,8 +20957,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new mongoose48.Types.ObjectId(bookingId),
-          userId: new mongoose48.Types.ObjectId(userId)
+          _id: new mongoose49.Types.ObjectId(bookingId),
+          userId: new mongoose49.Types.ObjectId(userId)
         }
       },
       // HOTEL
@@ -20538,8 +21102,8 @@ var getBookingDetail2 = async (userId, bookingId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new mongoose48.Types.ObjectId(bookingId),
-          userId: new mongoose48.Types.ObjectId(userId)
+          _id: new mongoose49.Types.ObjectId(bookingId),
+          userId: new mongoose49.Types.ObjectId(userId)
         }
       },
       // VENDOR
@@ -20672,7 +21236,7 @@ var updateUserStatus = async (userId, body) => {
     if (typeof isActive !== "boolean") {
       throw new Error("isActive must be true or false");
     }
-    if (!mongoose48.Types.ObjectId.isValid(userId)) {
+    if (!mongoose49.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const existingUser = await auth_model_default.findOne({
@@ -20831,7 +21395,7 @@ var user_routes_default2 = router32;
 import { Router as Router33 } from "express";
 
 // src/modules/admin/booking/booking.service.ts
-import mongoose49 from "mongoose";
+import mongoose50 from "mongoose";
 var getBookingStats = async () => {
   try {
     const todayStart = /* @__PURE__ */ new Date();
@@ -21149,10 +21713,10 @@ var getAllBookings = async (query) => {
 };
 var getBookingDetail3 = async (bookingId) => {
   try {
-    if (!mongoose49.Types.ObjectId.isValid(bookingId)) {
+    if (!mongoose50.Types.ObjectId.isValid(bookingId)) {
       throw new Error("Invalid booking ID");
     }
-    const objectId = new mongoose49.Types.ObjectId(bookingId);
+    const objectId = new mongoose50.Types.ObjectId(bookingId);
     const hotelBooking = await booking_model_default.aggregate([
       { $match: { _id: objectId } },
       {
@@ -21844,7 +22408,7 @@ var review_routes_default2 = router34;
 import { Router as Router35 } from "express";
 
 // src/modules/admin/payment/payment.service.ts
-import mongoose50 from "mongoose";
+import mongoose51 from "mongoose";
 init_availability_model();
 var getAllPayments = async (query) => {
   try {
@@ -22167,7 +22731,7 @@ var getPaymentDetail = async (paymentId) => {
     const hotelPipeline = [
       {
         $match: {
-          _id: new mongoose50.Types.ObjectId(paymentId)
+          _id: new mongoose51.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -22304,7 +22868,7 @@ var getPaymentDetail = async (paymentId) => {
     const genericPipeline = [
       {
         $match: {
-          _id: new mongoose50.Types.ObjectId(paymentId)
+          _id: new mongoose51.Types.ObjectId(paymentId)
         }
       },
       // BOOKING
@@ -23163,7 +23727,7 @@ var getRefundRequests = async (query) => {
   }
 };
 var handleRefund = async (paymentId, action) => {
-  const session = await mongoose50.startSession();
+  const session = await mongoose51.startSession();
   session.startTransaction();
   try {
     if (!["approve", "reject"].includes(action)) {
@@ -24334,7 +24898,7 @@ var tax_routes_default = router38;
 import { Router as Router39 } from "express";
 
 // src/modules/admin/account-deactivate/account.service.ts
-import mongoose51 from "mongoose";
+import mongoose52 from "mongoose";
 var getDeleteRequests = async (query) => {
   try {
     const { page = 1, limit = 10, search } = query;
@@ -24444,10 +25008,10 @@ var getDeleteRequests = async (query) => {
   }
 };
 var approveDeleteRequest = async (userId) => {
-  const session = await mongoose51.startSession();
+  const session = await mongoose52.startSession();
   try {
     session.startTransaction();
-    if (!mongoose51.Types.ObjectId.isValid(userId)) {
+    if (!mongoose52.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -24519,7 +25083,7 @@ var approveDeleteRequest = async (userId) => {
 };
 var rejectDeleteRequest = async (userId) => {
   try {
-    if (!mongoose51.Types.ObjectId.isValid(userId)) {
+    if (!mongoose52.Types.ObjectId.isValid(userId)) {
       throw new Error("Invalid user ID format");
     }
     const user = await auth_model_default.findOne({
@@ -25049,6 +25613,190 @@ router41.post(
 );
 var vendorProperty_routes_default = router41;
 
+// src/modules/popularSections/popularSection.routes.ts
+import { Router as Router42 } from "express";
+
+// src/modules/popularSections/popularSection.controller.ts
+var PopularSectionController = class {
+  /**
+   * Get active sections (public)
+   */
+  async getActiveSections(req, res, next) {
+    try {
+      const category = req.query.category || "hotel";
+      const sections = await popularSection_service_default.getActiveSections(category);
+      res.status(200).json({
+        success: true,
+        count: sections.length,
+        data: sections
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: getActiveSections", error);
+      next(error);
+    }
+  }
+  /**
+   * Get all sections for Admin
+   */
+  async getAllSections(req, res, next) {
+    try {
+      const category = req.query.category || "hotel";
+      const sections = await popularSection_service_default.getAllSectionsForAdmin(category);
+      res.status(200).json({
+        success: true,
+        count: sections.length,
+        data: sections
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: getAllSections", error);
+      next(error);
+    }
+  }
+  /**
+   * Create a section (admin)
+   */
+  async createSection(req, res, next) {
+    try {
+      const { tagline, city, aliases, order, isActive, limit, category } = req.body;
+      if (!tagline || !city) {
+        res.status(400).json({
+          success: false,
+          message: "City and Tagline are required"
+        });
+        return;
+      }
+      const section = await popularSection_service_default.createSection({
+        tagline,
+        city,
+        aliases,
+        order,
+        isActive,
+        limit,
+        category: category || "hotel"
+      });
+      res.status(201).json({
+        success: true,
+        message: "Destination section created successfully",
+        data: section
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: createSection", error);
+      next(error);
+    }
+  }
+  /**
+   * Update a section (admin)
+   */
+  async updateSection(req, res, next) {
+    try {
+      const { id } = req.params;
+      const section = await popularSection_service_default.updateSection(id, req.body);
+      res.status(200).json({
+        success: true,
+        message: "Destination section updated successfully",
+        data: section
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: updateSection", error);
+      next(error);
+    }
+  }
+  /**
+   * Toggle active state (admin)
+   */
+  async toggleActive(req, res, next) {
+    try {
+      const { id } = req.params;
+      const section = await popularSection_service_default.toggleActive(id);
+      res.status(200).json({
+        success: true,
+        message: `Section is now ${section.isActive ? "active" : "inactive"}`,
+        data: section
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: toggleActive", error);
+      next(error);
+    }
+  }
+  /**
+   * Delete section (admin)
+   */
+  async deleteSection(req, res, next) {
+    try {
+      const { id } = req.params;
+      const section = await popularSection_service_default.deleteSection(id);
+      res.status(200).json({
+        success: true,
+        message: "Destination section deleted successfully",
+        data: section
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: deleteSection", error);
+      next(error);
+    }
+  }
+  /**
+   * Reorder sections (admin)
+   */
+  async reorderSections(req, res, next) {
+    try {
+      const { items } = req.body;
+      if (!Array.isArray(items)) {
+        res.status(400).json({ success: false, message: "Invalid items array" });
+        return;
+      }
+      await popularSection_service_default.reorderSections(items);
+      res.status(200).json({
+        success: true,
+        message: "Sections reordered successfully"
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: reorderSections", error);
+      next(error);
+    }
+  }
+  /**
+   * Reset default sections (admin)
+   */
+  async resetDefaults(req, res, next) {
+    try {
+      const category = req.body.category || "hotel";
+      const sections = await popularSection_service_default.resetDefaultSections(category);
+      res.status(200).json({
+        success: true,
+        message: "Default destination sections restored successfully",
+        data: sections
+      });
+    } catch (error) {
+      logger_default.error("Controller Error: resetDefaults", error);
+      next(error);
+    }
+  }
+};
+var popularSectionController = new PopularSectionController();
+
+// src/modules/popularSections/popularSection.routes.ts
+var router42 = Router42();
+router42.get("/", (req, res, next) => {
+  if (req.baseUrl.includes("/admin")) {
+    return protect(req, res, () => {
+      return authorize("admin")(req, res, () => {
+        return popularSectionController.getAllSections(req, res, next);
+      });
+    });
+  }
+  return popularSectionController.getActiveSections(req, res, next);
+});
+router42.get("/active", popularSectionController.getActiveSections);
+router42.get("/all", protect, authorize("admin"), popularSectionController.getAllSections);
+router42.post("/", protect, authorize("admin"), popularSectionController.createSection);
+router42.put("/:id", protect, authorize("admin"), popularSectionController.updateSection);
+router42.patch("/:id/toggle-active", protect, authorize("admin"), popularSectionController.toggleActive);
+router42.delete("/:id", protect, authorize("admin"), popularSectionController.deleteSection);
+router42.post("/reorder", protect, authorize("admin"), popularSectionController.reorderSections);
+router42.post("/reset-defaults", protect, authorize("admin"), popularSectionController.resetDefaults);
+var popularSection_routes_default = router42;
+
 // src/shared/middlewares/errorHandler.ts
 var errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
@@ -25190,6 +25938,8 @@ app.use("/api/v1/admin/tax", tax_routes_default);
 app.use("/api/v1/admin/account-deactivate", account_routes_default);
 app.use("/api/v1/admin/promotions", promotion_routes_default);
 app.use("/api/v1/admin/vendor-properties", vendorProperty_routes_default);
+app.use("/api/v1/popular-sections", popularSection_routes_default);
+app.use("/api/v1/admin/popular-sections", popularSection_routes_default);
 app.use(errorHandler);
 var app_default = app;
 

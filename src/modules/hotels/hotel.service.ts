@@ -9,6 +9,7 @@ import Booking from "../bookings/booking.model.js";
 import Favorite from "../favorites/favorite.model.js";
 import Review from "../reviews/review.model.js";
 import logger from "../../shared/utils/logger.js";
+import popularSectionService from "../popularSections/popularSection.service.js";
 
 const optimizeCloudinary = (url: string, transform = "f_auto,q_auto") => {
   if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com") || (!url.includes("/image/upload/") && !url.includes("/upload/"))) {
@@ -718,6 +719,157 @@ export const getAllHotels = async (query: any = {}, userId: any = null) => {
 //   }
 // };
 
+// Known localities / sub-areas mapped to their parent city
+const LOCALITY_TO_CITY: Record<string, string> = {
+  // Shimla
+  sanjauli: "shimla",
+  kufri: "shimla",
+  mashobra: "shimla",
+  "chotta shimla": "shimla",
+  shoghi: "shimla",
+  "summer hill": "shimla",
+  dhalli: "shimla",
+  jakhoo: "shimla",
+  totu: "shimla",
+  boileauganj: "shimla",
+  kasumpti: "shimla",
+  bhattakufer: "shimla",
+  chakrayal: "shimla",
+  "new shimla": "shimla",
+  "lakkar bazar": "shimla",
+
+  // Manali
+  siyal: "manali",
+  simsa: "manali",
+  vashisht: "manali",
+  solang: "manali",
+  "solang valley": "manali",
+  naggar: "manali",
+  prini: "manali",
+  aleo: "manali",
+  "old manali": "manali",
+
+  // Goa
+  "south goa": "goa",
+  "north goa": "goa",
+  calangute: "goa",
+  candolim: "goa",
+  baga: "goa",
+  anjuna: "goa",
+  panaji: "goa",
+  panjim: "goa",
+  vasco: "goa",
+  morjim: "goa",
+  arambol: "goa",
+  colva: "goa",
+  benaulim: "goa",
+  vagator: "goa",
+  mapusa: "goa",
+  margao: "goa",
+
+  // Rishikesh
+  tapovan: "rishikesh",
+  shivpuri: "rishikesh",
+  "laxman jhula": "rishikesh",
+  "ram jhula": "rishikesh",
+
+  // Srinagar
+  "dal lake": "srinagar",
+  "lal chowk": "srinagar",
+  dalgate: "srinagar",
+  nishat: "srinagar",
+  shalimar: "srinagar",
+  rajbagh: "srinagar",
+
+  // Bengaluru
+  bangalore: "bengaluru",
+  whitefield: "bengaluru",
+  koramangala: "bengaluru",
+  indiranagar: "bengaluru",
+  "electronic city": "bengaluru",
+
+  // Mumbai
+  "navi mumbai": "mumbai",
+  thane: "mumbai",
+  andheri: "mumbai",
+  bandra: "mumbai",
+  juhu: "mumbai",
+  colaba: "mumbai",
+
+  // Delhi
+  "new delhi": "delhi",
+  "delhi ncr": "delhi",
+  "south delhi": "delhi",
+  dwarka: "delhi",
+  rohini: "delhi",
+};
+
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const matchesText = (haystack: string, needle: string): boolean => {
+  const h = haystack.toLowerCase().trim();
+  const n = needle.toLowerCase().trim();
+  if (!h || !n) return false;
+  if (h === n) return true;
+
+  const regex = new RegExp(`(?:^|[\\s,/-])${escapeRegex(n)}(?:$|[\\s,/-])`, "i");
+  if (regex.test(h)) return true;
+
+  const revRegex = new RegExp(`(?:^|[\\s,/-])${escapeRegex(h)}(?:$|[\\s,/-])`, "i");
+  if (revRegex.test(n)) return true;
+
+  return false;
+};
+
+const matchesSection = (hotel: any, section: any): boolean => {
+  const targetCity = (section.city || "").toLowerCase().trim();
+  const aliases: string[] = Array.isArray(section.aliases)
+    ? section.aliases.map((a: string) => a.toLowerCase().trim())
+    : [];
+
+  const locationStrings: string[] = [
+    hotel.city,
+    hotel.address?.city,
+    hotel.address?.areaName,
+    hotel.address?.district,
+    hotel.address?.formattedAddress,
+    hotel.address?.streetAddress,
+    hotel.address?.landmark,
+  ].filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+
+  for (const locStr of locationStrings) {
+    if (matchesText(locStr, targetCity)) return true;
+
+    for (const alias of aliases) {
+      if (matchesText(locStr, alias)) return true;
+    }
+
+    const tokens = locStr
+      .toLowerCase()
+      .split(/[,/-]+/)
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    for (const token of tokens) {
+      if (token === targetCity) return true;
+      if (LOCALITY_TO_CITY[token] === targetCity) return true;
+      if (aliases.includes(token)) return true;
+    }
+
+    for (const [locality, parentCity] of Object.entries(LOCALITY_TO_CITY)) {
+      if (parentCity === targetCity) {
+        const locRegex = new RegExp(
+          `(?:^|[\\s,/-])${escapeRegex(locality)}(?:$|[\\s,/-])`,
+          "i",
+        );
+        if (locRegex.test(locStr)) return true;
+      }
+    }
+  }
+
+  return false;
+};
+
 // get home hotels
 export const getHomeHotels = async (query: any = {}, userId: any = null) => {
   try {
@@ -876,7 +1028,51 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
     });
 
     const updatedHotels = await attachFavoriteFlag(formattedHotels, userId);
-    return updatedHotels;
+
+    // Calculate active destination sections with matching hotel items directly in backend
+    const activeSections = await popularSectionService.getActiveSections("hotel");
+
+    const sectionsWithItems = activeSections
+      .map((section: any) => {
+        const matchingHotels = updatedHotels.filter((hotel: any) =>
+          matchesSection(hotel, section),
+        );
+
+        const limit = Number(section.limit) || 12;
+        const sliced = matchingHotels.slice(0, limit);
+
+        const items = sliced.map((h: any) => ({
+          id: h._id.toString(),
+          _id: h._id.toString(),
+          title: h.name,
+          location: `${h.city}, ${h.country || "India"}`,
+          image: h.image,
+          href: `/hotels/${h._id.toString()}`,
+          price: h.startingPrice ?? null,
+          rating: h.rating,
+          numReviews: h.numReviews,
+          amenities: h.amenities,
+          isFavorite: h.isFavorite,
+        }));
+
+        return {
+          section: {
+            _id: section._id.toString(),
+            tagline: section.tagline,
+            city: section.city,
+            aliases: section.aliases || [],
+            order: section.order,
+            limit: section.limit,
+          },
+          items,
+        };
+      })
+      .filter((s: any) => s.items.length > 0);
+
+    return {
+      hotels: updatedHotels,
+      sections: sectionsWithItems,
+    };
   } catch (error) {
     throw error;
   }

@@ -223,12 +223,16 @@ export class HotelController {
     try {
       const userId = (req as any).user?._id || null;
 
-      const hotels = await hotelService.getHomeHotels(req.query as any, userId);
+      const result: any = await hotelService.getHomeHotels(req.query as any, userId);
+
+      const hotels = result.hotels || result;
+      const sections = result.sections || [];
 
       res.status(200).json({
         success: true,
-        count: hotels.length,
+        count: Array.isArray(hotels) ? hotels.length : 0,
         data: hotels,
+        sections,
       });
     } catch (error) {
       logger.error("Controller Error: getHomeHotels", error);
