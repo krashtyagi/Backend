@@ -4978,7 +4978,7 @@ var getHomeHotels = async (query = {}, userId = null) => {
         { city: cityRegex }
       ];
     }
-    const hotels = await hotel_model_default.find(filter).select("name city address.city address.country images rating numReviews isFeatured rank amenities").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
+    const hotels = await hotel_model_default.find(filter).select("name city address images rating numReviews isFeatured rank amenities").sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 }).lean();
     const hotelIds = hotels.map((h) => h._id);
     const priceAgg = await roomType_model_default.aggregate([
       {
@@ -5058,6 +5058,7 @@ var getHomeHotels = async (query = {}, userId = null) => {
         name: hotel.name,
         city: hotel.address?.city || hotel.city,
         country: hotel.address?.country || "India",
+        address: hotel.address,
         rating,
         numReviews,
         amenities,

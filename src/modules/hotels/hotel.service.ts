@@ -752,7 +752,7 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
     }
 
     const hotels = await Hotel.find(filter)
-      .select("name city address.city address.country images rating numReviews isFeatured rank amenities")
+      .select("name city address images rating numReviews isFeatured rank amenities")
       .sort({ isFeatured: -1, rank: 1, rating: -1, createdAt: -1 })
       .lean();
 
@@ -866,6 +866,7 @@ export const getHomeHotels = async (query: any = {}, userId: any = null) => {
         name: hotel.name,
         city: hotel.address?.city || hotel.city,
         country: hotel.address?.country || "India",
+        address: hotel.address,
         rating,
         numReviews,
         amenities,
