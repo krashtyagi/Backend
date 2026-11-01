@@ -658,7 +658,15 @@ var userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["user", "vendor", "admin"],
+      enum: [
+        "user",
+        "vendor",
+        "admin",
+        "super_admin",
+        "blog_author",
+        "blog_editor",
+        "seo_manager"
+      ],
       default: "user"
     },
     isVendor: {
@@ -6842,7 +6850,8 @@ var authorize = (...roles) => {
   return (req, res, next) => {
     const authReq = req;
     const userRole = authReq.user?.role;
-    if (!userRole || !roles.includes(userRole)) {
+    const isAuthorized = !!userRole && (userRole === "super_admin" || roles.includes(userRole) || roles.includes("admin") && (userRole === "admin" || userRole === "super_admin"));
+    if (!isAuthorized) {
       res.status(403).json({
         message: `Role (${userRole || "unknown"}) is not allowed to access this resource`
       });
@@ -12251,9 +12260,9 @@ var getFavoritesSummary = async (userId) => {
   }
   const coverImages = [];
   for (const fav of favorites) {
-    const Model30 = SERVICE_MODELS3[fav.itemType];
-    if (!Model30) continue;
-    const item = await Model30.findById(fav.itemId).select("images").lean();
+    const Model38 = SERVICE_MODELS3[fav.itemType];
+    if (!Model38) continue;
+    const item = await Model38.findById(fav.itemId).select("images").lean();
     if (!item) continue;
     const thumbnail = getThumbnail(item, fav.itemType);
     if (thumbnail) {
@@ -12276,9 +12285,9 @@ var getMyTripFavorites = async (userId, page = 1, limit = 10) => {
   }).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean();
   const results = [];
   for (const fav of favorites) {
-    const Model30 = SERVICE_MODELS3[fav.itemType];
-    if (!Model30) continue;
-    const item = await Model30.findOne({
+    const Model38 = SERVICE_MODELS3[fav.itemType];
+    if (!Model38) continue;
+    const item = await Model38.findOne({
       _id: fav.itemId,
       isActive: true
     }).lean();
@@ -18851,9 +18860,9 @@ var getPendingAdditionalProperties = async (query = {}) => {
     const typesToQuery = serviceType ? [serviceType] : ["hotel", "tour"];
     const allPending = [];
     for (const type of typesToQuery) {
-      const Model30 = SERVICE_MODELS4[type];
-      if (!Model30) continue;
-      const pendingProps = await Model30.find({
+      const Model38 = SERVICE_MODELS4[type];
+      if (!Model38) continue;
+      const pendingProps = await Model38.find({
         vendorId: { $in: vendorIdList },
         verificationStatus: "pending",
         isActive: false
@@ -18866,7 +18875,7 @@ var getPendingAdditionalProperties = async (query = {}) => {
         }
       }).sort({ createdAt: -1 }).lean();
       for (const prop of pendingProps) {
-        const verifiedCount = await Model30.countDocuments({
+        const verifiedCount = await Model38.countDocuments({
           vendorId: prop.vendorId?._id || prop.vendorId,
           verificationStatus: "verified",
           isActive: true
@@ -18912,9 +18921,9 @@ var approveAdditionalProperty = async (serviceType, propertyId, adminId) => {
     if (!mongoose46.Types.ObjectId.isValid(propertyId)) {
       throw new Error("Invalid property ID");
     }
-    const Model30 = SERVICE_MODELS4[serviceType];
-    if (!Model30) throw new Error("Invalid service type");
-    const property = await Model30.findById(propertyId);
+    const Model38 = SERVICE_MODELS4[serviceType];
+    if (!Model38) throw new Error("Invalid service type");
+    const property = await Model38.findById(propertyId);
     if (!property) throw new Error("Property not found");
     if (property.verificationStatus === "verified" && property.isActive) {
       throw new Error("Property is already approved");
@@ -18948,9 +18957,9 @@ var rejectAdditionalProperty = async (serviceType, propertyId, reason, adminId) 
     if (!mongoose46.Types.ObjectId.isValid(propertyId)) {
       throw new Error("Invalid property ID");
     }
-    const Model30 = SERVICE_MODELS4[serviceType];
-    if (!Model30) throw new Error("Invalid service type");
-    const property = await Model30.findById(propertyId);
+    const Model38 = SERVICE_MODELS4[serviceType];
+    if (!Model38) throw new Error("Invalid service type");
+    const property = await Model38.findById(propertyId);
     if (!property) throw new Error("Property not found");
     property.verificationStatus = "rejected";
     property.isActive = false;
@@ -25797,6 +25806,1542 @@ router42.post("/reorder", protect, authorize("admin"), popularSectionController.
 router42.post("/reset-defaults", protect, authorize("admin"), popularSectionController.resetDefaults);
 var popularSection_routes_default = router42;
 
+// src/modules/blog/routes/blog.public.routes.ts
+import { Router as Router43 } from "express";
+
+// src/modules/blog/models/post.model.ts
+import mongoose53, { Schema as Schema30 } from "mongoose";
+var blogSEOSchema = new Schema30(
+  {
+    metaTitle: { type: String, trim: true, maxlength: 100 },
+    metaDescription: { type: String, trim: true, maxlength: 250 },
+    canonicalUrl: { type: String, trim: true },
+    ogTitle: { type: String, trim: true },
+    ogDescription: { type: String, trim: true },
+    ogImage: { type: String, trim: true },
+    robotsIndex: { type: Boolean, default: true },
+    robotsFollow: { type: Boolean, default: true },
+    schemaType: { type: String, default: "BlogPosting" }
+  },
+  { _id: false }
+);
+var blogPostSchema = new Schema30(
+  {
+    title: {
+      type: String,
+      required: [true, "Post title is required"],
+      trim: true,
+      maxlength: 200
+    },
+    slug: {
+      type: String,
+      required: [true, "Post slug is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true
+    },
+    excerpt: {
+      type: String,
+      trim: true,
+      maxlength: 500
+    },
+    content: {
+      type: String,
+      required: [true, "Post content is required"]
+    },
+    featuredImage: {
+      type: String,
+      trim: true
+    },
+    imageAlt: {
+      type: String,
+      trim: true,
+      maxlength: 200
+    },
+    authorId: {
+      type: Schema30.Types.ObjectId,
+      ref: "User",
+      required: [true, "Author reference is required"],
+      index: true
+    },
+    status: {
+      type: String,
+      enum: ["DRAFT", "IN_REVIEW", "PUBLISHED", "REJECTED", "ARCHIVED"],
+      default: "DRAFT",
+      index: true
+    },
+    rejectionReason: {
+      type: String,
+      trim: true
+    },
+    readingTime: {
+      type: Number,
+      default: 1,
+      min: 1
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    publishedAt: {
+      type: Date,
+      default: null,
+      index: true
+    },
+    scheduledAt: {
+      type: Date,
+      default: null,
+      index: true
+    },
+    categories: [
+      {
+        type: Schema30.Types.ObjectId,
+        ref: "BlogCategory"
+      }
+    ],
+    tags: [
+      {
+        type: Schema30.Types.ObjectId,
+        ref: "BlogTag"
+      }
+    ],
+    seo: {
+      type: blogSEOSchema,
+      default: () => ({
+        robotsIndex: true,
+        robotsFollow: true,
+        schemaType: "BlogPosting"
+      })
+    },
+    viewsCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+blogPostSchema.pre("save", function() {
+  if (this.isModified("content") && this.content) {
+    const wordCount = this.content.replace(/<[^>]*>?/gm, "").split(/\s+/).length;
+    this.readingTime = Math.max(1, Math.ceil(wordCount / 200));
+  }
+});
+blogPostSchema.index({ status: 1, publishedAt: -1 });
+blogPostSchema.index({ status: 1, isFeatured: -1, publishedAt: -1 });
+blogPostSchema.index({ authorId: 1, status: 1 });
+blogPostSchema.index({ categories: 1, status: 1 });
+blogPostSchema.index({ tags: 1, status: 1 });
+blogPostSchema.index({ title: "text", excerpt: "text", content: "text" });
+var BlogPost = mongoose53.models.BlogPost || mongoose53.model("BlogPost", blogPostSchema);
+var post_model_default = BlogPost;
+
+// src/modules/blog/models/category.model.ts
+import mongoose54, { Schema as Schema31 } from "mongoose";
+var blogCategorySchema = new Schema31(
+  {
+    name: {
+      type: String,
+      required: [true, "Category name is required"],
+      trim: true,
+      maxlength: 100
+    },
+    slug: {
+      type: String,
+      required: [true, "Category slug is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 500
+    },
+    parentId: {
+      type: Schema31.Types.ObjectId,
+      ref: "BlogCategory",
+      default: null
+    },
+    postCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+blogCategorySchema.index({ parentId: 1 });
+var BlogCategory = mongoose54.models.BlogCategory || mongoose54.model("BlogCategory", blogCategorySchema);
+var category_model_default = BlogCategory;
+
+// src/modules/blog/models/tag.model.ts
+import mongoose55, { Schema as Schema32 } from "mongoose";
+var blogTagSchema = new Schema32(
+  {
+    name: {
+      type: String,
+      required: [true, "Tag name is required"],
+      trim: true,
+      maxlength: 50
+    },
+    slug: {
+      type: String,
+      required: [true, "Tag slug is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+var BlogTag = mongoose55.models.BlogTag || mongoose55.model("BlogTag", blogTagSchema);
+var tag_model_default = BlogTag;
+
+// src/modules/blog/models/revision.model.ts
+import mongoose56, { Schema as Schema33 } from "mongoose";
+var blogRevisionSchema = new Schema33(
+  {
+    postId: {
+      type: Schema33.Types.ObjectId,
+      ref: "BlogPost",
+      required: true,
+      index: true
+    },
+    editorId: {
+      type: Schema33.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    content: {
+      type: String,
+      required: true
+    },
+    excerpt: {
+      type: String
+    },
+    revisionNumber: {
+      type: Number,
+      required: true,
+      min: 1
+    }
+  },
+  {
+    timestamps: { createdAt: true, updatedAt: false }
+  }
+);
+blogRevisionSchema.index({ postId: 1, revisionNumber: -1 });
+var BlogRevision = mongoose56.models.BlogRevision || mongoose56.model("BlogRevision", blogRevisionSchema);
+var revision_model_default = BlogRevision;
+
+// src/modules/blog/models/author.model.ts
+import mongoose57, { Schema as Schema34 } from "mongoose";
+var blogAuthorProfileSchema = new Schema34(
+  {
+    userId: {
+      type: Schema34.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+      index: true
+    },
+    displayName: {
+      type: String,
+      required: [true, "Author display name is required"],
+      trim: true,
+      maxlength: 100
+    },
+    slug: {
+      type: String,
+      required: [true, "Author slug is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 1e3
+    },
+    avatar: {
+      type: String,
+      trim: true
+    },
+    designation: {
+      type: String,
+      trim: true,
+      default: "Travel Writer"
+    },
+    socialLinks: {
+      twitter: { type: String, trim: true },
+      linkedin: { type: String, trim: true },
+      instagram: { type: String, trim: true },
+      website: { type: String, trim: true }
+    },
+    isPublic: {
+      type: Boolean,
+      default: true
+    },
+    postsCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+var BlogAuthorProfile = mongoose57.models.BlogAuthorProfile || mongoose57.model(
+  "BlogAuthorProfile",
+  blogAuthorProfileSchema
+);
+var author_model_default = BlogAuthorProfile;
+
+// src/modules/blog/models/redirect.model.ts
+import mongoose58, { Schema as Schema35 } from "mongoose";
+var blogRedirectSchema = new Schema35(
+  {
+    oldPath: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true
+    },
+    newPath: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    statusCode: {
+      type: Number,
+      enum: [301, 302],
+      default: 301
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+var BlogRedirect = mongoose58.models.BlogRedirect || mongoose58.model("BlogRedirect", blogRedirectSchema);
+var redirect_model_default = BlogRedirect;
+
+// src/modules/blog/models/view.model.ts
+import mongoose59, { Schema as Schema36 } from "mongoose";
+var blogPostViewSchema = new Schema36(
+  {
+    postId: {
+      type: Schema36.Types.ObjectId,
+      ref: "BlogPost",
+      required: true,
+      index: true
+    },
+    viewedAt: {
+      type: Date,
+      default: Date.now,
+      index: true
+    },
+    visitorId: {
+      type: String,
+      trim: true
+    },
+    referrer: {
+      type: String,
+      trim: true
+    },
+    source: {
+      type: String,
+      trim: true
+    }
+  },
+  {
+    timestamps: false
+  }
+);
+blogPostViewSchema.index({ postId: 1, viewedAt: -1 });
+var BlogPostView = mongoose59.models.BlogPostView || mongoose59.model("BlogPostView", blogPostViewSchema);
+var view_model_default = BlogPostView;
+
+// src/modules/blog/services/blog.service.ts
+import slugify from "slugify";
+var createSlug = (str) => {
+  return slugify.default ? slugify.default(str, { lower: true, strict: true }) : slugify(str, { lower: true, strict: true });
+};
+var blogService = {
+  // ── Public APIs ────────────────────────────────────────────────────────
+  getPublicPosts: async (query) => {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(50, Number(query.limit) || 10));
+    const skip = (page - 1) * limit;
+    const filter = {
+      status: "PUBLISHED",
+      deletedAt: null,
+      $or: [
+        { publishedAt: { $lte: /* @__PURE__ */ new Date() } },
+        { publishedAt: null }
+      ]
+    };
+    if (query.featured) {
+      filter.isFeatured = true;
+    }
+    if (query.category) {
+      const cat = await category_model_default.findOne({ slug: query.category });
+      if (cat) filter.categories = cat._id;
+    }
+    if (query.tag) {
+      const t = await tag_model_default.findOne({ slug: query.tag });
+      if (t) filter.tags = t._id;
+    }
+    if (query.search) {
+      filter.$text = { $search: query.search };
+    }
+    const [posts, total] = await Promise.all([
+      post_model_default.find(filter).sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 }).skip(skip).limit(limit).populate("categories", "name slug").populate("tags", "name slug").populate("authorId", "firstName lastName avatar email").lean(),
+      post_model_default.countDocuments(filter)
+    ]);
+    return {
+      posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  },
+  getPublicPostBySlug: async (slug) => {
+    const redirect = await redirect_model_default.findOne({ oldPath: `/blog/${slug}` });
+    if (redirect) {
+      return { redirect: redirect.newPath, statusCode: redirect.statusCode };
+    }
+    const post = await post_model_default.findOne({
+      slug,
+      status: "PUBLISHED",
+      deletedAt: null,
+      $or: [
+        { publishedAt: { $lte: /* @__PURE__ */ new Date() } },
+        { publishedAt: null }
+      ]
+    }).populate("categories", "name slug description").populate("tags", "name slug").populate("authorId", "firstName lastName avatar email").lean();
+    if (!post) return null;
+    const authorProfile = await author_model_default.findOne({
+      userId: post.authorId?._id || post.authorId
+    }).lean();
+    const relatedPosts = await post_model_default.find({
+      _id: { $ne: post._id },
+      status: "PUBLISHED",
+      deletedAt: null,
+      categories: { $in: post.categories }
+    }).limit(3).select("title slug excerpt featuredImage readingTime publishedAt").lean();
+    return { post, authorProfile, relatedPosts };
+  },
+  recordPostView: async (slug, meta) => {
+    const post = await post_model_default.findOneAndUpdate(
+      { slug },
+      { $inc: { viewsCount: 1 } },
+      { new: true }
+    ).select("_id viewsCount");
+    if (post) {
+      await view_model_default.create({
+        postId: post._id,
+        visitorId: meta?.visitorId,
+        referrer: meta?.referrer,
+        source: meta?.source
+      });
+    }
+    return post?.viewsCount || 0;
+  },
+  getPublicCategories: async () => {
+    return category_model_default.find().sort({ postCount: -1, name: 1 }).lean();
+  },
+  getPublicTags: async () => {
+    return tag_model_default.find().sort({ name: 1 }).lean();
+  },
+  getPublicAuthor: async (slug) => {
+    const profile = await author_model_default.findOne({ slug, isPublic: true }).populate("userId", "firstName lastName avatar").lean();
+    if (!profile) return null;
+    const posts = await post_model_default.find({
+      authorId: profile.userId,
+      status: "PUBLISHED",
+      deletedAt: null
+    }).sort({ publishedAt: -1 }).select("title slug excerpt featuredImage publishedAt readingTime").lean();
+    return { profile, posts };
+  },
+  // ── Admin CMS APIs ───────────────────────────────────────────────────────
+  getAdminPosts: async (user, query) => {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(query.limit) || 20));
+    const skip = (page - 1) * limit;
+    const filter = { deletedAt: null };
+    if (user.role === "blog_author" && user.role !== "admin" && user.role !== "super_admin" && user.role !== "blog_editor") {
+      filter.authorId = user._id;
+    }
+    if (query.status && query.status !== "all") {
+      filter.status = query.status.toUpperCase();
+    }
+    if (query.category && query.category !== "all") {
+      filter.categories = query.category;
+    }
+    if (query.search) {
+      filter.$or = [
+        { title: { $regex: query.search, $options: "i" } },
+        { slug: { $regex: query.search, $options: "i" } }
+      ];
+    }
+    const [posts, total, stats] = await Promise.all([
+      post_model_default.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit).populate("categories", "name slug").populate("tags", "name slug").populate("authorId", "firstName lastName email").lean(),
+      post_model_default.countDocuments(filter),
+      post_model_default.aggregate([
+        { $match: { deletedAt: null } },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+            views: { $sum: "$viewsCount" }
+          }
+        }
+      ])
+    ]);
+    const metrics = {
+      total,
+      published: stats.find((s) => s._id === "PUBLISHED")?.count || 0,
+      drafts: stats.find((s) => s._id === "DRAFT")?.count || 0,
+      inReview: stats.find((s) => s._id === "IN_REVIEW")?.count || 0,
+      rejected: stats.find((s) => s._id === "REJECTED")?.count || 0,
+      totalViews: stats.reduce((acc, curr) => acc + (curr.views || 0), 0)
+    };
+    return {
+      posts,
+      metrics,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  },
+  getAdminPostById: async (id) => {
+    return post_model_default.findOne({ _id: id, deletedAt: null }).populate("categories").populate("tags").populate("authorId", "firstName lastName email");
+  },
+  createPost: async (payload, user) => {
+    let slug = payload.slug ? createSlug(payload.slug) : createSlug(payload.title);
+    const existing = await post_model_default.findOne({ slug });
+    if (existing) {
+      slug = `${slug}-${Date.now().toString().slice(-4)}`;
+    }
+    const wordCount = (payload.content || "").replace(/<[^>]*>?/gm, "").split(/\s+/).length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+    const post = await post_model_default.create({
+      title: payload.title,
+      slug,
+      excerpt: payload.excerpt,
+      content: payload.content,
+      featuredImage: payload.featuredImage,
+      imageAlt: payload.imageAlt || payload.title,
+      authorId: user._id,
+      status: payload.status || "DRAFT",
+      readingTime,
+      isFeatured: !!payload.isFeatured,
+      categories: payload.categories || [],
+      tags: payload.tags || [],
+      seo: {
+        metaTitle: payload.seo?.metaTitle || `${payload.title} | Trivllo`,
+        metaDescription: payload.seo?.metaDescription || payload.excerpt,
+        canonicalUrl: payload.seo?.canonicalUrl || `https://trivllo.com/blog/${slug}`,
+        ogTitle: payload.seo?.ogTitle || payload.title,
+        ogDescription: payload.seo?.ogDescription || payload.excerpt,
+        ogImage: payload.seo?.ogImage || payload.featuredImage,
+        robotsIndex: payload.seo?.robotsIndex !== false,
+        robotsFollow: payload.seo?.robotsFollow !== false,
+        schemaType: payload.seo?.schemaType || "BlogPosting"
+      },
+      publishedAt: payload.status === "PUBLISHED" ? /* @__PURE__ */ new Date() : null
+    });
+    await revision_model_default.create({
+      postId: post._id,
+      editorId: user._id,
+      title: post.title,
+      content: post.content,
+      excerpt: post.excerpt,
+      revisionNumber: 1
+    });
+    if (post.categories?.length) {
+      await category_model_default.updateMany(
+        { _id: { $in: post.categories } },
+        { $inc: { postCount: 1 } }
+      );
+    }
+    return post;
+  },
+  updatePost: async (id, payload, user) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    if (payload.slug && payload.slug !== post.slug) {
+      const newSlug = createSlug(payload.slug);
+      await redirect_model_default.findOneAndUpdate(
+        { oldPath: `/blog/${post.slug}` },
+        { newPath: `/blog/${newSlug}`, statusCode: 301 },
+        { upsert: true }
+      );
+      post.slug = newSlug;
+    }
+    if (payload.title) post.title = payload.title;
+    if (payload.excerpt !== void 0) post.excerpt = payload.excerpt;
+    if (payload.content !== void 0) {
+      post.content = payload.content;
+      const wordCount = post.content.replace(/<[^>]*>?/gm, "").split(/\s+/).length;
+      post.readingTime = Math.max(1, Math.ceil(wordCount / 200));
+    }
+    if (payload.featuredImage !== void 0) post.featuredImage = payload.featuredImage;
+    if (payload.imageAlt !== void 0) post.imageAlt = payload.imageAlt;
+    if (payload.isFeatured !== void 0) post.isFeatured = payload.isFeatured;
+    if (payload.categories) post.categories = payload.categories;
+    if (payload.tags) post.tags = payload.tags;
+    if (payload.seo) {
+      post.seo = {
+        ...post.seo,
+        ...payload.seo
+      };
+    }
+    await post.save();
+    const lastRev = await revision_model_default.findOne({ postId: post._id }).sort({ revisionNumber: -1 });
+    const revisionNumber = (lastRev?.revisionNumber || 0) + 1;
+    await revision_model_default.create({
+      postId: post._id,
+      editorId: user._id,
+      title: post.title,
+      content: post.content,
+      excerpt: post.excerpt,
+      revisionNumber
+    });
+    return post;
+  },
+  deletePost: async (id) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    post.deletedAt = /* @__PURE__ */ new Date();
+    await post.save();
+    if (post.categories?.length) {
+      await category_model_default.updateMany(
+        { _id: { $in: post.categories } },
+        { $inc: { postCount: -1 } }
+      );
+    }
+    return true;
+  },
+  // ── Publishing Workflow Transitions ──────────────────────────────────────
+  submitForReview: async (id, user) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    if (post.status !== "DRAFT" && post.status !== "REJECTED") {
+      throw new Error(`Cannot submit article currently in ${post.status} status.`);
+    }
+    post.status = "IN_REVIEW";
+    post.rejectionReason = void 0;
+    await post.save();
+    return post;
+  },
+  approvePost: async (id, user) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    post.status = "PUBLISHED";
+    if (!post.publishedAt) {
+      post.publishedAt = /* @__PURE__ */ new Date();
+    }
+    await post.save();
+    return post;
+  },
+  rejectPost: async (id, user, reason) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    post.status = "REJECTED";
+    post.rejectionReason = reason || "Needs revision";
+    await post.save();
+    return post;
+  },
+  publishPost: async (id, scheduledAt) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    if (scheduledAt && new Date(scheduledAt) > /* @__PURE__ */ new Date()) {
+      post.status = "PUBLISHED";
+      post.scheduledAt = new Date(scheduledAt);
+      post.publishedAt = new Date(scheduledAt);
+    } else {
+      post.status = "PUBLISHED";
+      post.publishedAt = /* @__PURE__ */ new Date();
+      post.scheduledAt = null;
+    }
+    await post.save();
+    return post;
+  },
+  archivePost: async (id) => {
+    const post = await post_model_default.findById(id);
+    if (!post) throw new Error("Article not found");
+    post.status = "ARCHIVED";
+    await post.save();
+    return post;
+  },
+  getRevisions: async (postId) => {
+    return revision_model_default.find({ postId }).populate("editorId", "firstName lastName email").sort({ revisionNumber: -1 });
+  },
+  // ── Categories & Tags Management ─────────────────────────────────────────
+  createCategory: async (data) => {
+    const slug = data.slug ? createSlug(data.slug) : createSlug(data.name);
+    return category_model_default.create({
+      name: data.name,
+      slug,
+      description: data.description,
+      parentId: data.parentId || null
+    });
+  },
+  updateCategory: async (id, data) => {
+    if (data.slug) data.slug = createSlug(data.slug);
+    return category_model_default.findByIdAndUpdate(id, data, { new: true });
+  },
+  deleteCategory: async (id) => {
+    return category_model_default.findByIdAndDelete(id);
+  },
+  createTag: async (name) => {
+    const slug = createSlug(name);
+    return tag_model_default.findOneAndUpdate(
+      { slug },
+      { name, slug },
+      { upsert: true, new: true }
+    );
+  },
+  deleteTag: async (id) => {
+    return tag_model_default.findByIdAndDelete(id);
+  }
+};
+
+// src/modules/blog/services/invitation.service.ts
+import crypto7 from "crypto";
+import nodemailer2 from "nodemailer";
+import jwt5 from "jsonwebtoken";
+
+// src/modules/blog/models/invitation.model.ts
+import mongoose60, { Schema as Schema37 } from "mongoose";
+var blogInvitationSchema = new Schema37(
+  {
+    email: {
+      type: String,
+      required: [true, "Invitation email is required"],
+      lowercase: true,
+      trim: true,
+      index: true
+    },
+    invitedBy: {
+      type: Schema37.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    assignedRole: {
+      type: String,
+      enum: ["blog_author", "blog_editor", "seo_manager"],
+      required: true,
+      default: "blog_author"
+    },
+    tokenHash: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: true
+    },
+    acceptedAt: {
+      type: Date,
+      default: null
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+blogInvitationSchema.index({ email: 1, expiresAt: 1 });
+var BlogInvitation = mongoose60.models.BlogInvitation || mongoose60.model("BlogInvitation", blogInvitationSchema);
+var invitation_model_default = BlogInvitation;
+
+// src/modules/blog/services/invitation.service.ts
+import slugify2 from "slugify";
+var createEmailTransporter = () => {
+  return nodemailer2.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+};
+var generateToken2 = (userId) => {
+  return jwt5.sign(
+    { id: userId },
+    process.env.JWT_ACCESS_SECRET || "default_secret",
+    { expiresIn: "7d" }
+  );
+};
+var invitationService = {
+  createInvitation: async (email, assignedRole, invitedBy) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    const rawToken = crypto7.randomBytes(32).toString("hex");
+    const tokenHash = crypto7.createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1e3);
+    await invitation_model_default.deleteMany({
+      email: normalizedEmail,
+      acceptedAt: null
+    });
+    const invitation = await invitation_model_default.create({
+      email: normalizedEmail,
+      invitedBy: invitedBy._id,
+      assignedRole,
+      tokenHash,
+      expiresAt
+    });
+    const acceptUrl = `${process.env.ADMIN_URL || "http://localhost:3002"}/accept-invite?token=${rawToken}`;
+    try {
+      const transporter2 = createEmailTransporter();
+      await transporter2.sendMail({
+        from: `"Trivllo Platform" <${process.env.EMAIL_USER}>`,
+        to: normalizedEmail,
+        subject: `You've been invited to write on Trivllo (${assignedRole.replace("_", " ").toUpperCase()})`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 580px; margin: auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
+            <h2 style="color: #111827; margin-bottom: 8px;">Welcome to Trivllo Editorial Team</h2>
+            <p style="color: #4b5563; font-size: 15px; line-height: 1.6;">
+              You have been invited by <strong>${invitedBy.firstName || "Trivllo Admin"}</strong> to contribute as a <strong>${assignedRole.replace("_", " ")}</strong>.
+            </p>
+            <div style="margin: 28px 0;">
+              <a href="${acceptUrl}" style="background-color: #0284c7; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                Accept Invitation & Activate Account
+              </a>
+            </div>
+            <p style="color: #9ca3af; font-size: 12px;">
+              This invitation link expires in 7 days. If you did not expect this invitation, you can safely ignore this email.
+            </p>
+          </div>
+        `
+      });
+    } catch (emailErr) {
+      console.warn("Nodemailer notice, link logged for manual sharing:", emailErr.message);
+    }
+    return {
+      invitationId: invitation._id,
+      email: normalizedEmail,
+      assignedRole,
+      expiresAt,
+      inviteUrl: acceptUrl
+    };
+  },
+  listInvitations: async () => {
+    return invitation_model_default.find().populate("invitedBy", "firstName lastName email").sort({ createdAt: -1 });
+  },
+  verifyInvitation: async (rawToken) => {
+    const tokenHash = crypto7.createHash("sha256").update(rawToken).digest("hex");
+    const invitation = await invitation_model_default.findOne({
+      tokenHash,
+      acceptedAt: null,
+      expiresAt: { $gt: /* @__PURE__ */ new Date() }
+    }).populate("invitedBy", "firstName lastName email");
+    if (!invitation) {
+      throw new Error("This invitation link is invalid or has expired.");
+    }
+    const existingUser = await auth_model_default.findOne({ email: invitation.email });
+    return {
+      valid: true,
+      email: invitation.email,
+      assignedRole: invitation.assignedRole,
+      invitedBy: invitation.invitedBy,
+      hasAccount: !!existingUser
+    };
+  },
+  acceptInvitation: async (rawToken, options) => {
+    const tokenHash = crypto7.createHash("sha256").update(rawToken).digest("hex");
+    const invitation = await invitation_model_default.findOne({
+      tokenHash,
+      acceptedAt: null,
+      expiresAt: { $gt: /* @__PURE__ */ new Date() }
+    });
+    if (!invitation) {
+      throw new Error("Invalid or expired invitation token.");
+    }
+    const targetEmail = invitation.email.toLowerCase().trim();
+    let user = await auth_model_default.findOne({ email: targetEmail });
+    if (!user) {
+      if (!options.password || options.password.length < 8) {
+        throw new Error("Password must be at least 8 characters long.");
+      }
+      user = await auth_model_default.create({
+        email: targetEmail,
+        password: options.password,
+        firstName: options.name || "Writer",
+        role: invitation.assignedRole,
+        isVendor: false,
+        isActive: true,
+        providers: {
+          local: { isVerified: true }
+        }
+      });
+    } else {
+      user.role = invitation.assignedRole;
+      if (options.password && options.password.length >= 8) {
+        user.password = options.password;
+      }
+      if (options.name) {
+        user.firstName = options.name;
+      }
+      user.providers = user.providers || { local: { isVerified: true } };
+      user.providers.local = { isVerified: true };
+      await user.save();
+    }
+    invitation.acceptedAt = /* @__PURE__ */ new Date();
+    await invitation.save();
+    const authorSlug = slugify2.default ? slugify2.default(
+      `${user.firstName || "writer"} ${user.lastName || ""}`.trim() || user.email || "writer",
+      { lower: true, strict: true }
+    ) : slugify2(
+      `${user.firstName || "writer"} ${user.lastName || ""}`.trim() || user.email || "writer",
+      { lower: true, strict: true }
+    );
+    let authorProfile = await author_model_default.findOne({ userId: user._id });
+    if (!authorProfile) {
+      authorProfile = await author_model_default.create({
+        userId: user._id,
+        displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Trivllo Writer",
+        slug: `${authorSlug}-${Math.floor(1e3 + Math.random() * 9e3)}`,
+        avatar: user.avatar || "",
+        designation: invitation.assignedRole === "blog_editor" ? "Editorial Manager" : "Travel Contributor"
+      });
+    }
+    const token = generateToken2(user._id);
+    return {
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName
+      },
+      assignedRole: invitation.assignedRole
+    };
+  }
+};
+
+// src/modules/blog/controllers/blog.public.controller.ts
+var getPublicPosts = async (req, res) => {
+  try {
+    const result = await blogService.getPublicPosts(req.query);
+    res.status(200).json({
+      success: true,
+      data: result.posts,
+      pagination: result.pagination
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch articles"
+    });
+  }
+};
+var getPublicPostBySlug = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const result = await blogService.getPublicPostBySlug(slug);
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Article not found"
+      });
+      return;
+    }
+    if ("redirect" in result) {
+      res.status(result.statusCode || 301).json({
+        success: true,
+        redirect: result.redirect
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: result.post,
+      authorProfile: result.authorProfile,
+      relatedPosts: result.relatedPosts
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch article"
+    });
+  }
+};
+var recordPostView = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const viewsCount = await blogService.recordPostView(slug, req.body);
+    res.status(200).json({
+      success: true,
+      viewsCount
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to record view"
+    });
+  }
+};
+var getPublicCategories = async (_req, res) => {
+  try {
+    const categories = await blogService.getPublicCategories();
+    res.status(200).json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch categories"
+    });
+  }
+};
+var getPublicTags = async (_req, res) => {
+  try {
+    const tags = await blogService.getPublicTags();
+    res.status(200).json({
+      success: true,
+      data: tags
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch tags"
+    });
+  }
+};
+var getPublicAuthor = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const result = await blogService.getPublicAuthor(slug);
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Author not found"
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: result.profile,
+      posts: result.posts
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch author"
+    });
+  }
+};
+var verifyInvitation = async (req, res) => {
+  try {
+    const token = req.query.token;
+    if (!token) {
+      res.status(400).json({ success: false, message: "Token is required" });
+      return;
+    }
+    const data = await invitationService.verifyInvitation(token);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message || "Invalid invitation" });
+  }
+};
+var acceptInvitation = async (req, res) => {
+  try {
+    const { token, name, password } = req.body;
+    if (!token) {
+      res.status(400).json({
+        success: false,
+        message: "Invitation token is required"
+      });
+      return;
+    }
+    const result = await invitationService.acceptInvitation(token, {
+      name,
+      password
+    });
+    res.status(200).json({
+      success: true,
+      message: `Invitation accepted! Role upgraded to ${result.assignedRole}.`,
+      data: result
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Invalid invitation"
+    });
+  }
+};
+
+// src/modules/blog/routes/blog.public.routes.ts
+var router43 = Router43();
+router43.get("/", getPublicPosts);
+router43.get("/categories", getPublicCategories);
+router43.get("/tags", getPublicTags);
+router43.get("/authors/:slug", getPublicAuthor);
+router43.get("/invitations/verify", verifyInvitation);
+router43.post("/invitations/accept", optionalProtect, acceptInvitation);
+router43.get("/:slug", getPublicPostBySlug);
+router43.post("/:slug/view", recordPostView);
+var blog_public_routes_default = router43;
+
+// src/modules/blog/routes/blog.admin.routes.ts
+import { Router as Router44 } from "express";
+
+// src/modules/blog/controllers/blog.admin.controller.ts
+var getAdminPosts = async (req, res) => {
+  try {
+    const result = await blogService.getAdminPosts(req.user, req.query);
+    res.status(200).json({
+      success: true,
+      data: result.posts,
+      metrics: result.metrics,
+      pagination: result.pagination
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to load posts"
+    });
+  }
+};
+var getAdminPostById = async (req, res) => {
+  try {
+    const post = await blogService.getAdminPostById(req.params.id);
+    if (!post) {
+      res.status(404).json({
+        success: false,
+        message: "Article not found"
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: post
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch article"
+    });
+  }
+};
+var createPost = async (req, res) => {
+  try {
+    const post = await blogService.createPost(req.body, req.user);
+    res.status(201).json({
+      success: true,
+      message: "Article created successfully",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to create article"
+    });
+  }
+};
+var updatePost = async (req, res) => {
+  try {
+    const post = await blogService.updatePost(
+      req.params.id,
+      req.body,
+      req.user
+    );
+    res.status(200).json({
+      success: true,
+      message: "Article updated successfully",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to update article"
+    });
+  }
+};
+var deletePost = async (req, res) => {
+  try {
+    await blogService.deletePost(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "Article deleted successfully"
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to delete article"
+    });
+  }
+};
+var submitForReview = async (req, res) => {
+  try {
+    const post = await blogService.submitForReview(
+      req.params.id,
+      req.user
+    );
+    res.status(200).json({
+      success: true,
+      message: "Article submitted for editorial review.",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var approvePost = async (req, res) => {
+  try {
+    const post = await blogService.approvePost(
+      req.params.id,
+      req.user
+    );
+    res.status(200).json({
+      success: true,
+      message: "Article approved and published live on Trivllo!",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var rejectPost = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const post = await blogService.rejectPost(
+      req.params.id,
+      req.user,
+      reason
+    );
+    res.status(200).json({
+      success: true,
+      message: "Article rejected with feedback.",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var publishPost = async (req, res) => {
+  try {
+    const { scheduledAt } = req.body;
+    const post = await blogService.publishPost(
+      req.params.id,
+      scheduledAt
+    );
+    res.status(200).json({
+      success: true,
+      message: scheduledAt ? `Article scheduled to publish on ${new Date(scheduledAt).toLocaleString()}` : "Article published live on Trivllo!",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var archivePost = async (req, res) => {
+  try {
+    const post = await blogService.archivePost(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "Article archived.",
+      data: post
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var getRevisions = async (req, res) => {
+  try {
+    const revisions = await blogService.getRevisions(req.params.id);
+    res.status(200).json({
+      success: true,
+      data: revisions
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var getAdminCategories = async (_req, res) => {
+  try {
+    const categories = await blogService.getPublicCategories();
+    res.status(200).json({ success: true, data: categories });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+var createCategory = async (req, res) => {
+  try {
+    const cat = await blogService.createCategory(req.body);
+    res.status(201).json({ success: true, data: cat });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+var updateCategory = async (req, res) => {
+  try {
+    const cat = await blogService.updateCategory(
+      req.params.id,
+      req.body
+    );
+    res.status(200).json({ success: true, data: cat });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+var deleteCategory = async (req, res) => {
+  try {
+    await blogService.deleteCategory(req.params.id);
+    res.status(200).json({ success: true, message: "Category deleted" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+var getAdminTags = async (_req, res) => {
+  try {
+    const tags = await blogService.getPublicTags();
+    res.status(200).json({ success: true, data: tags });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+var createTag = async (req, res) => {
+  try {
+    const tag = await blogService.createTag(req.body.name);
+    res.status(201).json({ success: true, data: tag });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+var deleteTag = async (req, res) => {
+  try {
+    await blogService.deleteTag(req.params.id);
+    res.status(200).json({ success: true, message: "Tag deleted" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+var createInvitation = async (req, res) => {
+  try {
+    const { email, role } = req.body;
+    if (!email || !role) {
+      res.status(400).json({
+        success: false,
+        message: "Email and assignedRole are required"
+      });
+      return;
+    }
+    const invitation = await invitationService.createInvitation(
+      email,
+      role,
+      req.user
+    );
+    res.status(201).json({
+      success: true,
+      message: `Invitation generated and dispatched to ${email}`,
+      data: invitation
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+var listInvitations = async (_req, res) => {
+  try {
+    const invitations = await invitationService.listInvitations();
+    res.status(200).json({ success: true, data: invitations });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+var listAuthors = async (_req, res) => {
+  try {
+    const authors = await author_model_default.find().populate("userId", "firstName lastName email role avatar").lean();
+    const blogUsers = await auth_model_default.find({
+      role: {
+        $in: ["blog_author", "blog_editor", "seo_manager", "super_admin", "admin"]
+      }
+    }).select("firstName lastName email role avatar").lean();
+    res.status(200).json({
+      success: true,
+      data: {
+        profiles: authors,
+        teamUsers: blogUsers
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// src/modules/blog/blog.middleware.ts
+var requireBlogRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    const userRole = req.user?.role;
+    if (!userRole) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+      return;
+    }
+    if (userRole === "super_admin" || userRole === "admin") {
+      return next();
+    }
+    if (allowedRoles.includes(userRole)) {
+      return next();
+    }
+    res.status(403).json({
+      success: false,
+      message: `Your role (${userRole}) does not have permission to perform this action.`
+    });
+  };
+};
+var checkArticleOwnership = async (req, res, next) => {
+  try {
+    const postId = req.params.id;
+    const user = req.user;
+    const post = await post_model_default.findById(postId);
+    if (!post) {
+      res.status(404).json({
+        success: false,
+        message: "Article not found"
+      });
+      return;
+    }
+    if (user.role === "admin" || user.role === "super_admin" || user.role === "blog_editor") {
+      req.blogPost = post;
+      return next();
+    }
+    if (post.authorId.toString() !== user._id.toString()) {
+      res.status(403).json({
+        success: false,
+        message: "Access denied. You can only edit articles created by your account."
+      });
+      return;
+    }
+    req.blogPost = post;
+    next();
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Ownership verification failed"
+    });
+  }
+};
+
+// src/modules/blog/routes/blog.admin.routes.ts
+var router44 = Router44();
+router44.use(protect);
+router44.use(requireBlogRole("blog_author", "blog_editor", "seo_manager"));
+router44.get("/posts", getAdminPosts);
+router44.post("/posts", createPost);
+router44.get("/posts/:id", getAdminPostById);
+router44.patch("/posts/:id", checkArticleOwnership, updatePost);
+router44.delete("/posts/:id", checkArticleOwnership, deletePost);
+router44.post("/posts/:id/submit", checkArticleOwnership, submitForReview);
+router44.post(
+  "/posts/:id/approve",
+  requireBlogRole("blog_editor"),
+  approvePost
+);
+router44.post(
+  "/posts/:id/reject",
+  requireBlogRole("blog_editor"),
+  rejectPost
+);
+router44.post(
+  "/posts/:id/publish",
+  requireBlogRole("blog_editor"),
+  publishPost
+);
+router44.post(
+  "/posts/:id/archive",
+  requireBlogRole("blog_editor"),
+  archivePost
+);
+router44.get("/posts/:id/revisions", getRevisions);
+router44.get("/categories", getAdminCategories);
+router44.post(
+  "/categories",
+  requireBlogRole("blog_editor", "seo_manager"),
+  createCategory
+);
+router44.patch(
+  "/categories/:id",
+  requireBlogRole("blog_editor", "seo_manager"),
+  updateCategory
+);
+router44.delete(
+  "/categories/:id",
+  requireBlogRole("blog_editor", "seo_manager"),
+  deleteCategory
+);
+router44.get("/tags", getAdminTags);
+router44.post(
+  "/tags",
+  requireBlogRole("blog_editor", "seo_manager"),
+  createTag
+);
+router44.delete(
+  "/tags/:id",
+  requireBlogRole("blog_editor", "seo_manager"),
+  deleteTag
+);
+router44.post("/invitations", requireBlogRole(), createInvitation);
+router44.get("/invitations", requireBlogRole(), listInvitations);
+router44.get("/authors", listAuthors);
+var blog_admin_routes_default = router44;
+
 // src/shared/middlewares/errorHandler.ts
 var errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
@@ -25940,6 +27485,8 @@ app.use("/api/v1/admin/promotions", promotion_routes_default);
 app.use("/api/v1/admin/vendor-properties", vendorProperty_routes_default);
 app.use("/api/v1/popular-sections", popularSection_routes_default);
 app.use("/api/v1/admin/popular-sections", popularSection_routes_default);
+app.use("/api/v1/blogs", blog_public_routes_default);
+app.use("/api/v1/admin/blogs", blog_admin_routes_default);
 app.use(errorHandler);
 var app_default = app;
 

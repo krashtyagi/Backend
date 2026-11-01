@@ -28,7 +28,7 @@ export interface IDeleteRequest {
 export interface IUser extends Document {
   email?: string;
   password?: string;
-  role: "user" | "vendor" | "admin";
+  role: "user" | "vendor" | "admin" | "super_admin" | "blog_author" | "blog_editor" | "seo_manager";
   isVendor: boolean;
   firstName?: string;
   lastName?: string;
@@ -68,7 +68,15 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["user", "vendor", "admin"],
+      enum: [
+        "user",
+        "vendor",
+        "admin",
+        "super_admin",
+        "blog_author",
+        "blog_editor",
+        "seo_manager",
+      ],
       default: "user",
     },
     isVendor: {

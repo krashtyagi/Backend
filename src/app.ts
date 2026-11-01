@@ -50,6 +50,8 @@ import adminAccountDeactivateRoutes from "./modules/admin/account-deactivate/acc
 import adminPromotionRoutes from "./modules/admin/promotion/promotion.routes.js";
 import adminVendorPropertyRoutes from "./modules/admin/vendorProperty/vendorProperty.routes.js";
 import popularSectionRoutes from "./modules/popularSections/popularSection.routes.js";
+import blogPublicRoutes from "./modules/blog/routes/blog.public.routes.js";
+import blogAdminRoutes from "./modules/blog/routes/blog.admin.routes.js";
 import { errorHandler } from "./shared/middlewares/errorHandler.js";
 import "./shared/config/passport.js";
 
@@ -230,6 +232,10 @@ app.use("/api/v1/admin/promotions", adminPromotionRoutes);
 app.use("/api/v1/admin/vendor-properties", adminVendorPropertyRoutes);
 app.use("/api/v1/popular-sections", popularSectionRoutes);
 app.use("/api/v1/admin/popular-sections", popularSectionRoutes);
+
+// blog CMS
+app.use("/api/v1/blogs", blogPublicRoutes);
+app.use("/api/v1/admin/blogs", blogAdminRoutes);
 
 app.use(errorHandler);
 

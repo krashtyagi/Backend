@@ -13,7 +13,13 @@ export const authorize = (...roles: string[]): RequestHandler => {
     const authReq = req as AuthenticatedRequest;
     const userRole = authReq.user?.role;
 
-    if (!userRole || !roles.includes(userRole)) {
+    const isAuthorized =
+      !!userRole &&
+      (userRole === "super_admin" ||
+        roles.includes(userRole) ||
+        (roles.includes("admin") && (userRole === "admin" || userRole === "super_admin")));
+
+    if (!isAuthorized) {
       res.status(403).json({
         message: `Role (${userRole || "unknown"}) is not allowed to access this resource`,
       });
