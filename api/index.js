@@ -26185,6 +26185,96 @@ var view_model_default = BlogPostView;
 
 // src/modules/blog/services/blog.service.ts
 import slugify from "slugify";
+
+// src/shared/services/googleIndexing.service.ts
+import { google } from "googleapis";
+import path2 from "path";
+import fs3 from "fs";
+var SCOPES = ["https://www.googleapis.com/auth/indexing"];
+var getKeyFilePath = () => {
+  const directPath = path2.resolve(
+    process.cwd(),
+    "src/shared/config/google-indexing-key.json"
+  );
+  if (fs3.existsSync(directPath)) return directPath;
+  const altPath = path2.resolve(
+    process.cwd(),
+    "backend/src/shared/config/google-indexing-key.json"
+  );
+  if (fs3.existsSync(altPath)) return altPath;
+  return "./src/shared/config/google-indexing-key.json";
+};
+var googleIndexingService = {
+  /**
+   * Notify Googlebot that a URL has been created or updated.
+   * @param url Full canonical URL (e.g. https://trivllo.com/blog/best-hotels-in-indore)
+   */
+  notifyUrlUpdate: async (url) => {
+    try {
+      const keyFile = getKeyFilePath();
+      if (!fs3.existsSync(keyFile)) {
+        logger_default.warn(
+          `[Google Indexing API] Keyfile not found at ${keyFile}. Skipping ping.`
+        );
+        return;
+      }
+      const auth = new google.auth.GoogleAuth({
+        keyFile,
+        scopes: SCOPES
+      });
+      const client = await auth.getClient();
+      const indexing = google.indexing({ version: "v3", auth: client });
+      const res = await indexing.urlNotifications.publish({
+        requestBody: {
+          url,
+          type: "URL_UPDATED"
+        }
+      });
+      logger_default.info(
+        `[Google Indexing API] Pinged update for: ${url} (Status: ${res.status})`
+      );
+      return res.data;
+    } catch (error) {
+      logger_default.error(
+        `[Google Indexing API Error] Failed for ${url}: ${error.message}`
+      );
+    }
+  },
+  /**
+   * Notify Googlebot that a URL has been deleted / archived.
+   */
+  notifyUrlDelete: async (url) => {
+    try {
+      const keyFile = getKeyFilePath();
+      if (!fs3.existsSync(keyFile)) {
+        logger_default.warn(
+          `[Google Indexing API] Keyfile not found at ${keyFile}. Skipping ping.`
+        );
+        return;
+      }
+      const auth = new google.auth.GoogleAuth({
+        keyFile,
+        scopes: SCOPES
+      });
+      const client = await auth.getClient();
+      const indexing = google.indexing({ version: "v3", auth: client });
+      const res = await indexing.urlNotifications.publish({
+        requestBody: {
+          url,
+          type: "URL_DELETED"
+        }
+      });
+      logger_default.info(`[Google Indexing API] Pinged deletion for: ${url}`);
+      return res.data;
+    } catch (error) {
+      logger_default.error(
+        `[Google Indexing API Error] Deletion ping failed for ${url}: ${error.message}`
+      );
+    }
+  }
+};
+
+// src/modules/blog/services/blog.service.ts
 var createSlug = (str) => {
   return slugify.default ? slugify.default(str, { lower: true, strict: true }) : slugify(str, { lower: true, strict: true });
 };
@@ -26393,6 +26483,11 @@ var blogService = {
         { $inc: { postCount: 1 } }
       );
     }
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {
+      });
+    }
     return post;
   },
   updatePost: async (id, payload, user) => {
@@ -26436,6 +26531,11 @@ var blogService = {
       excerpt: post.excerpt,
       revisionNumber
     });
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {
+      });
+    }
     return post;
   },
   deletePost: async (id) => {
@@ -26449,6 +26549,9 @@ var blogService = {
         { $inc: { postCount: -1 } }
       );
     }
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlDelete(postUrl).catch(() => {
+    });
     return true;
   },
   // ── Publishing Workflow Transitions ──────────────────────────────────────
@@ -26471,6 +26574,9 @@ var blogService = {
       post.publishedAt = /* @__PURE__ */ new Date();
     }
     await post.save();
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {
+    });
     return post;
   },
   rejectPost: async (id, user, reason) => {
@@ -26494,6 +26600,11 @@ var blogService = {
       post.scheduledAt = null;
     }
     await post.save();
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {
+      });
+    }
     return post;
   },
   archivePost: async (id) => {
@@ -26501,6 +26612,9 @@ var blogService = {
     if (!post) throw new Error("Article not found");
     post.status = "ARCHIVED";
     await post.save();
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlDelete(postUrl).catch(() => {
+    });
     return post;
   },
   getRevisions: async (postId) => {

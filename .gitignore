@@ -7,6 +7,8 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+ 
+*google-indexing-key.json
 
 logs/
 log/

@@ -6,6 +6,7 @@ import BlogAuthorProfile from "../models/author.model.js";
 import BlogRedirect from "../models/redirect.model.js";
 import BlogPostView from "../models/view.model.js";
 import slugify from "slugify";
+import { googleIndexingService } from "../../../shared/services/googleIndexing.service.js";
 
 const createSlug = (str: string) => {
   return (slugify as any).default
@@ -317,6 +318,11 @@ export const blogService = {
       );
     }
 
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {});
+    }
+
     return post;
   },
 
@@ -370,6 +376,11 @@ export const blogService = {
       revisionNumber,
     });
 
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {});
+    }
+
     return post;
   },
 
@@ -387,6 +398,9 @@ export const blogService = {
         { $inc: { postCount: -1 } }
       );
     }
+
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlDelete(postUrl).catch(() => {});
 
     return true;
   },
@@ -415,6 +429,10 @@ export const blogService = {
       post.publishedAt = new Date();
     }
     await post.save();
+
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {});
+
     return post;
   },
 
@@ -443,6 +461,12 @@ export const blogService = {
     }
 
     await post.save();
+
+    if (post.status === "PUBLISHED") {
+      const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+      googleIndexingService.notifyUrlUpdate(postUrl).catch(() => {});
+    }
+
     return post;
   },
 
@@ -452,6 +476,10 @@ export const blogService = {
 
     post.status = "ARCHIVED";
     await post.save();
+
+    const postUrl = `${process.env.SITE_URL || "https://trivllo.com"}/blog/${post.slug}`;
+    googleIndexingService.notifyUrlDelete(postUrl).catch(() => {});
+
     return post;
   },
 
