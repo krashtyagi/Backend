@@ -15,7 +15,7 @@ const SERVICE_MODELS: Record<string, any> = {
   adventure: Adventure,
 };
 
-const MAX_PROPERTIES = 10;
+const MAX_PROPERTIES = 50;
 
 /**
  * List all properties owned by the vendor
